@@ -1,0 +1,9 @@
+{
+  "extends": "@workspace/typescript-config/nestjs.json",
+  "compilerOptions": {
+    "baseUrl": "./",
+    "outDir": "./dist",
+    "module": "Node16"
+  },
+  "globalEnv": ["PORT"]
+}
