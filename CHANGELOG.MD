@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [1.0.0] - 2025-09-15
 
 ### Added
+
 - Monorepo setup with Turborepo
 - API service built with **NestJS + Prisma + PostgreSQL**
 - Web app built with **Next.js 14 + shadcn/ui + Tailwind CSS**

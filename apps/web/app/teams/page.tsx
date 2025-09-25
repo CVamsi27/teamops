@@ -4,7 +4,7 @@ import RenderTeams from "@/components/teams/render-team";
 
 export default function TeamsPage() {
   return (
-    <div className="grid md:grid-cols-2 gap-6">
+    <div className="grid md:grid-cols-2 grid-gap">
       <CreateTeams />
       <RenderTeams />
     </div>

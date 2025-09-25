@@ -16,10 +16,13 @@ export default function TeamCreateForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="flex flex-col form-spacing"
+    >
       <input {...register("name")} placeholder="Team name" className="input" />
       {formState.errors.name && (
-        <p className="text-red-600">{formState.errors.name.message}</p>
+        <p className="text-destructive">{formState.errors.name.message}</p>
       )}
       <textarea
         {...register("description")}

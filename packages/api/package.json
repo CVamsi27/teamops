@@ -4,8 +4,8 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "dev": "pnpm build --watch",
-    "build": "tsc -b -v",
+    "dev": "dotenv -e ../../.env -- pnpm build --watch",
+    "build": "dotenv -e ../../.env -- tsc -b -v",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\""
   },
   "main": "./dist/index.js",
@@ -29,6 +29,7 @@
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
     "@types/node": "^22.10.7",
+    "dotenv-cli": "^10.0.0",
     "ts-loader": "^9.4.3",
     "ts-node": "^10.9.2",
     "typescript": "5.5.4"

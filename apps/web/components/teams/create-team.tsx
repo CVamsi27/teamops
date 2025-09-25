@@ -11,22 +11,41 @@ import {
 } from "@workspace/ui/components/card";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
+import { Textarea } from "@workspace/ui/components/textarea";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  FormDescription,
+} from "@workspace/ui/components/form";
 import { toast } from "@workspace/ui/components/toast";
 
 export default function CreateTeams() {
   const create = useCreateTeam();
-  const { register, handleSubmit, formState, reset } = useForm<CreateTeam>({
+  const form = useForm<CreateTeam>({
     resolver: zodResolver(CreateTeamSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+    },
   });
+
+  const description = form.watch("description") || "";
+  const descriptionLength = description.length;
 
   const onCreateTeam = (payload: CreateTeam) => {
     create.mutate(payload, {
       onSuccess: () => {
-        reset();
+        form.reset();
         toast.success("Team created successfully!");
       },
-      onError: (err: any) => {
-        toast.error(err?.message ?? "Failed to create team.");
+      onError: (error: unknown) => {
+        const message =
+          error instanceof Error ? error.message : "Failed to create team.";
+        toast.error(message);
       },
     });
   };
@@ -37,23 +56,56 @@ export default function CreateTeams() {
         <CardTitle>Create Team</CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(onCreateTeam)} className="space-y-3">
-          <Input placeholder="Team name" {...register("name")} />
-          {formState.errors.name && (
-            <p className="text-red-600 text-sm">
-              {formState.errors.name.message}
-            </p>
-          )}
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onCreateTeam)}
+            className="flex flex-col form-spacing"
+          >
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Team Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter team name (minimum 3 characters)"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <Input
-            placeholder="Description (optional)"
-            {...register("description")}
-          />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description (optional)</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Describe your team's purpose and goals..."
+                      rows={3}
+                      {...field}
+                      value={field.value || ""}
+                    />
+                  </FormControl>
+                  <FormDescription className="flex justify-between">
+                    <span>Optional field</span>
+                    <span>{descriptionLength}/1000 characters</span>
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <Button type="submit" disabled={create.isPending}>
-            {create.isPending ? "Creating..." : "Create"}
-          </Button>
-        </form>
+            <Button type="submit" disabled={create.isPending}>
+              {create.isPending ? "Creating..." : "Create Team"}
+            </Button>
+          </form>
+        </Form>
       </CardContent>
     </Card>
   );

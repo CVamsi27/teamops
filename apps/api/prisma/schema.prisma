@@ -7,48 +7,46 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  ADMIN
-  MEMBER
-  VIEWER
+enum Role { 
+  ADMIN 
+  MEMBER 
+  VIEWER 
 }
 
-enum TaskStatus {
-  TODO
-  IN_PROGRESS
-  DONE
+enum TaskStatus { 
+  TODO 
+  IN_PROGRESS 
+  DONE 
 }
 
-enum Priority {
-  P1
-  P2
-  P3
-  P4
-  P5
+enum Priority { 
+  P1 
+  P2 
+  P3 
+  P4 
+  P5 
 }
 
 model User {
-  id          String       @id @default(uuid())
-  email       String       @unique
-  name        String?
-  avatarUrl   String?
-  passwordHash String?     // for email/password; OAuth users may not have this
-  provider    String?      // oauth provider
-  providerId  String?      // oauth provider id
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-
-  memberships Membership[]
-  tasks       Task[]       @relation("TaskAssignee")
+  id           String      @id @default(uuid())
+  email        String      @unique
+  name         String?
+  passwordHash String?
+  provider     String?     // 'google' or 'local'
+  providerId   String?
+  role         Role        @default(MEMBER)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  memberships  Membership[]
+  tasks        Task[]      @relation("TaskAssignee")
 }
 
 model Team {
-  id          String        @id @default(uuid())
+  id          String       @id @default(uuid())
   name        String
   description String?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
   memberships Membership[]
   projects    Project[]
   invitations Invitation[]
@@ -57,12 +55,11 @@ model Team {
 model Membership {
   id        String   @id @default(uuid())
   role      Role     @default(MEMBER)
+  user      User     @relation(fields:[userId], references:[id], onDelete: Cascade)
+  userId    String
+  team      Team     @relation(fields:[teamId], references:[id], onDelete: Cascade)
+  teamId    String
   createdAt DateTime @default(now())
-
-  userId String
-  teamId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
   @@unique([userId, teamId])
 }
@@ -72,11 +69,10 @@ model Invitation {
   email     String
   role      Role     @default(MEMBER)
   token     String   @unique
-  createdAt DateTime @default(now())
   accepted  Boolean  @default(false)
-
-  teamId String
-  team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  team      Team     @relation(fields:[teamId], references:[id], onDelete: Cascade)
+  teamId    String
+  createdAt DateTime @default(now())
 
   @@index([email])
 }
@@ -85,12 +81,11 @@ model Project {
   id          String    @id @default(uuid())
   name        String
   description String?
+  team        Team      @relation(fields:[teamId], references:[id], onDelete: Cascade)
+  teamId      String
+  tasks       Task[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-
-  teamId String
-  team   Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  tasks  Task[]
 }
 
 model Task {
@@ -100,12 +95,10 @@ model Task {
   status      TaskStatus @default(TODO)
   priority    Priority   @default(P3)
   dueDate     DateTime?
+  project     Project    @relation(fields:[projectId], references:[id], onDelete: Cascade)
+  projectId   String
+  assignee    User?      @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  assigneeId  String?
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
-
-  projectId String
-  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-
-  assigneeId String?
-  assignee   User?    @relation("TaskAssignee", fields: [assigneeId], references: [id])
 }

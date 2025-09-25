@@ -8,8 +8,8 @@ import {
 
 export default function HomePage() {
   return (
-    <section className="space-y-12">
-      <div className="text-center space-y-4">
+    <section className="flex flex-col section-spacing">
+      <div className="text-center flex flex-col content-spacing">
         <h1 className="text-4xl font-extrabold tracking-tight">
           Run Teams. Ship Projects. Track Tasks.
         </h1>
@@ -17,20 +17,20 @@ export default function HomePage() {
           TeamOps is a compact, full-stack project management app with teams,
           projects, tasks, roles, and real-time updates.
         </p>
-        <div className="flex justify-center gap-4">
+        <div className="flex justify-center content-spacing">
           <Link
-            className="px-5 py-2 rounded-lg bg-primary text-white"
+            className="padding-button rounded-lg bg-primary text-secondary"
             href="/dashboard"
           >
             Open Dashboard
           </Link>
-          <Link className="px-5 py-2 rounded-lg border" href="/pricing">
+          <Link className="padding-button rounded-lg border" href="/pricing">
             See Pricing
           </Link>
         </div>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="grid md:grid-cols-3 grid-gap">
         {[
           {
             title: "Team Management",
@@ -56,7 +56,7 @@ export default function HomePage() {
         ))}
       </div>
 
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="grid md:grid-cols-3 grid-gap">
         {[
           {
             tier: "Starter",
@@ -81,7 +81,7 @@ export default function HomePage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm">
-              <ul className="list-disc ml-5 space-y-1">
+              <ul className="list-disc ml-5 flex flex-col grid-gap-sm">
                 {p.features.map((x) => (
                   <li key={x}>{x}</li>
                 ))}

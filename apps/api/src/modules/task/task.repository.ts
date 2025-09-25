@@ -1,5 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../infrastructure/prisma.service';
+import type {
+  Task as PrismaTask,
+  TaskStatus as PrismaTaskStatus,
+  Priority as PrismaPriority,
+} from '@prisma/client';
 import type { Task, CreateTask, UpdateTask } from '@workspace/api';
 
 @Injectable()
@@ -22,13 +27,12 @@ export class TaskRepository {
     const t = await this.prisma.task.create({
       data: {
         title: payload.title,
-        description: payload.description,
-        priority: payload.priority
-          ? (`P${payload.priority}` as any)
-          : undefined,
-        dueDate: payload.dueDate ? new Date(payload.dueDate) : undefined,
-        projectId: payload.projectId!,
-        assigneeId: payload.assigneeId ?? undefined,
+        description: payload.description ?? null,
+        priority: payload.priority,
+        status: payload.status,
+        dueDate: payload.dueDate ? new Date(payload.dueDate) : null,
+        projectId: payload.projectId,
+        assigneeId: payload.assigneeId ?? null,
       },
     });
     return this.map(t);
@@ -36,18 +40,22 @@ export class TaskRepository {
 
   async update(id: string, payload: UpdateTask): Promise<Task | null> {
     try {
+      const updateData: Record<string, unknown> = {};
+
+      if (payload.title !== undefined) updateData.title = payload.title;
+      if (payload.description !== undefined)
+        updateData.description = payload.description ?? null;
+      if (payload.status !== undefined) updateData.status = payload.status;
+      if (payload.priority !== undefined)
+        updateData.priority = payload.priority;
+      if (payload.dueDate !== undefined)
+        updateData.dueDate = payload.dueDate ? new Date(payload.dueDate) : null;
+      if (payload.assigneeId !== undefined)
+        updateData.assigneeId = payload.assigneeId ?? null;
+
       const t = await this.prisma.task.update({
         where: { id },
-        data: {
-          title: payload.title,
-          description: payload.description,
-          status: payload.status as any,
-          priority: payload.priority
-            ? (`P${payload.priority}` as any)
-            : undefined,
-          dueDate: payload.dueDate ? new Date(payload.dueDate) : undefined,
-          assigneeId: payload.assigneeId ?? undefined,
-        },
+        data: updateData,
       });
       return this.map(t);
     } catch {
@@ -64,13 +72,13 @@ export class TaskRepository {
     }
   }
 
-  private map(t: any): Task {
+  private map(t: PrismaTask): Task {
     return {
       id: t.id,
       title: t.title,
       description: t.description ?? undefined,
-      status: t.status,
-      priority: (t.priority?.replace('P', '') ?? '3') as any,
+      status: t.status as PrismaTaskStatus,
+      priority: t.priority as PrismaPriority,
       dueDate: t.dueDate ? t.dueDate.toISOString() : undefined,
       projectId: t.projectId,
       assigneeId: t.assigneeId ?? undefined,

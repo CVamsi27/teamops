@@ -11,7 +11,8 @@ import {
 } from '@nestjs/common';
 import { TeamService } from './team.service';
 import { ZodValidationPipe } from '../../common/zod-validation.pipe';
-import { CreateTeamSchema, UpdateTeamSchema, Team } from '@workspace/api';
+import { CreateTeamSchema, UpdateTeamSchema } from '@workspace/api';
+import type { Team, CreateTeam, UpdateTeam } from '@workspace/api';
 
 @Controller('teams')
 export class TeamController {
@@ -29,13 +30,16 @@ export class TeamController {
 
   @Post()
   @UsePipes(new ZodValidationPipe(CreateTeamSchema))
-  async create(@Body() body: any): Promise<Team> {
+  async create(@Body() body: CreateTeam): Promise<Team> {
     return this.service.create(body);
   }
 
   @Patch(':id')
   @UsePipes(new ZodValidationPipe(UpdateTeamSchema))
-  async update(@Param('id') id: string, @Body() body: any): Promise<Team> {
+  async update(
+    @Param('id') id: string,
+    @Body() body: UpdateTeam
+  ): Promise<Team> {
     return this.service.update(id, body);
   }
 

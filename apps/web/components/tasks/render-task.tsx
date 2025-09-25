@@ -13,9 +13,12 @@ function TaskCardContent() {
 
   if (isLoading) {
     return (
-      <CardContent className="space-y-2">
+      <CardContent className="flex flex-col card-spacing">
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="space-y-2 p-3 rounded border">
+          <div
+            key={i}
+            className="flex flex-col card-spacing padding-card rounded border"
+          >
             <Skeleton className="h-4 w-1/3" />
             <Skeleton className="h-3 w-1/2" />
             <Skeleton className="h-3 w-1/4" />
@@ -28,7 +31,7 @@ function TaskCardContent() {
   if (isError) {
     return (
       <CardContent>
-        <div className="text-red-500">Error loading tasks.</div>
+        <div className="text-destructive">Error loading tasks.</div>
       </CardContent>
     );
   }
@@ -42,9 +45,9 @@ function TaskCardContent() {
   }
 
   return (
-    <CardContent className="space-y-2">
+    <CardContent className="flex flex-col card-spacing">
       {data.map((t) => (
-        <div key={t.id} className="p-3 rounded border">
+        <div key={t.id} className="padding-card rounded border">
           <div className="font-medium">{t.title}</div>
           <div className="text-sm text-muted-foreground">
             {t.status} • Priority {t.priority}

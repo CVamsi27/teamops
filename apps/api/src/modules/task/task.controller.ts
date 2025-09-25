@@ -10,7 +10,8 @@ import {
   HttpCode,
 } from '@nestjs/common';
 import { TaskService } from './task.service';
-import { CreateTaskSchema, UpdateTaskSchema, Task } from '@workspace/api';
+import { CreateTaskSchema, UpdateTaskSchema } from '@workspace/api';
+import type { Task, CreateTask, UpdateTask } from '@workspace/api';
 import { ZodValidationPipe } from '../../common/zod-validation.pipe';
 
 @Controller('tasks')
@@ -29,13 +30,16 @@ export class TaskController {
 
   @Post()
   @UsePipes(new ZodValidationPipe(CreateTaskSchema))
-  async create(@Body() body: any): Promise<Task> {
+  async create(@Body() body: CreateTask): Promise<Task> {
     return this.service.create(body);
   }
 
   @Patch(':id')
   @UsePipes(new ZodValidationPipe(UpdateTaskSchema))
-  async update(@Param('id') id: string, @Body() body: any): Promise<Task> {
+  async update(
+    @Param('id') id: string,
+    @Body() body: UpdateTask
+  ): Promise<Task> {
     return this.service.update(id, body);
   }
 
