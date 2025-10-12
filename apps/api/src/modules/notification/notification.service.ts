@@ -36,6 +36,13 @@ export class NotificationService implements OnModuleInit, OnModuleDestroy {
 
   private initializeKafka() {
     try {
+      // Check if we have KAFKA_BROKERS for traditional Kafka setup
+      if (!process.env.KAFKA_BROKERS) {
+        this.logger.warn('KAFKA_BROKERS not configured. Traditional Kafka setup skipped.');
+        this.kafkaEnabled = false;
+        return;
+      }
+      
       const brokers = process.env.KAFKA_BROKERS.split(',');
       this.kafka = new Kafka({
         clientId: 'teamops-notify',
