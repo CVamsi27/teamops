@@ -3,9 +3,9 @@ import { PrismaService } from '../../infrastructure/prisma.service';
 import type {
   Task as PrismaTask,
   TaskStatus as PrismaTaskStatus,
-  Priority as PrismaPriority,
+  TaskPriority as PrismaTaskPriority,
 } from '@prisma/client';
-import type { Task, CreateTask, UpdateTask } from '@workspace/api';
+import type { Task, CreateTaskWithCreator, UpdateTask } from '@workspace/api';
 
 @Injectable()
 export class TaskRepository {
@@ -23,7 +23,23 @@ export class TaskRepository {
     return t ? this.map(t) : null;
   }
 
-  async create(payload: CreateTask): Promise<Task> {
+  async findByAssigneeId(assigneeId: string): Promise<Task[]> {
+    const tasks = await this.prisma.task.findMany({
+      where: { assigneeId },
+      orderBy: { createdAt: 'desc' },
+    });
+    return tasks.map(this.map);
+  }
+
+  async findByProjectId(projectId: string): Promise<Task[]> {
+    const tasks = await this.prisma.task.findMany({
+      where: { projectId },
+      orderBy: { createdAt: 'desc' },
+    });
+    return tasks.map(this.map);
+  }
+
+  async create(payload: CreateTaskWithCreator): Promise<Task> {
     const t = await this.prisma.task.create({
       data: {
         title: payload.title,
@@ -31,8 +47,9 @@ export class TaskRepository {
         priority: payload.priority,
         status: payload.status,
         dueDate: payload.dueDate ? new Date(payload.dueDate) : null,
-        projectId: payload.projectId,
+        projectId: payload.projectId ?? null,
         assigneeId: payload.assigneeId ?? null,
+        createdById: payload.createdById,
       },
     });
     return this.map(t);
@@ -78,10 +95,11 @@ export class TaskRepository {
       title: t.title,
       description: t.description ?? undefined,
       status: t.status as PrismaTaskStatus,
-      priority: t.priority as PrismaPriority,
+      priority: t.priority as PrismaTaskPriority,
       dueDate: t.dueDate ? t.dueDate.toISOString() : undefined,
-      projectId: t.projectId,
+      projectId: t.projectId ?? undefined,
       assigneeId: t.assigneeId ?? undefined,
+      createdById: t.createdById,
       createdAt: t.createdAt.toISOString(),
       updatedAt: t.updatedAt.toISOString(),
     };

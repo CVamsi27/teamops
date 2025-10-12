@@ -1,14 +1,8 @@
 "use client";
-import { useTasks } from "@/hooks/tasks/useTasks";
 import { useMe } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@workspace/ui/components/card";
+import { DashboardOverview } from "@/components/dashboard/dashboard-overview";
 import { Loader2 } from "lucide-react";
 
 export default function DashboardPage() {
@@ -16,7 +10,7 @@ export default function DashboardPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!userLoading && (!user || (error as any)?.response?.status === 401)) {
+    if (!userLoading && (!user || (error && 'response' in error && (error as { response: { status: number } }).response?.status === 401))) {
       router.push("/auth/login");
     }
   }, [user, userLoading, error, router]);
@@ -32,45 +26,16 @@ export default function DashboardPage() {
   if (!user) {
     return null;
   }
-  const { data } = useTasks();
-  const tasks = data ?? [];
-
-  const upcoming = tasks
-    .filter((t) => t.dueDate)
-    .sort((a, b) => a.dueDate!.localeCompare(b.dueDate!))
-    .slice(0, 5);
 
   return (
-    <div className="grid md:grid-cols-3 grid-gap">
-      <Card>
-        <CardHeader>
-          <CardTitle>Upcoming Tasks</CardTitle>
-        </CardHeader>
-        <CardContent className="text-sm">
-          <ul className="flex flex-col card-spacing">
-            {upcoming.map((t) => (
-              <li key={t.id} className="flex justify-between">
-                <span>{t.title}</span>
-                <span className="text-muted-foreground">
-                  {t.dueDate?.slice(0, 10)}
-                </span>
-              </li>
-            ))}
-            {upcoming.length === 0 && (
-              <div className="text-muted-foreground">No upcoming tasks</div>
-            )}
-          </ul>
-        </CardContent>
-      </Card>
-
-      <Card className="md:col-span-2">
-        <CardHeader>
-          <CardTitle>Activity</CardTitle>
-        </CardHeader>
-        <CardContent className="text-sm text-muted-foreground">
-          Real-time activity stream planned (WebSockets + Kafka).
-        </CardContent>
-      </Card>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <p className="text-muted-foreground">
+          Welcome back, {user.name || user.email}! Here&apos;s what&apos;s happening.
+        </p>
+      </div>
+      <DashboardOverview />
     </div>
   );
 }

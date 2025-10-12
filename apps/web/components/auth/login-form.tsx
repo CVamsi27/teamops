@@ -11,7 +11,7 @@ import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Loader2, Mail, AlertCircle } from "lucide-react";
 import { LoginInput } from "@workspace/api";
-import { useLogin } from "../../hooks/useAuth";
+import { useLogin, AuthUtils } from "../../hooks/useAuth";
 import { useRouter } from "next/navigation";
 
 interface LoginFormProps {
@@ -35,7 +35,13 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
 
     login.mutate(payload, {
       onError: (error: unknown) => {
-        const errorMessage = (error as any)?.response?.data?.message || (error as any)?.message;
+        const errorMessage = (error && typeof error === 'object' && 'response' in error && error.response && 
+          typeof error.response === 'object' && 'data' in error.response && error.response.data &&
+          typeof error.response.data === 'object' && 'message' in error.response.data) 
+          ? (error.response.data as { message: string }).message 
+          : (error && typeof error === 'object' && 'message' in error) 
+            ? (error as { message: string }).message 
+            : 'Unknown error';
         
         if (errorMessage === 'EMAIL_NOT_FOUND') {
           setError("Email not found. Please register first.");
@@ -48,7 +54,11 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
           setError("Login failed. Please try again.");
         }
       },
-      onSuccess: async () => {
+      onSuccess: async (data: { access_token?: string }) => {
+        // Store token for persistent login
+        if (data?.access_token) {
+          AuthUtils.saveToken(data.access_token);
+        }
         await new Promise(resolve => setTimeout(resolve, 100));
         router.push("/dashboard");
       }

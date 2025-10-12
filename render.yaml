@@ -1,0 +1,61 @@
+services:
+  - type: web
+    name: teamops-api
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: |
+      cd apps/api
+      npm install
+      npx prisma generate
+      npm run build
+    startCommand: cd apps/api && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: teamops-db
+          property: connectionString
+      - key: UPSTASH_REDIS_REST_URL
+        sync: false
+      - key: UPSTASH_REDIS_REST_TOKEN
+        sync: false
+      - key: UPSTASH_KAFKA_REST_URL
+        sync: false
+      - key: UPSTASH_KAFKA_REST_TOKEN
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: GOOGLE_CALENDAR_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CALENDAR_CLIENT_SECRET
+        sync: false
+    healthCheckPath: /health
+
+  - type: web
+    name: teamops-web
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: |
+      cd apps/web
+      npm install
+      npm run build
+    startCommand: cd apps/web && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: NEXT_PUBLIC_API_URL
+        value: https://teamops-api.onrender.com
+
+databases:
+  - name: teamops-db
+    databaseName: teamops
+    user: teamops
+    region: oregon
+    plan: free

@@ -1,78 +1,172 @@
 "use client";
 import { useProjects } from "@/hooks/useProjects";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { CreateProjectSchema, type Project } from "@workspace/api";
+import { useTeams } from "@/hooks/teams/useTeams";
+import { type Project } from "@workspace/api";
 import { Button } from "@workspace/ui/components/button";
-import { Input } from "@workspace/ui/components/input";
+import { Card, CardContent } from "@workspace/ui/components/card";
+import { Badge } from "@workspace/ui/components/badge";
+import { Plus, Edit, Trash2, FolderOpen, Users } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
 import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from "@workspace/ui/components/card";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@workspace/ui/components/alert-dialog";
 
 export default function ProjectsPage() {
-  const { list, create, remove } = useProjects();
-  const { register, handleSubmit, reset } = useForm({
-    resolver: zodResolver(CreateProjectSchema),
-  });
+  const { list, remove } = useProjects();
+  const teamsQuery = useTeams();
+  const [deletingProject, setDeletingProject] = useState<string | null>(null);
+
+  const handleDelete = (projectId: string) => {
+    setDeletingProject(projectId);
+    remove.mutate({ id: projectId }, {
+      onSuccess: () => {
+        setDeletingProject(null);
+      },
+      onError: () => {
+        setDeletingProject(null);
+      }
+    });
+  };
+
+  const getTeamName = (teamId: string) => {
+    const team = teamsQuery.list.data?.find(t => t.id === teamId);
+    return team?.name || 'Unknown Team';
+  };
+
+  if (list.isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold">Projects</h1>
+        </div>
+        <div className="grid gap-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Card key={i}>
+              <CardContent className="p-6">
+                <div className="animate-pulse space-y-2">
+                  <div className="h-4 bg-muted rounded w-1/3"></div>
+                  <div className="h-3 bg-muted rounded w-2/3"></div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="grid md:grid-cols-2 grid-gap">
-      <Card>
-        <CardHeader>
-          <CardTitle>Create Project</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form
-            onSubmit={handleSubmit((v) =>
-              create.mutate(v, {
-                onSuccess: () => {
-                  reset();
-                },
-              }),
-            )}
-            className="flex flex-col form-spacing"
-          >
-            <Input {...register("name")} placeholder="Project name" />
-            <Input {...register("description")} placeholder="Description" />
-            <Button type="submit" disabled={create.isPending}>
-              {create.isPending ? "Creating..." : "Create"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">Projects</h1>
+          <p className="text-muted-foreground mt-1">
+            Manage your team projects and collaboration
+          </p>
+        </div>
+        <Button asChild>
+          <Link href="/projects/new">
+            <Plus className="h-4 w-4 mr-2" />
+            New Project
+          </Link>
+        </Button>
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Projects</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {list.isLoading && <div>Loading...</div>}
-          {list.data?.map((p: Project) => (
-            <div
-              key={p.id}
-              className="padding-card rounded border flex justify-between items-center"
-            >
-              <div>
-                <div className="font-medium">{p.name}</div>
-                <div className="text-sm text-muted-foreground">
-                  {p.description}
+      {/* Projects List */}
+      <div className="grid gap-4">
+        {list.data?.length === 0 ? (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <FolderOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">No projects yet</h3>
+              <p className="text-muted-foreground mb-4">
+                Get started by creating your first project
+              </p>
+              <Button asChild>
+                <Link href="/projects/new">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Project
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          list.data?.map((project: Project) => (
+            <Card key={project.id} className="hover:shadow-md transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3 mb-2">
+                      <h3 className="text-lg font-semibold truncate">
+                        {project.name}
+                      </h3>
+                      <Badge variant="secondary" className="flex items-center gap-1">
+                        <Users className="h-3 w-3" />
+                        {getTeamName(project.teamId)}
+                      </Badge>
+                    </div>
+                    {project.description && (
+                      <p className="text-muted-foreground text-sm leading-relaxed">
+                        {project.description}
+                      </p>
+                    )}
+                  </div>
+                  
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href={`/projects/${project.id}/edit`}>
+                        <Edit className="h-4 w-4" />
+                        <span className="hidden sm:inline ml-2">Edit</span>
+                      </Link>
+                    </Button>
+                    
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="text-destructive hover:text-destructive"
+                          disabled={deletingProject === project.id}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          <span className="hidden sm:inline ml-2">Delete</span>
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Project</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to delete &quot;{project.name}&quot;? This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDelete(project.id)}
+                            className="bg-destructive hover:bg-destructive/90"
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
                 </div>
-              </div>
-              <div>
-                <Button
-                  variant="destructive"
-                  onClick={() => remove.mutate({ id: p.id })}
-                >
-                  Delete
-                </Button>
-              </div>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </div>
     </div>
   );
 }

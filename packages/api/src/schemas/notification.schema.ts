@@ -31,7 +31,16 @@ export const NotificationPayloadSchema = z.object({
   payload: z.unknown(),
 });
 
+// Notification action schemas
+export const MarkAsReadSchema = z.object({
+  id: ID,
+}).strict();
+
+export const MarkAllAsReadSchema = z.object({}).strict();
+
 export type Notification = z.infer<typeof NotificationSchema>;
 export type CreateNotification = z.infer<typeof CreateNotificationSchema>;
 export type UpdateNotification = z.infer<typeof UpdateNotificationSchema>;
 export type NotificationPayload = z.infer<typeof NotificationPayloadSchema>;
+export type MarkAsRead = z.infer<typeof MarkAsReadSchema>;
+export type MarkAllAsRead = z.infer<typeof MarkAllAsReadSchema>;

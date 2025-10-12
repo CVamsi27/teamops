@@ -1,0 +1,57 @@
+{
+  "version": 2,
+  "name": "teamops",
+  "builds": [
+    {
+      "src": "apps/web/package.json",
+      "use": "@vercel/next"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/apps/web/app/api/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/apps/web/$1"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production",
+    "NEXT_PUBLIC_API_URL": "@next_public_api_url",
+    "DATABASE_URL": "@database_url",
+    "UPSTASH_REDIS_REST_URL": "@upstash_redis_rest_url",
+    "UPSTASH_REDIS_REST_TOKEN": "@upstash_redis_rest_token",
+    "UPSTASH_KAFKA_REST_URL": "@upstash_kafka_rest_url",
+    "UPSTASH_KAFKA_REST_TOKEN": "@upstash_kafka_rest_token",
+    "JWT_SECRET": "@jwt_secret",
+    "GOOGLE_CALENDAR_CLIENT_ID": "@google_calendar_client_id",
+    "GOOGLE_CALENDAR_CLIENT_SECRET": "@google_calendar_client_secret"
+  },
+  "functions": {
+    "apps/web/app/api/**/*.ts": {
+      "runtime": "nodejs18.x",
+      "maxDuration": 30
+    }
+  },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, PUT, DELETE, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization"
+        }
+      ]
+    }
+  ]
+}

@@ -1,7 +1,6 @@
 "use client";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { CreateTaskSchema, Project, type CreateTask } from "@workspace/api";
+import { Project, type CreateTask } from "@workspace/api";
 import { useState, useRef, useEffect } from "react";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
@@ -126,22 +125,25 @@ function DatePicker({
 export default function CreateTask() {
   const create = useCreateTask();
   const { list: projectsQuery } = useProjects();
+  
+  // Get today's date in YYYY-MM-DD format
+  const today = new Date().toISOString().split('T')[0];
+  
   const form = useForm({
-    resolver: zodResolver(CreateTaskSchema),
     defaultValues: {
       title: "",
       description: "",
-      priority: "P3" as const,
+      priority: "MEDIUM" as const,
       status: "TODO" as const,
       projectId: "",
-      dueDate: "",
+      dueDate: today, // Set today as default due date
     },
   });
 
   const onCreateTask = (data: CreateTask) => {
     const payload: CreateTask = {
       ...data,
-      priority: data.priority || "P3",
+      priority: data.priority || "MEDIUM",
       status: data.status || "TODO",
     };
 

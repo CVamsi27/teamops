@@ -9,11 +9,20 @@ export const CreateProjectSchema = z
   })
   .strict();
 
+export const CreateProjectWithCreatorSchema = z
+  .object({
+    name: z.string().min(1, 'Project name is required'),
+    description: z.string().max(2000).nullable().optional(),
+    teamId: ID,
+    createdById: ID,
+  })
+  .strict();
+
 export const UpdateProjectSchema = CreateProjectSchema.partial().omit({
   teamId: true,
 });
 
-export const ProjectSchema = CreateProjectSchema.extend({
+export const ProjectSchema = CreateProjectWithCreatorSchema.extend({
   id: ID,
   ...TimestampFields,
 }).strict();
@@ -24,6 +33,7 @@ export const ProjectWithStatsSchema = ProjectSchema.extend({
 }).strict();
 
 export type CreateProject = z.infer<typeof CreateProjectSchema>;
+export type CreateProjectWithCreator = z.infer<typeof CreateProjectWithCreatorSchema>;
 export type UpdateProject = z.infer<typeof UpdateProjectSchema>;
 export type Project = z.infer<typeof ProjectSchema>;
 export type ProjectWithStats = z.infer<typeof ProjectWithStatsSchema>;

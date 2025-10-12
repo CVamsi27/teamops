@@ -10,8 +10,7 @@ export const ISODateString = z
 export const Role = z.enum(['ADMIN', 'MEMBER', 'VIEWER']);
 export const TaskStatus = z.enum(['TODO', 'IN_PROGRESS', 'DONE']);
 export const Priority = z.enum(['P1', 'P2', 'P3', 'P4', 'P5']);
-
-export const TaskPriority = Priority;
+export const TaskPriority = z.enum(['HIGH', 'MEDIUM', 'LOW']);
 
 export const TimestampFields = {
   createdAt: ISODateString.optional(),

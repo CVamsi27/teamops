@@ -6,8 +6,8 @@ export const CreateUserSchema = z
     email: z.email('Valid email required'),
     name: z.string().min(1).optional(),
     passwordHash: z.string().optional(),
-    provider: z.string().optional(),
-    providerId: z.string().optional(),
+    provider: z.string().nullable().optional(),
+    providerId: z.string().nullable().optional(),
     role: Role.default('MEMBER'),
   })
   .strict();
@@ -23,7 +23,12 @@ export const PublicUserSchema = UserSchema.omit({
   passwordHash: true,
 }).strict();
 
+export const UserProfileSchema = UserSchema.omit({
+  passwordHash: true,
+}).strict();
+
 export type CreateUser = z.infer<typeof CreateUserSchema>;
 export type UpdateUser = z.infer<typeof UpdateUserSchema>;
 export type User = z.infer<typeof UserSchema>;
 export type PublicUser = z.infer<typeof PublicUserSchema>;
+export type UserProfile = z.infer<typeof UserProfileSchema>;

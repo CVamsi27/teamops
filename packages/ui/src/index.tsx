@@ -5,3 +5,7 @@ export * from "./components/textarea.js";
 export * from "./components/toast.js";
 export * from "./lib/utils.js";
 export * from "./components/separator.js";
+export * from "./components/alert-dialog.js";
+export * from "./components/scroll-area.js";
+export * from "./components/avatar.js";
+export * from "./components/switch.js";

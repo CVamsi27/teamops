@@ -3,9 +3,15 @@ import {
   OnModuleInit,
   OnModuleDestroy,
   Logger,
+  NotFoundException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { Kafka, Consumer } from 'kafkajs';
 import { NotificationGateway } from './notification.gateway';
+import { NotificationRepository } from './notification.repository';
+import { CreateNotificationDto } from './dto/create-notification.dto';
+import { UpdateNotificationDto } from './dto/update-notification.dto';
+import type { CreateNotification } from '@workspace/api';
 
 @Injectable()
 export class NotificationService implements OnModuleInit, OnModuleDestroy {
@@ -15,7 +21,10 @@ export class NotificationService implements OnModuleInit, OnModuleDestroy {
   private topics = ['task.created', 'task.updated'];
   private kafkaEnabled = false;
 
-  constructor(private gateway: NotificationGateway) {
+  constructor(
+    private gateway: NotificationGateway,
+    private notificationRepository: NotificationRepository,
+  ) {
     if (process.env.KAFKA_ENABLED === 'true') {
       this.initializeKafka();
     } else {
@@ -85,5 +94,91 @@ export class NotificationService implements OnModuleInit, OnModuleDestroy {
         );
       }
     }
+  }
+
+  async create(createNotificationDto: CreateNotificationDto) {
+    const createData: CreateNotification = {
+      userId: createNotificationDto.userId,
+      title: createNotificationDto.title,
+      message: createNotificationDto.message,
+      type: createNotificationDto.type,
+      data: createNotificationDto.metadata,
+      read: false,
+    };
+    
+    const notification = await this.notificationRepository.create(createData);
+    
+    // Broadcast to user via WebSocket
+    this.gateway.broadcast('notification', notification);
+    
+    return notification;
+  }
+
+  async createFromApi(createData: CreateNotification) {
+    const notification = await this.notificationRepository.create(createData);
+    
+    // Broadcast to user via WebSocket
+    this.gateway.broadcast('notification', notification);
+    
+    return notification;
+  }
+
+  async findAllForUser(
+    userId: string,
+    page: number = 1,
+    limit: number = 20,
+    unreadOnly: boolean = false,
+  ) {
+    return this.notificationRepository.findManyForUser(
+      userId,
+      page,
+      limit,
+      unreadOnly,
+    );
+  }
+
+  async findOne(id: string, userId: string) {
+    const notification = await this.notificationRepository.findById(id);
+    
+    if (!notification) {
+      throw new NotFoundException('Notification not found');
+    }
+    
+    if (notification.userId !== userId) {
+      throw new ForbiddenException('Access denied');
+    }
+    
+    return notification;
+  }
+
+  async update(id: string, updateNotificationDto: UpdateNotificationDto, userId: string) {
+    const notification = await this.findOne(id, userId);
+    const updateData = {
+      ...(updateNotificationDto.title && { title: updateNotificationDto.title }),
+      ...(updateNotificationDto.message && { message: updateNotificationDto.message }),
+      ...(updateNotificationDto.type && { type: updateNotificationDto.type }),
+      ...(updateNotificationDto.metadata && { data: updateNotificationDto.metadata }),
+      ...(updateNotificationDto.isRead !== undefined && { read: updateNotificationDto.isRead }),
+    };
+    return this.notificationRepository.update(id, updateData);
+  }
+
+  async markAsRead(id: string, userId: string) {
+    const notification = await this.findOne(id, userId);
+    return this.notificationRepository.markAsRead(id);
+  }
+
+  async markAllAsRead(userId: string) {
+    return this.notificationRepository.markAllAsRead(userId);
+  }
+
+  async getUnreadCount(userId: string) {
+    const count = await this.notificationRepository.getUnreadCount(userId);
+    return { count };
+  }
+
+  async delete(id: string, userId: string) {
+    const notification = await this.findOne(id, userId);
+    return this.notificationRepository.delete(id);
   }
 }

@@ -6,46 +6,82 @@ import {
   Delete,
   Param,
   Body,
-  UsePipes,
   HttpCode,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { TaskService } from './task.service';
-import { CreateTaskSchema, UpdateTaskSchema } from '@workspace/api';
+import { ValidateResponse } from '../../common/response-validation.decorator';
+import { 
+  CreateTaskSchema, 
+  UpdateTaskSchema,
+  TaskSchema 
+} from '@workspace/api';
 import type { Task, CreateTask, UpdateTask } from '@workspace/api';
 import { ZodValidationPipe } from '../../common/zod-validation.pipe';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { z } from 'zod';
+
+interface AuthenticatedRequest extends Request {
+  user?: {
+    userId: string;
+    email: string;
+    role: string;
+  };
+}
 
 @Controller('tasks')
+@UseGuards(JwtAuthGuard)
 export class TaskController {
   constructor(private readonly service: TaskService) {}
 
   @Get()
+  @ValidateResponse(z.array(TaskSchema))
   async list(): Promise<Task[]> {
     return this.service.list();
   }
 
   @Get(':id')
+  @ValidateResponse(TaskSchema)
   async get(@Param('id') id: string): Promise<Task> {
     return this.service.get(id);
   }
 
   @Post()
-  @UsePipes(new ZodValidationPipe(CreateTaskSchema))
-  async create(@Body() body: CreateTask): Promise<Task> {
-    return this.service.create(body);
+  @ValidateResponse(TaskSchema)
+  async create(
+    @Body(new ZodValidationPipe(CreateTaskSchema)) body: CreateTask,
+    @Request() req: AuthenticatedRequest
+  ): Promise<Task> {
+    const taskWithCreator = {
+      ...body,
+      createdById: req.user!.userId,
+    };
+    return this.service.create(taskWithCreator);
   }
 
   @Patch(':id')
-  @UsePipes(new ZodValidationPipe(UpdateTaskSchema))
+  @ValidateResponse(TaskSchema)
   async update(
     @Param('id') id: string,
-    @Body() body: UpdateTask
+    @Body(new ZodValidationPipe(UpdateTaskSchema)) body: UpdateTask,
+    @Request() req: AuthenticatedRequest
   ): Promise<Task> {
-    return this.service.update(id, body);
+    return this.service.update(id, body, {
+      userId: req.user!.userId,
+      email: req.user!.email,
+    });
   }
 
   @Delete(':id')
   @HttpCode(204)
-  async remove(@Param('id') id: string): Promise<void> {
-    return this.service.remove(id);
+  async remove(
+    @Param('id') id: string,
+    @Request() req: AuthenticatedRequest
+  ): Promise<void> {
+    return this.service.remove(id, {
+      userId: req.user!.userId,
+      email: req.user!.email,
+    });
   }
 }

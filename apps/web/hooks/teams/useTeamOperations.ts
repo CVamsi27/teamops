@@ -6,8 +6,8 @@ import {
   CreateTeamSchema,
   UpdateTeamSchema,
 } from "@workspace/api";
-import { useApiQuery } from "../useApiQuery";
-import { useApiMutation } from "../useApiMutation";
+import { useApiQuery } from "../api/useApiQuery";
+import { useApiMutation } from "../api/useApiMutation";
 import { z } from "zod";
 
 export function useTeamOperations() {

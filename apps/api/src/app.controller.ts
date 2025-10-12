@@ -11,4 +11,15 @@ export class AppController {
   getHello(): string {
     return this.appService.getStarted();
   }
+
+  @Get('health')
+  @Public()
+  getHealth() {
+    return {
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      service: 'teamops-api',
+      version: '1.0.0'
+    };
+  }
 }

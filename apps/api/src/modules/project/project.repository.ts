@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../infrastructure/prisma.service';
 import type { Project as PrismaProject } from '@prisma/client';
-import type { Project, CreateProject, UpdateProject } from '@workspace/api';
+import type { Project, CreateProjectWithCreator, UpdateProject } from '@workspace/api';
 
 @Injectable()
 export class ProjectRepository {
@@ -19,12 +19,21 @@ export class ProjectRepository {
     return project ? this.map(project) : null;
   }
 
-  async create(payload: CreateProject): Promise<Project> {
+  async findByTeamId(teamId: string): Promise<Project[]> {
+    const projects = await this.prisma.project.findMany({
+      where: { teamId },
+      orderBy: { createdAt: 'desc' },
+    });
+    return projects.map(this.map);
+  }
+
+  async create(payload: CreateProjectWithCreator): Promise<Project> {
     const project = await this.prisma.project.create({
       data: {
         name: payload.name,
         description: payload.description ?? null,
         teamId: payload.teamId,
+        createdById: payload.createdById,
       },
     });
     return this.map(project);
@@ -63,6 +72,7 @@ export class ProjectRepository {
       name: p.name,
       description: p.description ?? undefined,
       teamId: p.teamId,
+      createdById: p.createdById,
       createdAt: p.createdAt.toISOString(),
       updatedAt: p.updatedAt.toISOString(),
     };

@@ -6,10 +6,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@workspace/ui/components/card";
+import { Button } from "@workspace/ui/components/button";
 import { Skeleton } from "@workspace/ui/components/skeleton";
+import { Eye } from "lucide-react";
+import Link from "next/link";
 
 function TaskCardContent() {
-  const { data, isLoading, isError } = useTasks();
+  const { list: { data, isLoading, isError } } = useTasks();
 
   if (isLoading) {
     return (
@@ -47,16 +50,24 @@ function TaskCardContent() {
   return (
     <CardContent className="flex flex-col card-spacing">
       {data.map((t) => (
-        <div key={t.id} className="padding-card rounded border">
-          <div className="font-medium">{t.title}</div>
-          <div className="text-sm text-muted-foreground">
-            {t.status} • Priority {t.priority}
-          </div>
-          {t.dueDate && (
-            <div className="text-xs text-muted-foreground">
-              Due {t.dueDate.slice(0, 10)}
+        <div key={t.id} className="padding-card rounded border flex justify-between items-center">
+          <div className="flex-1">
+            <div className="font-medium">{t.title}</div>
+            <div className="text-sm text-muted-foreground">
+              {t.status} • Priority {t.priority}
             </div>
-          )}
+            {t.dueDate && (
+              <div className="text-xs text-muted-foreground">
+                Due {t.dueDate.slice(0, 10)}
+              </div>
+            )}
+          </div>
+          <Button variant="outline" size="sm" asChild>
+            <Link href={`/tasks/${t.id}`}>
+              <Eye className="h-4 w-4 mr-1" />
+              View
+            </Link>
+          </Button>
         </div>
       ))}
     </CardContent>

@@ -2,14 +2,12 @@
 import {
   QueryClient,
   QueryClientProvider,
-  useQueryClient,
 } from "@tanstack/react-query";
 import { ReactNode, useState, useEffect } from "react";
 
 import AuthGuard from "@/components/auth/auth-guard";
+import { ThemeProvider } from "@/components/theme-provider";
 import { initSocket } from "@/lib/ws";
-import { io } from "socket.io-client";
-import { type Task } from "@workspace/api";
 
 const getQueryClient = () =>
   new QueryClient({
@@ -21,47 +19,30 @@ const getQueryClient = () =>
     },
   });
 
-function SocketInitializer({ children }: { children: ReactNode }) {
-  const qc = useQueryClient();
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const socket = io(process.env.NEXT_PUBLIC_WS_URL);
-    socket.on("connect", () => console.log("ws connected"));
-    socket.on("task.created", (payload: Task) => {
-      qc.setQueryData<Task[]>(["tasks"], (old) => [payload, ...(old ?? [])]);
-    });
-    socket.on("task.updated", (payload: Task) => {
-      qc.setQueryData<Task[]>(["tasks"], (old) =>
-        (old ?? []).map((t) =>
-          t.id === payload.id ? { ...t, ...payload } : t,
-        ),
-      );
-    });
-    return () => {
-      socket.disconnect();
-    };
-  }, [qc]);
-
-  return <>{children}</>;
-}
-
 export default function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(getQueryClient);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    initSocket(queryClient);
+    const socket = initSocket(queryClient);
+    
+    return () => {
+      socket.disconnect();
+    };
   }, [queryClient]);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthGuard>
-        <SocketInitializer>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+    >
+      <QueryClientProvider client={queryClient}>
+        <AuthGuard>
           {children}
-        </SocketInitializer>
-      </AuthGuard>
-    </QueryClientProvider>
+        </AuthGuard>
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }

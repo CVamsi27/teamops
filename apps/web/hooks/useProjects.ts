@@ -6,8 +6,8 @@ import {
   CreateProjectSchema,
   UpdateProjectSchema,
 } from "@workspace/api";
-import { useApiQuery } from "./useApiQuery";
-import { useApiMutation } from "./useApiMutation";
+import { useApiQuery } from "./api/useApiQuery";
+import { useApiMutation } from "./api/useApiMutation";
 import z from "zod";
 
 export function useProjects() {
@@ -15,6 +15,12 @@ export function useProjects() {
     ["projects"],
     "/projects",
     z.array(ProjectSchema),
+  );
+
+  const get = (projectId: string) => useApiQuery<Project>(
+    ["projects", projectId],
+    `/projects/${projectId}`,
+    ProjectSchema,
   );
 
   const create = useApiMutation<Project, CreateProject>(
@@ -59,5 +65,5 @@ export function useProjects() {
     },
   );
 
-  return { list, create, update, remove };
+  return { list, get, create, update, remove };
 }

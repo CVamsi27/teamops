@@ -5,9 +5,10 @@ import {
   Logger,
 } from '@nestjs/common';
 import { TaskRepository } from './task.repository';
+import { ActivityService } from '../activity/activity.service';
 import { Kafka, Producer, Partitioners } from 'kafkajs';
 import type {
-  CreateTask,
+  CreateTaskWithCreator,
   UpdateTask,
   Task,
   TaskCreatedEvent,
@@ -21,7 +22,10 @@ export class TaskService implements OnModuleDestroy {
   private logger = new Logger(TaskService.name);
   private kafkaEnabled = false;
 
-  constructor(private repo: TaskRepository) {
+  constructor(
+    private repo: TaskRepository,
+    private activityService: ActivityService
+  ) {
     if (process.env.KAFKA_ENABLED === 'true') {
       this.initializeKafka();
     } else {
@@ -58,14 +62,46 @@ export class TaskService implements OnModuleDestroy {
     return this.repo.findAll();
   }
 
+  async getMyTasks(userId: string): Promise<Task[]> {
+    return this.repo.findByAssigneeId(userId);
+  }
+
+  async getTasksByProject(projectId: string): Promise<Task[]> {
+    return this.repo.findByProjectId(projectId);
+  }
+
   async get(id: string): Promise<Task> {
     const t = await this.repo.findOne(id);
     if (!t) throw new NotFoundException('Task not found');
     return t;
   }
 
-  async create(dto: CreateTask): Promise<Task> {
+  async create(dto: CreateTaskWithCreator): Promise<Task> {
     const t = await this.repo.create(dto);
+    
+    // Get user name from database
+    const userInfo = await this.repo['prisma'].user.findUnique({
+      where: { id: dto.createdById },
+      select: { name: true, email: true }
+    });
+    
+    const userName = userInfo?.name || userInfo?.email || 'Unknown User';
+    const userEmail = userInfo?.email || 'unknown@example.com';
+    
+    // Track activity
+    try {
+      await this.activityService.trackTaskActivity(
+        'task_created',
+        t.id,
+        t.title,
+        dto.createdById,
+        userName,
+        userEmail
+      );
+    } catch (error) {
+      this.logger.warn('Failed to track activity:', error);
+    }
+    
     const event: TaskCreatedEvent = {
       id: t.id,
       title: t.title,
@@ -77,9 +113,72 @@ export class TaskService implements OnModuleDestroy {
     return t;
   }
 
-  async update(id: string, dto: UpdateTask): Promise<Task> {
+  async update(id: string, dto: UpdateTask, user: { userId: string; email: string }): Promise<Task> {
+    const oldTask = await this.repo.findOne(id);
+    if (!oldTask) throw new NotFoundException('Task not found');
+    
     const t = await this.repo.update(id, dto);
     if (!t) throw new NotFoundException('Task not found');
+    
+    // Get user name from database
+    const userInfo = await this.repo['prisma'].user.findUnique({
+      where: { id: user.userId },
+      select: { name: true, email: true }
+    });
+    
+    const userName = userInfo?.name || userInfo?.email || 'Unknown User';
+    
+    // Determine activity type based on status change
+    let activityType: 'task_updated' | 'task_completed' = 'task_updated';
+    if (dto.status === 'DONE' && oldTask.status !== 'DONE') {
+      activityType = 'task_completed';
+    }
+    
+    // Track activity with metadata about what changed
+    const metadata: Record<string, unknown> = {};
+    if (dto.status && dto.status !== oldTask.status) {
+      metadata.oldStatus = oldTask.status;
+      metadata.newStatus = dto.status;
+    }
+    if (dto.priority && dto.priority !== oldTask.priority) {
+      metadata.oldPriority = oldTask.priority;
+      metadata.newPriority = dto.priority;
+    }
+    if (dto.dueDate !== oldTask.dueDate) {
+      metadata.oldDueDate = oldTask.dueDate;
+      metadata.newDueDate = dto.dueDate;
+      // Also track due date changes specifically
+      if (dto.dueDate !== oldTask.dueDate) {
+        try {
+          await this.activityService.trackTaskActivity(
+            'due_date_changed',
+            t.id,
+            t.title,
+            user.userId,
+            userName,
+            user.email,
+            { oldDueDate: oldTask.dueDate, newDueDate: dto.dueDate }
+          );
+        } catch (error) {
+          this.logger.warn('Failed to track due date activity:', error);
+        }
+      }
+    }
+    
+    try {
+      await this.activityService.trackTaskActivity(
+        activityType,
+        t.id,
+        t.title,
+        user.userId,
+        userName,
+        user.email,
+        Object.keys(metadata).length > 0 ? metadata : undefined
+      );
+    } catch (error) {
+      this.logger.warn('Failed to track activity:', error);
+    }
+    
     const event: TaskUpdatedEvent = {
       id: t.id,
       status: t.status,
@@ -90,7 +189,32 @@ export class TaskService implements OnModuleDestroy {
     return t;
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: string, user: { userId: string; email: string }): Promise<void> {
+    const task = await this.repo.findOne(id);
+    if (!task) throw new NotFoundException('Task not found');
+    
+    // Get user name from database
+    const userInfo = await this.repo['prisma'].user.findUnique({
+      where: { id: user.userId },
+      select: { name: true, email: true }
+    });
+    
+    const userName = userInfo?.name || userInfo?.email || 'Unknown User';
+    
+    // Track activity before deletion
+    try {
+      await this.activityService.trackTaskActivity(
+        'task_deleted',
+        task.id,
+        task.title,
+        user.userId,
+        userName,
+        user.email
+      );
+    } catch (error) {
+      this.logger.warn('Failed to track activity:', error);
+    }
+    
     const ok = await this.repo.delete(id);
     if (!ok) throw new NotFoundException('Task not found');
   }

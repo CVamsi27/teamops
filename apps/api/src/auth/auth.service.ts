@@ -7,7 +7,7 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../infrastructure/prisma.service';
 import * as bcrypt from 'bcryptjs';
 import type { User } from '@prisma/client';
-import type { Role, RegisterResponse } from '@workspace/api';
+import type { Role, RegisterResponse, LoginResponse } from '@workspace/api';
 
 interface GoogleProfile {
   id: string;
@@ -41,10 +41,15 @@ export class AuthService {
       user = await this.prisma.user.create({
         data: {
           email,
-          name: displayName || null,
+          name: displayName || 'Google User',
           provider: 'google',
           providerId: id,
         },
+      });
+    } else if (!user.name && displayName) {
+      user = await this.prisma.user.update({
+        where: { id: user.id },
+        data: { name: displayName },
       });
     }
     return user;
@@ -52,7 +57,7 @@ export class AuthService {
 
   async generateToken(
     user: User
-  ): Promise<{ access_token: string; user: RegisterResponse }> {
+  ): Promise<RegisterResponse> {
     const payload: TokenPayload = {
       sub: user.id,
       email: user.email,
@@ -64,7 +69,7 @@ export class AuthService {
       user: {
         id: user.id,
         email: user.email,
-        name: user.name || undefined,
+        name: user.name,
       },
     };
   }
@@ -72,8 +77,8 @@ export class AuthService {
   async register(
     email: string,
     password: string,
-    name?: string
-  ): Promise<{ access_token: string; user: RegisterResponse }> {
+    name: string
+  ): Promise<RegisterResponse> {
     const existing = await this.prisma.user.findUnique({ where: { email } });
     
     if (existing) {
@@ -88,11 +93,12 @@ export class AuthService {
       data: {
         email,
         passwordHash: hash,
-        name: name || null,
+        name,
+        provider: 'local',
       },
     });
 
-    return this.signToken(user.id, user.email, user.role);
+    return await this.signToken(user.id, user.email, user.role);
   }
 
   async validateUser(email: string, password: string): Promise<User | null> {
@@ -113,21 +119,27 @@ export class AuthService {
   async login(
     email: string,
     password: string
-  ): Promise<{ access_token: string; user: RegisterResponse }> {
+  ): Promise<LoginResponse> {
     const user = await this.validateUser(email, password);
-    return this.signToken(user.id, user.email, user.role);
+    return await this.signToken(user.id, user.email, user.role);
   }
 
-  private signToken(
+  private async signToken(
     userId: string,
     email: string,
     role: Role
-  ): { access_token: string; user: RegisterResponse } {
+  ): Promise<RegisterResponse> {
     const payload: TokenPayload = { sub: userId, email, role };
     const token = this.jwt.sign(payload);
+    
+    const user = await this.prisma.user.findUnique({ 
+      where: { id: userId },
+      select: { name: true }
+    });
+    
     return {
       access_token: token,
-      user: { id: userId, email, name: undefined },
+      user: { id: userId, email, name: user?.name || 'Unknown User' },
     };
   }
 }

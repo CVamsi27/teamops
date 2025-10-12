@@ -6,7 +6,20 @@
     "build": "dotenv -e .env -- turbo build",
     "dev": "dotenv -e .env -- turbo dev",
     "lint": "turbo lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "deploy:free": "./scripts/deploy-free.sh",
+    "deploy:vercel": "cd apps/web && vercel --prod",
+    "deploy:railway": "railway up",
+    "deploy:help": "cat docs/DEPLOYMENT_STEPS.md",
+    "deploy:guide": "./scripts/deployment-help.sh",
+    "setup:upstash": "echo 'Please visit https://upstash.com to set up Redis and Kafka'",
+    "setup:neon": "echo 'Please visit https://neon.tech to set up PostgreSQL'",
+    "setup:all": "echo 'Follow DEPLOYMENT_STEPS.md for complete setup guide'",
+    "test:health": "curl http://localhost:3001/api/health",
+    "test:backend": "curl http://localhost:3001/api/auth/profile",
+    "prisma:generate": "cd apps/api && npx prisma generate",
+    "prisma:migrate": "cd apps/api && npx prisma migrate dev",
+    "prisma:studio": "cd apps/api && npx prisma studio"
   },
   "devDependencies": {
     "@eslint/js": "^9.35.0",

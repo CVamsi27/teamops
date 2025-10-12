@@ -1,20 +1,19 @@
 import {
   LoginSchema,
   RegisterSchema,
+  UserProfileSchema,
   type LoginInput,
   type RegisterInput,
+  type UserProfile,
   type LoginResponse,
   type RegisterResponse,
 } from "@workspace/api";
-import { useApiMutation } from "./useApiMutation";
-import { useApiQuery } from "./useApiQuery";
+import { useApiMutation } from "./api/useApiMutation";
+import { useApiQuery } from "./api/useApiQuery";
+import { AuthStorage } from "@/lib/auth-storage";
 import { z } from "zod";
 
-const UserProfileSchema = z.object({
-  userId: z.string(),
-  email: z.string(),
-  role: z.string(),
-});
+const LogoutSchema = z.object({});
 
 export function useLogin() {
   return useApiMutation<LoginResponse, LoginInput>(
@@ -38,19 +37,36 @@ export function useRegister() {
   );
 }
 
-const LogoutSchema = z.object({});
-
 export function useLogout() {
   return useApiMutation<any, {}>("/auth/logout", ["auth"], LogoutSchema, {
     invalidateKeys: [["me"]],
   });
 }
 
+export const AuthUtils = {
+  saveToken: (token: string) => {
+    AuthStorage.setToken(token, 14);
+  },
+  
+  clearToken: () => {
+    AuthStorage.clearToken();
+  },
+  
+  isAuthenticated: () => {
+    return AuthStorage.isAuthenticated();
+  }
+};
+
 export function useMe(options?: { enabled?: boolean }) {
-  return useApiQuery(["me"], "/auth/profile", UserProfileSchema, {
-    retry: false,
+  return useApiQuery<UserProfile>(["me"], "/auth/profile", UserProfileSchema, {
+    retry: (failureCount, error: any) => {
+      if (error?.response?.status === 401) {
+        return false;
+      }
+      return failureCount < 2;
+    },
     staleTime: 1000 * 60 * 5,
-    enabled: options?.enabled,
+    enabled: options?.enabled ?? true,
     refetchOnWindowFocus: false,
     refetchOnMount: true,
   });

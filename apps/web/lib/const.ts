@@ -1,11 +1,9 @@
 export const API = process.env.NEXT_PUBLIC_API_URL;
 
 export const PRIORITY_OPTIONS = [
-  { value: "P1", label: "P1 - Critical" },
-  { value: "P2", label: "P2 - High" },
-  { value: "P3", label: "P3 - Medium" },
-  { value: "P4", label: "P4 - Low" },
-  { value: "P5", label: "P5 - Lowest" },
+  { value: "HIGH", label: "High Priority" },
+  { value: "MEDIUM", label: "Medium Priority" },
+  { value: "LOW", label: "Low Priority" },
 ] as const;
 
 export const STATUS_OPTIONS = [

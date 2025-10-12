@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ProjectRepository } from './project.repository';
-import type { Project, CreateProject, UpdateProject } from '@workspace/api';
+import type { Project, CreateProjectWithCreator, UpdateProject } from '@workspace/api';
 
 @Injectable()
 export class ProjectService {
@@ -16,7 +16,7 @@ export class ProjectService {
     return p;
   }
 
-  create(dto: CreateProject): Promise<Project> {
+  create(dto: CreateProjectWithCreator): Promise<Project> {
     return this.repo.create(dto);
   }
 
@@ -29,5 +29,9 @@ export class ProjectService {
   async remove(id: string): Promise<void> {
     const success = await this.repo.delete(id);
     if (!success) throw new NotFoundException('Project not found');
+  }
+
+  async getProjectsByTeam(teamId: string): Promise<Project[]> {
+    return this.repo.findByTeamId(teamId);
   }
 }

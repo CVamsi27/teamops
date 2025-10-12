@@ -25,7 +25,7 @@ export default function HomePage() {
             Open Dashboard
           </Link>
           <Link className="padding-button rounded-lg border" href="/pricing">
-            See Pricing
+            View Pricing
           </Link>
         </div>
       </div>
@@ -59,25 +59,25 @@ export default function HomePage() {
       <div className="grid md:grid-cols-3 grid-gap">
         {[
           {
-            tier: "Starter",
-            price: "$0",
-            features: ["Up to 2 teams", "Basic tasks", "Email invites"],
+            tier: "Pricing",
+            price: "Coming Soon",
+            features: ["Flexible plans for all team sizes", "Early access available", "Enterprise options"],
           },
           {
-            tier: "Pro",
-            price: "$9",
-            features: ["Unlimited teams", "Projects", "Priority & deadlines"],
+            tier: "Features",
+            price: "Full-Stack",
+            features: ["Team management & RBAC", "Projects & task tracking", "Real-time updates"],
           },
           {
-            tier: "Business",
-            price: "$29",
-            features: ["RBAC", "WebSockets", "Audit events (Kafka)"],
+            tier: "Contact",
+            price: "Get Started",
+            features: ["Demo available", "Enterprise inquiries", "Custom solutions"],
           },
         ].map((p) => (
           <Card key={p.tier}>
             <CardHeader>
               <CardTitle>
-                {p.tier} — {p.price}/mo
+                {p.tier} — {p.price}
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm">
@@ -98,8 +98,8 @@ export default function HomePage() {
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground">
             Want a demo or enterprise features? Email{" "}
-            <a className="underline" href="mailto:hello@teamops.app">
-              hello@teamops.app
+            <a className="underline" href="mailto:cvamsik99@gmail.com">
+              cvamsik99@gmail.com
             </a>
           </CardContent>
         </Card>

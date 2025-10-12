@@ -11,13 +11,23 @@ import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import express from 'express';
 import { ZodValidationPipe } from '../common/zod-validation.pipe';
-import { LoginSchema, RegisterSchema } from '@workspace/api';
+import { ValidateResponse } from '../common/response-validation.decorator';
+import { 
+  LoginSchema, 
+  RegisterSchema,
+  RegisterResponseSchema,
+  LoginResponseSchema,
+  LogoutResponseSchema,
+  ProfileResponseSchema,
+} from '@workspace/api';
 import { Public } from '../common/public.decorator';
 import type {
   LoginInput,
   RegisterInput,
-  LoginResponse,
   RegisterResponse,
+  LoginResponse,
+  LogoutResponse,
+  ProfileResponse,
 } from '@workspace/api';
 
 interface AuthenticatedRequest extends express.Request {
@@ -50,10 +60,10 @@ export class AuthController {
     @Req() req: GoogleAuthRequest,
     @Res() res: express.Response
   ) {
-    const { access_token, user } = await this.authService.generateToken(
+    const result = await this.authService.generateToken(
       req.user!
     );
-    res.cookie('teamops_token', access_token, {
+    res.cookie('teamops_token', result.access_token, {
       httpOnly: true,
       sameSite: 'lax',
       secure: process.env.APP_ENV === 'production',
@@ -64,51 +74,86 @@ export class AuthController {
   }
 
   @Get('profile')
-  getProfile(@Req() req: AuthenticatedRequest) {
-    return req.user;
+  @ValidateResponse(ProfileResponseSchema)
+  async getProfile(@Req() req: AuthenticatedRequest): Promise<ProfileResponse> {
+    if (!req.user || !req.user.userId) {
+      throw new Error('User not authenticated');
+    }
+
+    const user = await this.authService['prisma'].user.findUnique({
+      where: { id: req.user.userId },
+      select: { 
+        id: true, 
+        email: true, 
+        name: true, 
+        role: true,
+        provider: true,
+        providerId: true,
+        createdAt: true,
+        updatedAt: true
+      }
+    });
+    
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name || 'Unknown User',
+      role: user.role,
+      provider: user.provider,
+      providerId: user.providerId,
+      createdAt: user.createdAt.toISOString(),
+      updatedAt: user.updatedAt.toISOString(),
+    };
   }
 
   @Post('register')
   @Public()
+  @ValidateResponse(RegisterResponseSchema)
   async register(
     @Body(new ZodValidationPipe(RegisterSchema)) body: RegisterInput,
     @Res({ passthrough: true }) res: express.Response
-  ): Promise<RegisterResponse & { access_token: string }> {
-    const { access_token, user } = await this.authService.register(
+  ): Promise<RegisterResponse> {
+    const result = await this.authService.register(
       body.email,
       body.password,
       body.name
     );
-    res.cookie('teamops_token', access_token, {
+    res.cookie('teamops_token', result.access_token, {
       httpOnly: true,
       sameSite: 'lax',
       secure: process.env.APP_ENV === 'production',
       maxAge: 1000 * 60 * 60 * 24 * 7,
     });
-    return { access_token, ...user };
+    return result;
   }
 
   @Post('login')
   @Public()
+  @ValidateResponse(LoginResponseSchema)
   async login(
     @Body(new ZodValidationPipe(LoginSchema)) body: LoginInput,
     @Res({ passthrough: true }) res: express.Response
-  ): Promise<LoginResponse & { user: RegisterResponse }> {
-    const { access_token, user } = await this.authService.login(
+  ): Promise<LoginResponse> {
+    const result = await this.authService.login(
       body.email,
       body.password
     );
-    res.cookie('teamops_token', access_token, {
+    res.cookie('teamops_token', result.access_token, {
       httpOnly: true,
       sameSite: 'lax',
       secure: process.env.APP_ENV === 'production',
       maxAge: 1000 * 60 * 60 * 24 * 7,
     });
-    return { access_token, user };
+    return result;
   }
 
   @Post('logout')
-  async logout(@Res({ passthrough: true }) res: express.Response) {
+  @ValidateResponse(LogoutResponseSchema)
+  async logout(@Res({ passthrough: true }) res: express.Response): Promise<LogoutResponse> {
     res.clearCookie('teamops_token');
     return { ok: true };
   }

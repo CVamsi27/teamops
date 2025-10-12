@@ -1,8 +1,7 @@
 "use client";
 import { useCreateTeam } from "@/hooks/teams/useCreateTeam";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { CreateTeamSchema, type CreateTeam } from "@workspace/api";
+import { type CreateTeam } from "@workspace/api";
 import {
   Card,
   CardContent,
@@ -26,7 +25,6 @@ import { toast } from "@workspace/ui/components/toast";
 export default function CreateTeams() {
   const create = useCreateTeam();
   const form = useForm<CreateTeam>({
-    resolver: zodResolver(CreateTeamSchema),
     defaultValues: {
       name: "",
       description: "",
@@ -86,7 +84,7 @@ export default function CreateTeams() {
                   <FormLabel>Description (optional)</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Describe your team's purpose and goals..."
+                      placeholder="Describe your team&apos;s purpose and goals..."
                       rows={3}
                       {...field}
                       value={field.value || ""}

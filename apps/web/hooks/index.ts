@@ -1,5 +1,5 @@
-export { useApiQuery } from "./useApiQuery";
-export { useApiMutation } from "./useApiMutation";
+export { useApiQuery } from "./api/useApiQuery";
+export { useApiMutation } from "./api/useApiMutation";
 
 export { useLogin, useRegister, useLogout, useMe } from "./useAuth";
 
@@ -16,3 +16,7 @@ export { useCreateTask } from "./tasks/useCreateTask";
 export { useTaskOperations } from "./tasks/useTaskOperations";
 
 export { useNotifications } from "./useNotifications";
+
+export { useDashboard } from "./useDashboard";
+export { useProfile } from "./profile/useProfile";
+export { useUpdateProfile } from "./profile/useUpdateProfile";

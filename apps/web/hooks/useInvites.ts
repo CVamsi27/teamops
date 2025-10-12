@@ -5,7 +5,7 @@ import {
   CreateInviteSchema,
   AcceptInviteSchema,
 } from "@workspace/api";
-import { useApiMutation } from "./useApiMutation";
+import { useApiMutation } from "./api/useApiMutation";
 
 export function useInvites() {
   const create = useApiMutation<Invite, CreateInvite>(

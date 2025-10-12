@@ -12,6 +12,49 @@
 **TeamOps** is a **collaboration and team management platform** designed to streamline how teams manage **projects, tasks, and communication**.
 It demonstrates **modern full-stack development skills** with **microservices, real-time updates, open-source standards, and cloud-native deployment**.
 
+## 🚀 **Quick Start Deployment**
+
+### **One-Command Deployment**
+```bash
+# Interactive deployment wizard
+npm run deploy:free
+```
+
+### **Quick Setup**
+```bash
+# 1. Copy environment template
+cp .env.example .env.local
+
+# 2. Get deployment help
+npm run deploy:guide
+
+# 3. Setup services (follow the links)
+npm run setup:all
+
+# 4. Test locally
+npm run dev
+
+# 5. Deploy to production
+npm run deploy:vercel
+```
+
+### **Free Hosting Options**
+- **Vercel**: $0/month (Recommended)
+- **Railway**: $0 for first few months  
+- **Render**: $0/month forever
+
+### **CI/CD Ready**
+- ✅ GitHub Actions configured
+- ✅ Automatic testing on PR
+- ✅ Optional auto-deploy to production
+- ✅ Zero-config setup
+
+📖 **[Complete Documentation →](docs/README.md)**
+📖 **[🏗️ Architecture Overview →](docs/ARCHITECTURE.md)**
+📖 **[Quick Deployment Guide →](docs/DEPLOYMENT_STEPS.md)**
+📖 **[Free Cloud Setup →](docs/FREE_CLOUD_SETUP.md)**
+📖 **[GitHub Actions Setup →](docs/ACTIONS_SETUP.md)**
+
 ---
 
 ## **🚀 Tech Stack**
@@ -24,7 +67,7 @@ It demonstrates **modern full-stack development skills** with **microservices, r
 | **Event Streaming** | Apache Kafka                                                             | Real-time events & notifications               |
 | **Auth**            | NextAuth.js + JWT                                                        | Secure authentication & authorization          |
 | **Caching**         | Redis                                                                    | Session storage & faster response times        |
-| **Deployment**      | Vercel (frontend), AWS ECS/Lambda (backend), RDS (database)              | Cloud-native scalable infra                    |
+| **Deployment**      | Vercel (frontend), Railway/Render (backend), Neon (database)             | Cloud-native scalable infra                    |
 | **Testing**         | Jest + React Testing Library                                             | Unit & integration testing                     |
 | **CI/CD**           | GitHub Actions                                                           | Automated testing & deployments                |
 | **Docs**            | Storybook + OpenAPI                                                      | Component & API documentation                  |
@@ -47,48 +90,61 @@ It demonstrates **modern full-stack development skills** with **microservices, r
 
 ### **High-Level Design (HLD)**
 
-- **Frontend** → Next.js app on Vercel
-- **API Gateway** → Nest.js Gateway Service
-- **Microservices** → User, Team, Task, Notification, File Services
-- **Database** → PostgreSQL + Prisma ORM
-- **Event Streaming** → Kafka for inter-service communication
-- **Deployment** → AWS ECS for services, RDS for DB, S3 for file storage
+```
+┌─────────────────┐    HTTP/REST    ┌─────────────────┐
+│   Frontend      │◄───────────────►│   Backend       │
+│   (Next.js)     │                 │   (NestJS)      │
+│   Port: 3000    │                 │   Port: 3001    │
+└─────────────────┘                 └─────────────────┘
+                                             │
+                                             ▼
+                                    ┌─────────────────┐
+                                    │   PostgreSQL    │
+                                    │   + Redis       │
+                                    │   + Kafka       │
+                                    └─────────────────┘
+```
+
+- **Frontend** → Next.js app (Vercel)
+- **Backend** → NestJS API (Railway/Render)
+- **Database** → PostgreSQL (Neon)
+- **Cache** → Redis (Upstash)
+- **Events** → Kafka (Upstash)
 
 ---
 
 ### **Low-Level Design (LLD)**
 
-#### **Frontend (Next.js)**
+#### **Frontend (Next.js) - `apps/web`**
 
 ```
-/teamops-frontend
- ├── app/
- │   ├── dashboard/
- │   ├── projects/
- │   ├── tasks/
- │   ├── profile/
- ├── components/
- ├── hooks/
- ├── lib/
- ├── utils/
- ├── styles/
- ├── tests/
+apps/web/
+ ├── app/                  # Next.js 13+ app directory
+ │   ├── dashboard/        # Dashboard pages  
+ │   ├── projects/         # Project management
+ │   ├── tasks/           # Task management
+ │   └── profile/         # User profile
+ ├── components/          # Reusable UI components
+ ├── hooks/              # Custom React hooks
+ ├── lib/                # Utilities and services
+ └── styles/             # CSS and styling
 ```
 
-#### **Backend (Nest.js)**
+#### **Backend (NestJS) - `apps/api`**
 
 ```
-/teamops-backend
- ├── apps/
- │   ├── api-gateway/
- │   ├── user-service/
- │   ├── team-service/
- │   ├── task-service/
- │   ├── notification-service/
- ├── libs/
- │   ├── common/
- │   ├── kafka/
- │   ├── prisma/
+apps/api/
+ ├── src/
+ │   ├── modules/
+ │   │   ├── auth/        # Authentication service
+ │   │   ├── user/        # User management
+ │   │   ├── team/        # Team management
+ │   │   ├── project/     # Project service
+ │   │   ├── task/        # Task service
+ │   │   └── notification/ # Notification service
+ │   ├── common/          # Shared utilities
+ │   └── infrastructure/  # Database, Kafka, etc.
+ └── prisma/              # Database schema
 ```
 
 ---
@@ -164,33 +220,35 @@ AWS_BUCKET=teamops-files
 ### **3. Install Dependencies**
 
 ```bash
-# Frontend
-cd teamops-frontend
-pnpm install
-
-# Backend
-cd teamops-backend
+# Install all dependencies (frontend + backend)
 pnpm install
 ```
 
 ### **4. Run Development Servers**
 
 ```bash
-# Frontend
-pnpm dev
+# Start both frontend and backend
+npm run dev
 
-# Backend
-pnpm start:dev
+# This starts:
+# - Frontend: http://localhost:3000 (Next.js)
+# - Backend: http://localhost:3001 (NestJS)
 ```
 
 ---
 
 ## **🌎 Deployment**
 
-- **Frontend** → [Vercel](https://vercel.com)
-- **Backend** → [AWS ECS](https://aws.amazon.com/ecs/)
-- **Database** → [AWS RDS](https://aws.amazon.com/rds/)
-- **File Storage** → [AWS S3](https://aws.amazon.com/s3/)
+### **Free Cloud Deployment**
+- **Frontend** → [Vercel](https://vercel.com) (Free)
+- **Backend** → [Railway](https://railway.app) or [Render](https://render.com) (Free)
+- **Database** → [Neon](https://neon.tech) (Free PostgreSQL)
+- **Cache & Events** → [Upstash](https://upstash.com) (Free Redis + Kafka)
+
+### **Alternative: Enterprise**
+- **Backend** → AWS ECS/EKS, Google Cloud Run
+- **Database** → AWS RDS, Google Cloud SQL
+- **File Storage** → AWS S3, Google Cloud Storage
 
 ---
 

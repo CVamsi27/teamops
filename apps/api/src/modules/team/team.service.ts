@@ -16,8 +16,8 @@ export class TeamService {
     return team;
   }
 
-  async create(dto: CreateTeam): Promise<Team> {
-    return this.repo.create(dto);
+  async create(dto: CreateTeam, creatorUserId: string): Promise<Team> {
+    return this.repo.createWithMembership(dto, creatorUserId);
   }
 
   async update(id: string, dto: UpdateTeam): Promise<Team> {
@@ -29,5 +29,9 @@ export class TeamService {
   async remove(id: string): Promise<void> {
     const ok = await this.repo.delete(id);
     if (!ok) throw new NotFoundException('Team not found');
+  }
+
+  async getMyTeams(userId: string): Promise<Team[]> {
+    return this.repo.findByUserId(userId);
   }
 }

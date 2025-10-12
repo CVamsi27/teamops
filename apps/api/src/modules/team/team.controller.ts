@@ -6,39 +6,53 @@ import {
   Delete,
   Param,
   Body,
-  UsePipes,
   HttpCode,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { TeamService } from './team.service';
 import { ZodValidationPipe } from '../../common/zod-validation.pipe';
-import { CreateTeamSchema, UpdateTeamSchema } from '@workspace/api';
+import { ValidateResponse } from '../../common/response-validation.decorator';
+import { 
+  CreateTeamSchema, 
+  UpdateTeamSchema,
+  TeamSchema 
+} from '@workspace/api';
 import type { Team, CreateTeam, UpdateTeam } from '@workspace/api';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { z } from 'zod';
 
 @Controller('teams')
+@UseGuards(JwtAuthGuard)
 export class TeamController {
   constructor(private readonly service: TeamService) {}
 
   @Get()
-  async list(): Promise<Team[]> {
-    return this.service.list();
+  @ValidateResponse(z.array(TeamSchema))
+  async list(@Request() req: any): Promise<Team[] | null> {
+    return this.service.getMyTeams(req.user.userId);
   }
 
   @Get(':id')
+  @ValidateResponse(TeamSchema)
   async get(@Param('id') id: string): Promise<Team> {
     return this.service.get(id);
   }
 
   @Post()
-  @UsePipes(new ZodValidationPipe(CreateTeamSchema))
-  async create(@Body() body: CreateTeam): Promise<Team> {
-    return this.service.create(body);
+  @ValidateResponse(TeamSchema)
+  async create(
+    @Body(new ZodValidationPipe(CreateTeamSchema)) body: CreateTeam, 
+    @Request() req: any
+  ): Promise<Team> {
+    return this.service.create(body, req.user.userId);
   }
 
   @Patch(':id')
-  @UsePipes(new ZodValidationPipe(UpdateTeamSchema))
+  @ValidateResponse(TeamSchema)
   async update(
     @Param('id') id: string,
-    @Body() body: UpdateTeam
+    @Body(new ZodValidationPipe(UpdateTeamSchema)) body: UpdateTeam
   ): Promise<Team> {
     return this.service.update(id, body);
   }

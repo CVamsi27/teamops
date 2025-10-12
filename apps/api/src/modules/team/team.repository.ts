@@ -19,11 +19,41 @@ export class TeamRepository {
     return t ? this.map(t) : null;
   }
 
+  async findByUserId(userId: string): Promise<Team[]> {
+    const teams = await this.prisma.team.findMany({
+      where: {
+        memberships: {
+          some: {
+            userId: userId,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+    return teams.map(this.map);
+  }
+
   async create(payload: CreateTeam): Promise<Team> {
     const t = await this.prisma.team.create({
       data: {
         name: payload.name,
         description: payload.description ?? null,
+      },
+    });
+    return this.map(t);
+  }
+
+  async createWithMembership(payload: CreateTeam, creatorUserId: string): Promise<Team> {
+    const t = await this.prisma.team.create({
+      data: {
+        name: payload.name,
+        description: payload.description ?? null,
+        memberships: {
+          create: {
+            userId: creatorUserId,
+            role: 'ADMIN', // Creator becomes admin of the team
+          },
+        },
       },
     });
     return this.map(t);
