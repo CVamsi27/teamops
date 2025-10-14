@@ -20,7 +20,7 @@ export class ChatController {
   @Get('history')
   async getChatHistory(
     @Query() query: GetChatHistoryDto,
-    @Request() req: any
+    @Request() _req: any
   ): Promise<ChatMessage[]> {
     const { roomId, roomType, limit, offset } = query;
 
@@ -31,9 +31,12 @@ export class ChatController {
   async createMessage(
     @Body()
     body: { content: string; roomId: string; roomType: 'TEAM' | 'TASK' },
-    @Request() req: any
+    @Request() _req: any
   ): Promise<ChatMessage> {
-    const user = req.user;
+    const user = _req.user;
+    if (!user) {
+      throw new Error('Unauthorized');
+    }
 
     const messageData: CreateChatMessage = {
       content: body.content,
@@ -52,7 +55,7 @@ export class ChatController {
   async getOnlineUsers(
     @Query('roomType') roomType: string,
     @Query('roomId') roomId: string,
-    @Request() req: any
+    @Request() _req: any
   ): Promise<{ onlineUsers: string[] }> {
     const onlineUsers = await this.chatService.getOnlineUsers(roomId, roomType);
     return { onlineUsers };
@@ -62,7 +65,7 @@ export class ChatController {
   async getRoomStats(
     @Query('roomType') roomType: string,
     @Query('roomId') roomId: string,
-    @Request() req: any
+    @Request() _req: any
   ): Promise<{ messageCount: number; onlineUsers: string[] }> {
     const [messageCount, onlineUsers] = await Promise.all([
       this.chatService.getRoomMessageCount(roomId, roomType),

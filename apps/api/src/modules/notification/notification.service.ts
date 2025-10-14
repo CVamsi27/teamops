@@ -114,19 +114,19 @@ export class NotificationService implements OnModuleInit, OnModuleDestroy {
       read: false,
     };
 
-    const notification = await this.notificationRepository.create(createData);
+  const _notification = await this.notificationRepository.create(createData);
 
-    this.gateway.broadcast('notification', notification);
+  this.gateway.broadcast('notification', _notification);
 
-    return notification;
+  return _notification;
   }
 
   async createFromApi(createData: CreateNotification) {
-    const notification = await this.notificationRepository.create(createData);
+  const _notification = await this.notificationRepository.create(createData);
 
-    this.gateway.broadcast('notification', notification);
+  this.gateway.broadcast('notification', _notification);
 
-    return notification;
+  return _notification;
   }
 
   async findAllForUser(
@@ -162,7 +162,7 @@ export class NotificationService implements OnModuleInit, OnModuleDestroy {
     updateNotificationDto: UpdateNotificationDto,
     userId: string
   ) {
-    const notification = await this.findOne(id, userId);
+    await this.findOne(id, userId);
     const updateData = {
       ...(updateNotificationDto.title && {
         title: updateNotificationDto.title,
@@ -182,8 +182,8 @@ export class NotificationService implements OnModuleInit, OnModuleDestroy {
   }
 
   async markAsRead(id: string, userId: string) {
-    const notification = await this.findOne(id, userId);
-    return this.notificationRepository.markAsRead(id);
+  await this.findOne(id, userId);
+  return this.notificationRepository.markAsRead(id);
   }
 
   async markAllAsRead(userId: string) {
@@ -196,7 +196,7 @@ export class NotificationService implements OnModuleInit, OnModuleDestroy {
   }
 
   async delete(id: string, userId: string) {
-    const notification = await this.findOne(id, userId);
-    return this.notificationRepository.delete(id);
+  await this.findOne(id, userId);
+  return this.notificationRepository.delete(id);
   }
 }

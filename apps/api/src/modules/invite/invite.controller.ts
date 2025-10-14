@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Param, Req } from '@nestjs/common';
+import { Controller, Post, Body, Req } from '@nestjs/common';
 import { InviteService } from './invite.service';
 import { ZodValidationPipe } from '../../common/zod-validation.pipe';
 import { CreateInviteSchema, AcceptInviteSchema } from '@workspace/api';

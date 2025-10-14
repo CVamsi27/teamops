@@ -1,7 +1,6 @@
 import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { Injectable, Logger } from '@nestjs/common';
-import type { NotificationPayload } from '@workspace/api';
 
 @WebSocketGateway({ cors: { origin: true } })
 @Injectable()

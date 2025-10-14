@@ -64,7 +64,7 @@ export class ChatService {
     roomId: string,
     roomType: ChatRoomType,
     content: string,
-    triggerUserId?: string
+    _triggerUserId?: string
   ): Promise<ChatMessage> {
     const systemMessage: CreateChatMessage = {
       content,

@@ -3,10 +3,11 @@ import { sql } from "@vercel/postgres";
 export const db = {
   user: {
     findUnique: async ({
-      where,
+      where: _where,
     }: {
       where: { email?: string; id?: number };
     }) => {
+      const where = _where;
       if (where.email === "test@example.com" || where.id === 1) {
         return {
           id: 1,
@@ -38,7 +39,8 @@ export const db = {
   },
 
   team: {
-    findMany: async ({ where, include }: any) => {
+    findMany: async (_opts: unknown) => {
+      void _opts;
       return [
         {
           id: 1,
@@ -71,12 +73,16 @@ export const db = {
       ];
     },
 
-    create: async ({ data, include }: any) => {
+    create: async (args: Record<string, unknown>) => {
+      const data = (args?.data as Record<string, unknown>) || {};
+      const name = typeof data.name === 'string' ? data.name : undefined;
+      const description = typeof data.description === 'string' ? data.description : undefined;
+      const ownerId = typeof data.ownerId === 'number' ? data.ownerId : undefined;
       return {
         id: Math.floor(Math.random() * 1000),
-        name: data.name,
-        description: data.description,
-        ownerId: data.ownerId,
+        name,
+        description,
+        ownerId,
         createdAt: new Date(),
         updatedAt: new Date(),
         members: [
@@ -97,7 +103,7 @@ export const db = {
     },
   },
 
-  query: async (query: string, params: any[] = []) => {
+  query: async (query: string, params: unknown[] = []) => {
     try {
       if (process.env.POSTGRES_URL) {
         return await sql.query(query, params);

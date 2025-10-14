@@ -6,9 +6,6 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ValidateResponse } from '../common/response-validation.decorator';
 import {
   DashboardDataSchema,
-  type Task,
-  type Team,
-  type Project,
   type DashboardData as DashboardDataType,
 } from '@workspace/api';
 
@@ -27,7 +24,8 @@ export class DashboardController {
   constructor(
     private taskService: TaskService,
     private teamService: TeamService,
-    private projectService: ProjectService
+    private projectService: ProjectService,
+
   ) {}
 
   @Get()

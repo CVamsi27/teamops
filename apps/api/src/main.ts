@@ -41,6 +41,7 @@ async function bootstrap() {
     exposedHeaders: ['Access-Control-Allow-Credentials'],
   });
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
-  await app.listen(process.env.PORT);
+  const port = process.env.PORT || 3000;
+  await app.listen(port);
 }
 void bootstrap();

@@ -64,11 +64,11 @@ export class IntegrationController {
         events,
         message: 'Calendar events refreshed successfully',
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         success: false,
         message:
-          error instanceof Error ? error.message : 'Failed to refresh calendar',
+          _error instanceof Error ? _error.message : 'Failed to refresh calendar',
       };
     }
   }
@@ -107,7 +107,7 @@ export class IntegrationController {
       if (state) {
         try {
           userId = Buffer.from(state, 'base64').toString();
-        } catch (error) {
+        } catch {
           const frontendUrl =
             process.env.FRONTEND_URL || 'http://localhost:3000';
           return res.redirect(
@@ -159,13 +159,13 @@ export class IntegrationController {
   @Patch('google-calendar/settings')
   @UseGuards(JwtAuthGuard)
   async updateCalendarSettings(
-    @Req() req: AuthenticatedRequest,
-    @Body() settings: any
+    @Req() _req: AuthenticatedRequest,
+    @Body() _settings: unknown
   ) {
-    const userId = req.user!.id || req.user!.userId;
+    const userId = _req.user!.id || _req.user!.userId;
     return await this.integrationService.updateCalendarSettings(
       userId,
-      settings
+      _settings as any,
     );
   }
 
@@ -186,20 +186,20 @@ export class IntegrationController {
   @Post('google-calendar/sync-tasks-projects')
   @UseGuards(JwtAuthGuard)
   async syncTasksAndProjects(
-    @Req() req: AuthenticatedRequest,
-    @Body() body: { accessToken: string; refreshToken: string }
+    @Req() _req: AuthenticatedRequest,
+    @Body() _body: { accessToken: string; refreshToken: string }
   ) {
-    const userId = req.user!.id || req.user!.userId;
+    const userId = _req.user!.id || _req.user!.userId;
     return await this.googleCalendarService.syncUserTasksAndProjects(userId);
   }
 
   @Post('google-calendar/sync-task')
   @UseGuards(JwtAuthGuard)
   async syncTask(
-    @Req() req: AuthenticatedRequest,
+    @Req() _req: AuthenticatedRequest,
     @Body() body: { taskId: string; accessToken: string; refreshToken: string }
   ) {
-    const userId = req.user!.id || req.user!.userId;
+    const userId = _req.user!.id || _req.user!.userId;
     return await this.googleCalendarService.syncTaskToCalendar(
       body.taskId,
       userId,
@@ -211,11 +211,11 @@ export class IntegrationController {
   @Post('google-calendar/sync-project')
   @UseGuards(JwtAuthGuard)
   async syncProject(
-    @Req() req: AuthenticatedRequest,
+    @Req() _req: AuthenticatedRequest,
     @Body()
     body: { projectId: string; accessToken: string; refreshToken: string }
   ) {
-    const userId = req.user!.id || req.user!.userId;
+    const userId = _req.user!.id || _req.user!.userId;
     return await this.googleCalendarService.syncProjectToCalendar(
       body.projectId,
       userId,

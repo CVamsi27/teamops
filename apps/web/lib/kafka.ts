@@ -8,7 +8,7 @@ export interface NotificationEvent {
     | "team_invite"
     | "deadline_reminder";
   userId: number;
-  data: any;
+  data: unknown;
   timestamp: Date;
   id: string;
 }
@@ -55,7 +55,7 @@ export class KafkaService {
       }
 
       const producer = this.kafka.producer();
-      const result = await producer.produce(
+      await producer.produce(
         "notifications",
         JSON.stringify(notification),
         {
@@ -79,7 +79,7 @@ export class KafkaService {
     taskId: number;
     userId: number;
     projectId?: number;
-    data: any;
+    data: unknown;
   }): Promise<boolean> {
     try {
       if (!this.kafka) {
@@ -93,7 +93,7 @@ export class KafkaService {
       };
 
       const producer = this.kafka.producer();
-      const result = await producer.produce(
+      await producer.produce(
         "task-events",
         JSON.stringify(eventData),
         {
@@ -118,7 +118,7 @@ export class KafkaService {
     projectId: number;
     userId: number;
     teamId?: number;
-    data: any;
+    data: unknown;
   }): Promise<boolean> {
     try {
       if (!this.kafka) {
@@ -132,7 +132,7 @@ export class KafkaService {
       };
 
       const producer = this.kafka.producer();
-      const result = await producer.produce(
+      await producer.produce(
         "project-events",
         JSON.stringify(eventData),
         {
@@ -172,16 +172,21 @@ export class KafkaService {
         });
 
         if (messages && Array.isArray(messages) && messages.length > 0) {
-          messages.forEach((message: any) => {
+          messages.forEach((message: unknown) => {
             try {
-              const notification: NotificationEvent = JSON.parse(message.value);
+              const m = message as { value?: string | Buffer | null };
+              const valueStr = m.value ? m.value.toString() : '';
+              const notification: NotificationEvent = JSON.parse(valueStr);
               callback(notification);
-            } catch (error) {
-              console.error("Failed to parse notification message:", error);
+            } catch (parseError: unknown) {
+              const msg = parseError && typeof parseError === 'object' && 'message' in parseError
+                ? (parseError as { message?: unknown }).message
+                : String(parseError);
+              console.error("Failed to parse notification message:", msg);
             }
           });
         }
-      } catch (consumeError) {
+      } catch {
         console.warn(
           "Kafka consumer not fully implemented in Upstash REST API, consider using webhooks",
         );
@@ -194,7 +199,7 @@ export class KafkaService {
   createNotificationEvent(
     type: NotificationEvent["type"],
     userId: number,
-    data: any,
+    data: unknown,
   ): NotificationEvent {
     return {
       type,
@@ -209,7 +214,7 @@ export class KafkaService {
     events: Array<{
       topic: string;
       key: string;
-      value: any;
+      value: unknown;
       headers?: Array<{ key: string; value: string }>;
     }>,
   ): Promise<boolean> {

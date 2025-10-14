@@ -51,7 +51,7 @@ export class CacheService {
     }
   }
 
-  async set(key: string, value: any, ttl: number = 3600): Promise<void> {
+  async set(key: string, value: unknown, ttl: number = 3600): Promise<void> {
     try {
       if (!this.redis) {
         console.warn("Redis not configured, skipping cache set");
@@ -93,7 +93,7 @@ export class CacheService {
     return this.get(`teams:user:${userId}`);
   }
 
-  async setUserTeams(userId: number, teams: any[]): Promise<void> {
+  async setUserTeams(userId: number, teams: unknown[]): Promise<void> {
     await this.set(`teams:user:${userId}`, teams, 300); // 5 minutes
   }
 
@@ -101,7 +101,7 @@ export class CacheService {
     return this.get(`projects:user:${userId}`);
   }
 
-  async setUserProjects(userId: number, projects: any[]): Promise<void> {
+  async setUserProjects(userId: number, projects: unknown[]): Promise<void> {
     await this.set(`projects:user:${userId}`, projects, 300); // 5 minutes
   }
 
@@ -111,7 +111,7 @@ export class CacheService {
 
   async setUserNotifications(
     userId: number,
-    notifications: any[],
+    notifications: unknown[],
   ): Promise<void> {
     await this.set(`notifications:user:${userId}`, notifications, 60); // 1 minute
   }

@@ -271,7 +271,7 @@ export function ActivityTimeline({
                     {activity.metadata?.comment &&
                     typeof activity.metadata.comment === "string" ? (
                       <div className="mt-2 p-2 bg-muted/50 rounded text-xs">
-                        " &quot;{activity.metadata.comment}&quot;"
+                        &quot;{activity.metadata.comment}&quot;
                       </div>
                     ) : null}
                   </div>
