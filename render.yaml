@@ -34,10 +34,6 @@ services:
         sync: false
       - key: GOOGLE_CALLBACK_URL
         value: https://teamops-api.onrender.com/api/auth/google/callback
-      - key: GOOGLE_CALENDAR_CLIENT_ID
-        sync: false
-      - key: GOOGLE_CALENDAR_CLIENT_SECRET
-        sync: false
       - key: GOOGLE_CALENDAR_CALLBACK_URL
         value: https://teamops-api.onrender.com/api/integrations/google-calendar/callback
       - key: UPSTASH_REDIS_REST_URL
