@@ -4,7 +4,7 @@ import { UserProfileSchema } from './user.schema';
 export const RegisterSchema = z.object({
   email: z.email(),
   password: z.string().min(8),
-  name: z.string().min(1, "Name is required"),
+  name: z.string().min(1, 'Name is required'),
 });
 
 export const LoginSchema = z.object({
@@ -12,7 +12,6 @@ export const LoginSchema = z.object({
   password: z.string().min(6),
 });
 
-// Response schemas
 export const RegisterResponseSchema = z.object({
   access_token: z.string(),
   user: z.object({

@@ -26,7 +26,7 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
-    
+
     const formData = new FormData(e.currentTarget);
     const payload: LoginInput = {
       email: formData.get("email") as string,
@@ -35,33 +35,41 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
 
     login.mutate(payload, {
       onError: (error: unknown) => {
-        const errorMessage = (error && typeof error === 'object' && 'response' in error && error.response && 
-          typeof error.response === 'object' && 'data' in error.response && error.response.data &&
-          typeof error.response.data === 'object' && 'message' in error.response.data) 
-          ? (error.response.data as { message: string }).message 
-          : (error && typeof error === 'object' && 'message' in error) 
-            ? (error as { message: string }).message 
-            : 'Unknown error';
-        
-        if (errorMessage === 'EMAIL_NOT_FOUND') {
+        const errorMessage =
+          error &&
+          typeof error === "object" &&
+          "response" in error &&
+          error.response &&
+          typeof error.response === "object" &&
+          "data" in error.response &&
+          error.response.data &&
+          typeof error.response.data === "object" &&
+          "message" in error.response.data
+            ? (error.response.data as { message: string }).message
+            : error && typeof error === "object" && "message" in error
+              ? (error as { message: string }).message
+              : "Unknown error";
+
+        if (errorMessage === "EMAIL_NOT_FOUND") {
           setError("Email not found. Please register first.");
           setTimeout(() => onSwitchToRegister(), 2000);
-        } else if (errorMessage === 'USE_GOOGLE_LOGIN') {
-          setError("This email is registered with Google. Please use Google login.");
-        } else if (errorMessage === 'INVALID_PASSWORD') {
+        } else if (errorMessage === "USE_GOOGLE_LOGIN") {
+          setError(
+            "This email is registered with Google. Please use Google login.",
+          );
+        } else if (errorMessage === "INVALID_PASSWORD") {
           setError("Invalid password. Please try again.");
         } else {
           setError("Login failed. Please try again.");
         }
       },
       onSuccess: async (data: { access_token?: string }) => {
-        // Store token for persistent login
         if (data?.access_token) {
           AuthUtils.saveToken(data.access_token);
         }
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
         router.push("/dashboard");
-      }
+      },
     });
   }
 
@@ -87,11 +95,7 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
             </div>
           )}
 
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={login.isPending}
-          >
+          <Button type="submit" className="w-full" disabled={login.isPending}>
             {login.isPending && (
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
             )}

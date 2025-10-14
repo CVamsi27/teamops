@@ -21,12 +21,14 @@ TeamOps follows a **clean separation** between frontend and backend:
 ## Applications
 
 ### **Frontend: `apps/web`**
+
 - **Technology**: Next.js 15 + TypeScript + TailwindCSS
 - **Port**: 3000
 - **Purpose**: User interface, routing, client-side logic
 - **API Calls**: Makes HTTP requests to NestJS backend on port 3001
 
-### **Backend: `apps/api`** 
+### **Backend: `apps/api`**
+
 - **Technology**: NestJS + TypeScript + Prisma ORM
 - **Port**: 3001
 - **Purpose**: API endpoints, business logic, database operations
@@ -74,11 +76,13 @@ npm run dev
 ## Deployment Options
 
 ### **Option 1: Separate Deployment (Recommended)**
+
 - **Frontend**: Deploy to Vercel (static hosting)
 - **Backend**: Deploy to Railway/Render (API hosting)
 - **Database**: Neon PostgreSQL
 
 ### **Option 2: Full Stack Platform**
+
 - **Both**: Deploy to Railway (full-stack hosting)
 - **Database**: Railway PostgreSQL
 

@@ -12,4 +12,5 @@ export * from './schemas/chat.schema';
 export * from './schemas/integration.schema';
 export * from './validation';
 export * from './schemas/dashboard.schema';
+export * from './types/deletion';
 export * from './validation';

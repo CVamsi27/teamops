@@ -2,7 +2,12 @@
 
 import { useParams } from "next/navigation";
 import { useTeams } from "@/hooks/teams/useTeams";
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@workspace/ui/components/card";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import { Skeleton } from "@workspace/ui/components/skeleton";
@@ -14,7 +19,7 @@ import Link from "next/link";
 export default function TeamDetailPage() {
   const params = useParams();
   const teamId = params.id as string;
-  
+
   const { get } = useTeams();
   const teamQuery = get(teamId);
 
@@ -29,12 +34,12 @@ export default function TeamDetailPage() {
             </Link>
           </Button>
         </div>
-        
+
         <div className="space-y-4">
           <Skeleton className="h-8 w-[300px]" />
           <Skeleton className="h-4 w-[500px]" />
         </div>
-        
+
         <div className="grid gap-6 lg:grid-cols-2">
           <Card>
             <CardContent className="py-12">
@@ -62,7 +67,7 @@ export default function TeamDetailPage() {
             </Link>
           </Button>
         </div>
-        
+
         <Card>
           <CardContent className="py-12 text-center">
             <p className="text-muted-foreground">
@@ -92,9 +97,7 @@ export default function TeamDetailPage() {
             {team.name}
           </h1>
           {team.description && (
-            <p className="text-muted-foreground mt-2">
-              {team.description}
-            </p>
+            <p className="text-muted-foreground mt-2">{team.description}</p>
           )}
         </div>
       </div>
@@ -115,18 +118,19 @@ export default function TeamDetailPage() {
                 {team.description || "No description provided"}
               </p>
             </div>
-            
+
             <div>
               <h3 className="font-medium mb-2">Team ID</h3>
               <code className="text-xs bg-muted px-2 py-1 rounded">
                 {team.id}
               </code>
             </div>
-            
+
             <div className="flex items-center gap-2">
               <Badge variant="secondary">Active Team</Badge>
               <Badge variant="outline">
-                Created: {new Date(team.createdAt || Date.now()).toLocaleDateString()}
+                Created:{" "}
+                {new Date(team.createdAt || Date.now()).toLocaleDateString()}
               </Badge>
             </div>
           </div>
@@ -137,20 +141,12 @@ export default function TeamDetailPage() {
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Live Chat */}
         <div>
-          <LiveChat 
-            roomId={teamId}
-            roomType="team"
-            roomName={team.name}
-          />
+          <LiveChat roomId={teamId} roomType="team" roomName={team.name} />
         </div>
 
         {/* Activity Timeline */}
         <div>
-          <ActivityTimeline 
-            entityId={teamId}
-            entityType="team"
-            limit={20}
-          />
+          <ActivityTimeline entityId={teamId} entityType="team" limit={20} />
         </div>
       </div>
 
@@ -162,19 +158,13 @@ export default function TeamDetailPage() {
         <CardContent>
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" asChild>
-              <Link href={`/teams/${teamId}/edit`}>
-                Edit Team
-              </Link>
+              <Link href={`/teams/${teamId}/edit`}>Edit Team</Link>
             </Button>
             <Button variant="outline" asChild>
-              <Link href="/projects/new">
-                Create Project
-              </Link>
+              <Link href="/projects/new">Create Project</Link>
             </Button>
             <Button variant="outline" asChild>
-              <Link href="/tasks/new">
-                Create Task
-              </Link>
+              <Link href="/tasks/new">Create Task</Link>
             </Button>
           </div>
         </CardContent>

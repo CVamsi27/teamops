@@ -1,7 +1,12 @@
-import { Kafka } from '@upstash/kafka';
+import { Kafka } from "@upstash/kafka";
 
 export interface NotificationEvent {
-  type: 'task_assigned' | 'task_completed' | 'project_created' | 'team_invite' | 'deadline_reminder';
+  type:
+    | "task_assigned"
+    | "task_completed"
+    | "project_created"
+    | "team_invite"
+    | "deadline_reminder";
   userId: number;
   data: any;
   timestamp: Date;
@@ -11,7 +16,7 @@ export interface NotificationEvent {
 export class KafkaService {
   private static instance: KafkaService;
   private kafka: Kafka | null = null;
-  
+
   public static getInstance(): KafkaService {
     if (!KafkaService.instance) {
       KafkaService.instance = new KafkaService();
@@ -28,18 +33,18 @@ export class KafkaService {
       const url = process.env.UPSTASH_KAFKA_REST_URL;
       const username = process.env.UPSTASH_KAFKA_REST_USERNAME;
       const password = process.env.UPSTASH_KAFKA_REST_PASSWORD;
-      
+
       if (url && username && password) {
         this.kafka = new Kafka({
           url,
           username,
-          password
+          password,
         });
       } else {
         this.kafka = null;
       }
     } catch (error) {
-      console.error('Kafka initialization error:', error);
+      console.error("Kafka initialization error:", error);
     }
   }
 
@@ -51,26 +56,26 @@ export class KafkaService {
 
       const producer = this.kafka.producer();
       const result = await producer.produce(
-        'notifications',
+        "notifications",
         JSON.stringify(notification),
         {
           key: notification.userId.toString(),
           headers: [
-            { key: 'content-type', value: 'application/json' },
-            { key: 'event-type', value: notification.type },
+            { key: "content-type", value: "application/json" },
+            { key: "event-type", value: notification.type },
           ],
-        }
+        },
       );
 
       return true;
     } catch (error) {
-      console.error('Failed to publish notification:', error);
+      console.error("Failed to publish notification:", error);
       return false;
     }
   }
 
   async publishTaskEvent(event: {
-    type: 'created' | 'updated' | 'deleted' | 'assigned' | 'completed';
+    type: "created" | "updated" | "deleted" | "assigned" | "completed";
     taskId: number;
     userId: number;
     projectId?: number;
@@ -89,27 +94,27 @@ export class KafkaService {
 
       const producer = this.kafka.producer();
       const result = await producer.produce(
-        'task-events',
+        "task-events",
         JSON.stringify(eventData),
         {
           key: event.taskId.toString(),
           headers: [
-            { key: 'content-type', value: 'application/json' },
-            { key: 'event-type', value: event.type },
-            { key: 'user-id', value: event.userId.toString() },
+            { key: "content-type", value: "application/json" },
+            { key: "event-type", value: event.type },
+            { key: "user-id", value: event.userId.toString() },
           ],
-        }
+        },
       );
 
       return true;
     } catch (error) {
-      console.error('Failed to publish task event:', error);
+      console.error("Failed to publish task event:", error);
       return false;
     }
   }
 
   async publishProjectEvent(event: {
-    type: 'created' | 'updated' | 'deleted' | 'member_added' | 'member_removed';
+    type: "created" | "updated" | "deleted" | "member_added" | "member_removed";
     projectId: number;
     userId: number;
     teamId?: number;
@@ -128,43 +133,42 @@ export class KafkaService {
 
       const producer = this.kafka.producer();
       const result = await producer.produce(
-        'project-events',
+        "project-events",
         JSON.stringify(eventData),
         {
           key: event.projectId.toString(),
           headers: [
-            { key: 'content-type', value: 'application/json' },
-            { key: 'event-type', value: event.type },
-            { key: 'user-id', value: event.userId.toString() },
+            { key: "content-type", value: "application/json" },
+            { key: "event-type", value: event.type },
+            { key: "user-id", value: event.userId.toString() },
           ],
-        }
+        },
       );
 
       return true;
     } catch (error) {
-      console.error('Failed to publish project event:', error);
+      console.error("Failed to publish project event:", error);
       return false;
     }
   }
 
-  async consumeNotifications(callback: (notification: NotificationEvent) => void): Promise<void> {
+  async consumeNotifications(
+    callback: (notification: NotificationEvent) => void,
+  ): Promise<void> {
     try {
       if (!this.kafka) {
-        console.warn('Kafka not configured, cannot consume notifications');
+        console.warn("Kafka not configured, cannot consume notifications");
         return;
       }
 
-      // Upstash Kafka REST API consumer usage
       const consumer = this.kafka.consumer();
-      
-      // Simple polling implementation for notifications
-      // In production, consider using webhooks for better performance
+
       try {
         const messages = await consumer.consume({
-          consumerGroupId: 'teamops-notifications',
+          consumerGroupId: "teamops-notifications",
           instanceId: `instance-${Date.now()}`,
-          topics: ['notifications'],
-          autoOffsetReset: 'earliest',
+          topics: ["notifications"],
+          autoOffsetReset: "earliest",
         });
 
         if (messages && Array.isArray(messages) && messages.length > 0) {
@@ -173,23 +177,24 @@ export class KafkaService {
               const notification: NotificationEvent = JSON.parse(message.value);
               callback(notification);
             } catch (error) {
-              console.error('Failed to parse notification message:', error);
+              console.error("Failed to parse notification message:", error);
             }
           });
         }
       } catch (consumeError) {
-        console.warn('Kafka consumer not fully implemented in Upstash REST API, consider using webhooks');
+        console.warn(
+          "Kafka consumer not fully implemented in Upstash REST API, consider using webhooks",
+        );
       }
     } catch (error) {
-      console.error('Failed to consume notifications:', error);
+      console.error("Failed to consume notifications:", error);
     }
   }
 
-  // Helper method to create notification events
   createNotificationEvent(
-    type: NotificationEvent['type'],
+    type: NotificationEvent["type"],
     userId: number,
-    data: any
+    data: any,
   ): NotificationEvent {
     return {
       type,
@@ -200,42 +205,47 @@ export class KafkaService {
     };
   }
 
-  // Batch publish multiple events
-  async publishBatch(events: Array<{
-    topic: string;
-    key: string;
-    value: any;
-    headers?: Array<{ key: string; value: string }>;
-  }>): Promise<boolean> {
+  async publishBatch(
+    events: Array<{
+      topic: string;
+      key: string;
+      value: any;
+      headers?: Array<{ key: string; value: string }>;
+    }>,
+  ): Promise<boolean> {
     try {
       if (!this.kafka) {
-        console.warn('Kafka not configured, skipping batch publish');
+        console.warn("Kafka not configured, skipping batch publish");
         return false;
       }
 
       const producer = this.kafka.producer();
-      
-      // Upstash Kafka doesn't support batch operations in the same way
-      // We'll send them sequentially
+
       const results = await Promise.allSettled(
-        events.map(event => 
+        events.map((event) =>
           producer.produce(
             event.topic,
-            typeof event.value === 'string' ? event.value : JSON.stringify(event.value),
+            typeof event.value === "string"
+              ? event.value
+              : JSON.stringify(event.value),
             {
               key: event.key,
               headers: event.headers || [],
-            }
-          )
-        )
+            },
+          ),
+        ),
       );
 
-      const successful = results.filter(result => result.status === 'fulfilled').length;
-      console.log(`Batch publish: ${successful}/${events.length} messages sent`);
-      
+      const successful = results.filter(
+        (result) => result.status === "fulfilled",
+      ).length;
+      console.log(
+        `Batch publish: ${successful}/${events.length} messages sent`,
+      );
+
       return successful === events.length;
     } catch (error) {
-      console.error('Failed to publish batch:', error);
+      console.error("Failed to publish batch:", error);
       return false;
     }
   }

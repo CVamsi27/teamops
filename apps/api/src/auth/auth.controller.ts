@@ -12,8 +12,8 @@ import { AuthService } from './auth.service';
 import express from 'express';
 import { ZodValidationPipe } from '../common/zod-validation.pipe';
 import { ValidateResponse } from '../common/response-validation.decorator';
-import { 
-  LoginSchema, 
+import {
+  LoginSchema,
   RegisterSchema,
   RegisterResponseSchema,
   LoginResponseSchema,
@@ -60,16 +60,14 @@ export class AuthController {
     @Req() req: GoogleAuthRequest,
     @Res() res: express.Response
   ) {
-    const result = await this.authService.generateToken(
-      req.user!
-    );
+    const result = await this.authService.generateToken(req.user!);
     res.cookie('teamops_token', result.access_token, {
       httpOnly: true,
       sameSite: 'lax',
       secure: process.env.APP_ENV === 'production',
       maxAge: 1000 * 60 * 60 * 24 * 7,
     });
-    
+
     res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
   }
 
@@ -82,18 +80,18 @@ export class AuthController {
 
     const user = await this.authService['prisma'].user.findUnique({
       where: { id: req.user.userId },
-      select: { 
-        id: true, 
-        email: true, 
-        name: true, 
+      select: {
+        id: true,
+        email: true,
+        name: true,
         role: true,
         provider: true,
         providerId: true,
         createdAt: true,
-        updatedAt: true
-      }
+        updatedAt: true,
+      },
     });
-    
+
     if (!user) {
       throw new Error('User not found');
     }
@@ -138,10 +136,7 @@ export class AuthController {
     @Body(new ZodValidationPipe(LoginSchema)) body: LoginInput,
     @Res({ passthrough: true }) res: express.Response
   ): Promise<LoginResponse> {
-    const result = await this.authService.login(
-      body.email,
-      body.password
-    );
+    const result = await this.authService.login(body.email, body.password);
     res.cookie('teamops_token', result.access_token, {
       httpOnly: true,
       sameSite: 'lax',
@@ -153,7 +148,9 @@ export class AuthController {
 
   @Post('logout')
   @ValidateResponse(LogoutResponseSchema)
-  async logout(@Res({ passthrough: true }) res: express.Response): Promise<LogoutResponse> {
+  async logout(
+    @Res({ passthrough: true }) res: express.Response
+  ): Promise<LogoutResponse> {
     res.clearCookie('teamops_token');
     return { ok: true };
   }

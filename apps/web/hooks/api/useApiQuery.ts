@@ -28,23 +28,30 @@ export function useApiQuery<T>(
         try {
           return schema.parse(data);
         } catch (zodError: any) {
-          throw new Error(`Data validation failed for ${endpoint}: ${zodError.message}`);
+          throw new Error(
+            `Data validation failed for ${endpoint}: ${zodError.message}`,
+          );
         }
       } catch (apiError: any) {
         if (apiError.response) {
           if (apiError.response.status === 401) {
-            throw new Error('Unauthorized: Please login again');
+            throw new Error("Unauthorized: Please login again");
           } else if (apiError.response.status === 403) {
-            throw new Error('Forbidden: You do not have permission to access this resource');
+            throw new Error(
+              "Forbidden: You do not have permission to access this resource",
+            );
           } else if (apiError.response.status === 404) {
-            throw new Error('Resource not found');
+            throw new Error("Resource not found");
           } else if (apiError.response.status >= 500) {
-            throw new Error('Server error: Please try again later');
+            throw new Error("Server error: Please try again later");
           } else {
-            throw new Error(apiError.response.data?.message || `Request failed with status ${apiError.response.status}`);
+            throw new Error(
+              apiError.response.data?.message ||
+                `Request failed with status ${apiError.response.status}`,
+            );
           }
         } else if (apiError.request) {
-          throw new Error('Network error: Please check your connection');
+          throw new Error("Network error: Please check your connection");
         } else {
           throw apiError;
         }

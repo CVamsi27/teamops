@@ -26,7 +26,7 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
-    
+
     const formData = new FormData(e.currentTarget);
     const payload: RegisterInput = {
       name: formData.get("name") as string,
@@ -36,31 +36,39 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
 
     register.mutate(payload, {
       onError: (error: unknown) => {
-        const errorMessage = (error && typeof error === 'object' && 'response' in error && error.response && 
-          typeof error.response === 'object' && 'data' in error.response && error.response.data &&
-          typeof error.response.data === 'object' && 'message' in error.response.data) 
-          ? (error.response.data as { message: string }).message 
-          : (error && typeof error === 'object' && 'message' in error) 
-            ? (error as { message: string }).message 
-            : 'Unknown error';
-        
-        if (errorMessage === 'USER_EXISTS_LOGIN') {
+        const errorMessage =
+          error &&
+          typeof error === "object" &&
+          "response" in error &&
+          error.response &&
+          typeof error.response === "object" &&
+          "data" in error.response &&
+          error.response.data &&
+          typeof error.response.data === "object" &&
+          "message" in error.response.data
+            ? (error.response.data as { message: string }).message
+            : error && typeof error === "object" && "message" in error
+              ? (error as { message: string }).message
+              : "Unknown error";
+
+        if (errorMessage === "USER_EXISTS_LOGIN") {
           setError("This email is already registered. Please login instead.");
           setTimeout(() => onSwitchToLogin(), 2000);
-        } else if (errorMessage === 'USER_EXISTS_GOOGLE') {
-          setError("This email is registered with Google. Please use Google login.");
+        } else if (errorMessage === "USER_EXISTS_GOOGLE") {
+          setError(
+            "This email is registered with Google. Please use Google login.",
+          );
         } else {
           setError("Registration failed. Please try again.");
         }
       },
       onSuccess: async (data: { access_token?: string }) => {
-        // Store token for persistent login
         if (data?.access_token) {
           AuthUtils.saveToken(data.access_token);
         }
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
         router.push("/dashboard");
-      }
+      },
     });
   }
 

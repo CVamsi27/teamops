@@ -8,16 +8,17 @@ export class SocketIoAdapter extends IoAdapter {
       cors: {
         origin: (origin, callback) => {
           if (!origin) return callback(null, true);
-          
+
           const allowedOrigins = [
             process.env.FRONTEND_URL || 'http://localhost:3000',
             'http://localhost:8080',
-            'http://localhost:9000'
+            'http://localhost:9000',
           ];
-          
-          const isAllowed = allowedOrigins.includes(origin) || 
-                           /^http:\/\/localhost:\d+$/.test(origin);
-          
+
+          const isAllowed =
+            allowedOrigins.includes(origin) ||
+            /^http:\/\/localhost:\d+$/.test(origin);
+
           if (isAllowed) {
             callback(null, true);
           } else {
@@ -26,10 +27,10 @@ export class SocketIoAdapter extends IoAdapter {
         },
         methods: ['GET', 'POST'],
         allowedHeaders: ['Content-Type', 'Authorization'],
-        credentials: true
+        credentials: true,
       },
       allowEIO3: true,
-      transports: ['websocket', 'polling']
+      transports: ['websocket', 'polling'],
     });
 
     return server;

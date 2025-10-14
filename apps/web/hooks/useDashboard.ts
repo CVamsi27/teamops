@@ -1,11 +1,11 @@
-import { useApiQuery } from './api/useApiQuery';
-import { z } from 'zod';
+import { useApiQuery } from "./api/useApiQuery";
+import { z } from "zod";
 
 const TaskSchema = z.object({
   id: z.string(),
   title: z.string(),
-  status: z.enum(['TODO', 'IN_PROGRESS', 'DONE']),
-  priority: z.enum(['HIGH', 'MEDIUM', 'LOW']).optional(),
+  status: z.enum(["TODO", "IN_PROGRESS", "DONE"]),
+  priority: z.enum(["HIGH", "MEDIUM", "LOW"]).optional(),
   dueDate: z.string().optional(),
   projectId: z.string(),
   assigneeId: z.string().optional(),
@@ -38,10 +38,12 @@ const DashboardDataSchema = z.object({
 export type DashboardData = z.infer<typeof DashboardDataSchema>;
 
 export function useDashboard() {
-  return useApiQuery(['dashboard'], '/dashboard', DashboardDataSchema, {
+  return useApiQuery(["dashboard"], "/dashboard", DashboardDataSchema, {
     retry: (failureCount, error: any) => {
-      if (error?.message?.includes('Unauthorized') || 
-          error?.message?.includes('Data validation failed')) {
+      if (
+        error?.message?.includes("Unauthorized") ||
+        error?.message?.includes("Data validation failed")
+      ) {
         return false;
       }
       return failureCount < 3;

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ID, ISODateString, TimestampFields } from './common';
+import { ID, TimestampFields } from './common';
 
 export const CreateTeamSchema = z
   .object({

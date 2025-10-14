@@ -6,8 +6,7 @@ import { useCreateTeam } from "@/hooks/teams/useCreateTeam";
 
 export default function TeamCreateForm() {
   const create = useCreateTeam();
-  const { register, handleSubmit, formState } = useForm<CreateTeam>({
-  });
+  const { register, handleSubmit, formState } = useForm<CreateTeam>({});
 
   function onSubmit(values: CreateTeam) {
     create.mutate(values);

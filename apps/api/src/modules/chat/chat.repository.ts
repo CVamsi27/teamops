@@ -22,9 +22,9 @@ export class ChatRepository {
   }
 
   async findByRoom(
-    roomId: string, 
-    roomType: string, 
-    limit: number = 50, 
+    roomId: string,
+    roomType: string,
+    limit: number = 50,
     offset: number = 0
   ): Promise<ChatMessage[]> {
     const messages = await this.prisma.chatMessage.findMany({
@@ -51,7 +51,7 @@ export class ChatRepository {
   async deleteOlderThan(days: number): Promise<number> {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - days);
-    
+
     const result = await this.prisma.chatMessage.deleteMany({
       where: {
         createdAt: {
@@ -59,7 +59,7 @@ export class ChatRepository {
         },
       },
     });
-    
+
     return result.count;
   }
 

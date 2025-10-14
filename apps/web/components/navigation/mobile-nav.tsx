@@ -2,7 +2,11 @@
 
 import { useState } from "react";
 import { Button } from "@workspace/ui/components/button";
-import { Sheet, SheetContent, SheetTrigger } from "@workspace/ui/components/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from "@workspace/ui/components/sheet";
 import { Menu } from "lucide-react";
 import Link from "next/link";
 
@@ -24,11 +28,7 @@ export function MobileNav({ user }: MobileNavProps) {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button
-          variant="ghost"
-          className="md:hidden"
-          size="icon"
-        >
+        <Button variant="ghost" className="md:hidden" size="icon">
           <Menu className="h-5 w-5" />
           <span className="sr-only">Toggle menu</span>
         </Button>
@@ -40,7 +40,7 @@ export function MobileNav({ user }: MobileNavProps) {
               TeamOps
             </span>
           </div>
-          
+
           {user && (
             <div className="space-y-2">
               <MobileNavLink href="/dashboard" onClick={handleLinkClick}>
@@ -60,7 +60,7 @@ export function MobileNav({ user }: MobileNavProps) {
               </MobileNavLink>
             </div>
           )}
-          
+
           <div className="space-y-2 pt-4 border-t">
             <MobileNavLink href="/pricing" onClick={handleLinkClick}>
               Pricing
@@ -69,7 +69,7 @@ export function MobileNav({ user }: MobileNavProps) {
               Contact
             </MobileNavLink>
           </div>
-          
+
           {!user && (
             <div className="space-y-2 pt-4 border-t">
               <Button asChild className="w-full justify-start">

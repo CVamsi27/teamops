@@ -1,18 +1,42 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@workspace/ui/components/card";
 import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";
 import { Switch } from "@workspace/ui/components/switch";
 import { Label } from "@workspace/ui/components/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select";
 import { Alert, AlertDescription } from "@workspace/ui/components/alert";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@workspace/ui/components/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@workspace/ui/components/tooltip";
 import { useApiQuery } from "@/hooks/api/useApiQuery";
 import { useApiMutation } from "@/hooks/api/useApiMutation";
 import { api } from "@/lib/api";
-import { Calendar, Clock, ExternalLink, Settings, CheckCircle, RefreshCw, Zap, Info } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  ExternalLink,
+  Settings,
+  CheckCircle,
+  RefreshCw,
+  Zap,
+  Info,
+} from "lucide-react";
 import Link from "next/link";
 import { z } from "zod";
 import { toast } from "@workspace/ui/components/toast";
@@ -30,14 +54,14 @@ const CalendarEventSchema = z.object({
     dateTime: z.string(),
   }),
   eventUrl: z.string(),
-  source: z.enum(['task', 'project', 'manual']).optional(),
+  source: z.enum(["task", "project", "manual"]).optional(),
   sourceId: z.string().optional(),
 });
 
 const CalendarIntegrationSchema = z.object({
   id: z.string(),
   userId: z.string(),
-  provider: z.literal('google'),
+  provider: z.literal("google"),
   accessToken: z.string(),
   refreshToken: z.string(),
   calendarId: z.string(),
@@ -87,21 +111,28 @@ export function GoogleCalendarIntegration() {
   const [isConnecting, setIsConnecting] = useState(false);
   const [syncResults, setSyncResults] = useState<SyncResponse[]>([]);
   const [lastSyncTime, setLastSyncTime] = useState<string | null>(null);
-  
-  // Check connection status using the new endpoint
-  const { data: connectionStatus, isLoading: isCheckingStatus, refetch: refetchStatus } = useApiQuery<ConnectionStatus>(
-    ['google-calendar-status'],
-    '/integrations/google-calendar/status',
-    ConnectionStatusSchema
+
+  const {
+    data: connectionStatus,
+    isLoading: isCheckingStatus,
+    refetch: refetchStatus,
+  } = useApiQuery<ConnectionStatus>(
+    ["google-calendar-status"],
+    "/integrations/google-calendar/status",
+    ConnectionStatusSchema,
   );
 
-  const { data: integration, isLoading, refetch } = useApiQuery<CalendarIntegration | null>(
-    ['calendar-integration'],
-    '/integrations/google-calendar',
+  const {
+    data: integration,
+    isLoading,
+    refetch,
+  } = useApiQuery<CalendarIntegration | null>(
+    ["calendar-integration"],
+    "/integrations/google-calendar",
     CalendarIntegrationSchema.nullable(),
     {
       enabled: connectionStatus?.connected === true,
-    }
+    },
   );
 
   useEffect(() => {
@@ -112,59 +143,66 @@ export function GoogleCalendarIntegration() {
   }, [refetchStatus, refetch, connectionStatus?.connected]);
 
   const { data: upcomingEvents } = useApiQuery<CalendarEvent[]>(
-    ['calendar-events'],
-    '/integrations/google-calendar/events',
+    ["calendar-events"],
+    "/integrations/google-calendar/events",
     z.array(CalendarEventSchema),
     {
       enabled: connectionStatus?.connected === true && !!integration?.isActive,
-    }
+    },
   );
 
-  // Check sync status
   const { data: syncStatus } = useApiQuery<SyncStatus>(
-    ['sync-status'],
-    '/integrations/google-calendar/sync-tasks-projects',
+    ["sync-status"],
+    "/integrations/google-calendar/sync-tasks-projects",
     SyncStatusSchema,
     {
       enabled: connectionStatus?.connected === true && !!integration?.isActive,
-    }
+    },
   );
 
   const updateSettings = useApiMutation<CalendarIntegration, CalendarSettings>(
-    '/integrations/google-calendar/settings',
-    ['calendar-integration'],
+    "/integrations/google-calendar/settings",
+    ["calendar-integration"],
     CalendarSettingsSchema,
     {
-      method: 'patch',
-    }
+      method: "patch",
+    },
   );
 
   const disconnect = useApiMutation<void, Record<string, never>>(
-    '/integrations/google-calendar/disconnect',
-    ['calendar-integration', 'google-calendar-status'],
+    "/integrations/google-calendar/disconnect",
+    ["calendar-integration", "google-calendar-status"],
     z.object({}),
     {
-      method: 'post',
-      invalidateKeys: [['calendar-integration'], ['calendar-events'], ['google-calendar-status']],
-    }
+      method: "post",
+      invalidateKeys: [
+        ["calendar-integration"],
+        ["calendar-events"],
+        ["google-calendar-status"],
+      ],
+    },
   );
 
   const refreshConnection = useApiMutation<void, Record<string, never>>(
-    '/integrations/google-calendar/refresh',
-    ['google-calendar-status'],
+    "/integrations/google-calendar/refresh",
+    ["google-calendar-status"],
     z.object({}),
     {
-      method: 'post',
-      invalidateKeys: [['google-calendar-status'], ['calendar-integration'], ['calendar-events']],
-    }
+      method: "post",
+      invalidateKeys: [
+        ["google-calendar-status"],
+        ["calendar-integration"],
+        ["calendar-events"],
+      ],
+    },
   );
 
   const handleConnect = async () => {
     setIsConnecting(true);
     try {
-      const response = await api.get('/integrations/google-calendar/auth');
+      const response = await api.get("/integrations/google-calendar/auth");
       const data = response.data;
-      
+
       window.location.href = data.authUrl;
     } catch {
       toast.error("Failed to connect to Google Calendar", {
@@ -182,13 +220,13 @@ export function GoogleCalendarIntegration() {
       await refetchStatus();
       await refetch();
       setLastSyncTime(new Date().toISOString());
-      
+
       toast.success("Google Calendar connection refreshed successfully!", {
         description: "Your calendar integration is now up to date.",
         duration: 4000,
       });
     } catch (error) {
-      console.error('Failed to refresh connection:', error);
+      console.error("Failed to refresh connection:", error);
       toast.error("Failed to refresh connection", {
         description: "Please try again or reconnect your Google Calendar.",
         duration: 5000,
@@ -200,19 +238,26 @@ export function GoogleCalendarIntegration() {
 
   const handleFullSync = async () => {
     if (!integration) return;
-    
+
     setSyncResults([]);
     setLastSyncTime(new Date().toISOString());
-    
+
     try {
-      const statusResponse = await api.get('/integrations/google-calendar/sync-tasks-projects');
-      
-      if (statusResponse.data.tasksCount > 0 || statusResponse.data.projectsCount > 0) {
+      const statusResponse = await api.get(
+        "/integrations/google-calendar/sync-tasks-projects",
+      );
+
+      if (
+        statusResponse.data.tasksCount > 0 ||
+        statusResponse.data.projectsCount > 0
+      ) {
         const results: SyncResponse[] = [];
-        
+
         if (statusResponse.data.tasksCount > 0) {
           try {
-            const taskSyncResponse = await api.post('/integrations/google-calendar/sync-task');
+            const taskSyncResponse = await api.post(
+              "/integrations/google-calendar/sync-task",
+            );
             results.push(taskSyncResponse.data);
           } catch {
             toast.error("Task sync failed", {
@@ -221,10 +266,12 @@ export function GoogleCalendarIntegration() {
             });
           }
         }
-        
+
         if (statusResponse.data.projectsCount > 0) {
           try {
-            const projectSyncResponse = await api.post('/integrations/google-calendar/sync-project');
+            const projectSyncResponse = await api.post(
+              "/integrations/google-calendar/sync-project",
+            );
             results.push(projectSyncResponse.data);
           } catch {
             toast.error("Project sync failed", {
@@ -233,7 +280,7 @@ export function GoogleCalendarIntegration() {
             });
           }
         }
-        
+
         setSyncResults(results);
         refetch();
       }
@@ -245,9 +292,12 @@ export function GoogleCalendarIntegration() {
     }
   };
 
-  const handleSettingsUpdate = (field: keyof CalendarSettings, value: boolean | number | string) => {
+  const handleSettingsUpdate = (
+    field: keyof CalendarSettings,
+    value: boolean | number | string,
+  ) => {
     if (!integration) return;
-    
+
     const newSettings: CalendarSettings = {
       syncTasks: integration.syncTasks,
       syncProjects: integration.syncProjects,
@@ -255,12 +305,16 @@ export function GoogleCalendarIntegration() {
       calendarId: integration.calendarId,
       [field]: value,
     };
-    
+
     updateSettings.mutate(newSettings);
   };
 
   const handleDisconnect = () => {
-    if (confirm('Are you sure you want to disconnect Google Calendar? This will remove all synced events.')) {
+    if (
+      confirm(
+        "Are you sure you want to disconnect Google Calendar? This will remove all synced events.",
+      )
+    ) {
       disconnect.mutate({});
     }
   };
@@ -320,17 +374,20 @@ export function GoogleCalendarIntegration() {
           {!connectionStatus?.connected ? (
             <div className="text-center py-8">
               <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Connect Google Calendar</h3>
+              <h3 className="text-lg font-semibold mb-2">
+                Connect Google Calendar
+              </h3>
               <p className="text-muted-foreground mb-6">
-                Sync your tasks and project deadlines with Google Calendar to never miss a deadline.
+                Sync your tasks and project deadlines with Google Calendar to
+                never miss a deadline.
               </p>
-              <Button 
+              <Button
                 onClick={handleConnect}
                 disabled={isConnecting}
                 className="gap-2"
               >
                 <Calendar className="h-4 w-4" />
-                {isConnecting ? 'Connecting...' : 'Connect Google Calendar'}
+                {isConnecting ? "Connecting..." : "Connect Google Calendar"}
               </Button>
             </div>
           ) : (
@@ -342,7 +399,12 @@ export function GoogleCalendarIntegration() {
                   <div>
                     <p className="font-medium">Google Calendar Connected</p>
                     <p className="text-sm text-muted-foreground">
-                      Last synced: {lastSyncTime ? new Date(lastSyncTime).toLocaleString() : (integration?.updatedAt ? new Date(integration.updatedAt).toLocaleString() : 'Never')}
+                      Last synced:{" "}
+                      {lastSyncTime
+                        ? new Date(lastSyncTime).toLocaleString()
+                        : integration?.updatedAt
+                          ? new Date(integration.updatedAt).toLocaleString()
+                          : "Never"}
                     </p>
                   </div>
                 </div>
@@ -354,14 +416,20 @@ export function GoogleCalendarIntegration() {
                     disabled={isConnecting}
                     className="gap-2"
                   >
-                    <RefreshCw className={`h-4 w-4 ${isConnecting ? 'animate-spin' : ''}`} />
+                    <RefreshCw
+                      className={`h-4 w-4 ${isConnecting ? "animate-spin" : ""}`}
+                    />
                     Refresh
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={handleFullSync}
-                    disabled={!syncStatus || ((syncStatus.tasksCount || 0) === 0 && (syncStatus.projectsCount || 0) === 0)}
+                    disabled={
+                      !syncStatus ||
+                      ((syncStatus.tasksCount || 0) === 0 &&
+                        (syncStatus.projectsCount || 0) === 0)
+                    }
                     className="gap-2"
                   >
                     <Zap className="h-4 w-4" />
@@ -390,9 +458,12 @@ export function GoogleCalendarIntegration() {
                   <CheckCircle className="h-4 w-4" />
                   <AlertDescription>
                     {syncStatus.message}
-                    {((syncStatus.tasksCount && syncStatus.tasksCount > 0) || (syncStatus.projectsCount && syncStatus.projectsCount > 0)) && (
+                    {((syncStatus.tasksCount && syncStatus.tasksCount > 0) ||
+                      (syncStatus.projectsCount &&
+                        syncStatus.projectsCount > 0)) && (
                       <span className="ml-2">
-                        Ready to sync {syncStatus.tasksCount || 0} tasks and {syncStatus.projectsCount || 0} projects.
+                        Ready to sync {syncStatus.tasksCount || 0} tasks and{" "}
+                        {syncStatus.projectsCount || 0} projects.
                       </span>
                     )}
                   </AlertDescription>
@@ -404,12 +475,27 @@ export function GoogleCalendarIntegration() {
                 <div className="space-y-2">
                   <h4 className="font-medium">Recent Sync Results</h4>
                   {syncResults.map((result, index) => (
-                    <Alert key={index} className={result.success ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"}>
-                      <CheckCircle className={`h-4 w-4 ${result.success ? 'text-green-600' : 'text-red-600'}`} />
-                      <AlertDescription className={result.success ? 'text-green-800' : 'text-red-800'}>
+                    <Alert
+                      key={index}
+                      className={
+                        result.success
+                          ? "border-green-200 bg-green-50"
+                          : "border-red-200 bg-red-50"
+                      }
+                    >
+                      <CheckCircle
+                        className={`h-4 w-4 ${result.success ? "text-green-600" : "text-red-600"}`}
+                      />
+                      <AlertDescription
+                        className={
+                          result.success ? "text-green-800" : "text-red-800"
+                        }
+                      >
                         {result.message}
                         {result.eventId && (
-                          <span className="block text-xs opacity-75">Event ID: {result.eventId}</span>
+                          <span className="block text-xs opacity-75">
+                            Event ID: {result.eventId}
+                          </span>
                         )}
                       </AlertDescription>
                     </Alert>
@@ -424,10 +510,13 @@ export function GoogleCalendarIntegration() {
                     <Settings className="h-4 w-4" />
                     Sync Settings
                   </h4>
-                  
+
                   <div className="space-y-4 border rounded-lg p-4">
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="sync-tasks" className="flex items-center gap-2">
+                      <Label
+                        htmlFor="sync-tasks"
+                        className="flex items-center gap-2"
+                      >
                         Sync Tasks
                         <span className="text-sm text-muted-foreground">
                           Create calendar events for task due dates
@@ -436,12 +525,17 @@ export function GoogleCalendarIntegration() {
                       <Switch
                         id="sync-tasks"
                         checked={integration?.syncTasks || false}
-                        onCheckedChange={(checked: boolean) => handleSettingsUpdate('syncTasks', checked)}
+                        onCheckedChange={(checked: boolean) =>
+                          handleSettingsUpdate("syncTasks", checked)
+                        }
                       />
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="sync-projects" className="flex items-center gap-2">
+                      <Label
+                        htmlFor="sync-projects"
+                        className="flex items-center gap-2"
+                      >
                         Sync Projects
                         <span className="text-sm text-muted-foreground">
                           Create calendar events for project deadlines
@@ -450,7 +544,9 @@ export function GoogleCalendarIntegration() {
                       <Switch
                         id="sync-projects"
                         checked={integration?.syncProjects || false}
-                        onCheckedChange={(checked: boolean) => handleSettingsUpdate('syncProjects', checked)}
+                        onCheckedChange={(checked: boolean) =>
+                          handleSettingsUpdate("syncProjects", checked)
+                        }
                       />
                     </div>
 
@@ -458,7 +554,12 @@ export function GoogleCalendarIntegration() {
                       <Label>Reminder</Label>
                       <Select
                         value={integration?.reminderMinutes?.toString() || "15"}
-                        onValueChange={(value: string) => handleSettingsUpdate('reminderMinutes', parseInt(value))}
+                        onValueChange={(value: string) =>
+                          handleSettingsUpdate(
+                            "reminderMinutes",
+                            parseInt(value),
+                          )
+                        }
                       >
                         <SelectTrigger className="w-[180px]">
                           <SelectValue />
@@ -504,7 +605,10 @@ export function GoogleCalendarIntegration() {
             ) : (
               <div className="space-y-3">
                 {upcomingEvents.slice(0, 10).map((event) => (
-                  <div key={event.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div
+                    key={event.id}
+                    className="flex items-center justify-between p-3 border rounded-lg"
+                  >
                     <div className="flex items-center gap-3">
                       <div className="h-2 w-2 bg-blue-500 rounded-full" />
                       <div>
@@ -515,11 +619,13 @@ export function GoogleCalendarIntegration() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline">
-                        {event.source}
-                      </Badge>
+                      <Badge variant="outline">{event.source}</Badge>
                       <Button variant="ghost" size="sm" asChild>
-                        <a href={event.eventUrl} target="_blank" rel="noopener noreferrer">
+                        <a
+                          href={event.eventUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
                           <ExternalLink className="h-4 w-4" />
                         </a>
                       </Button>

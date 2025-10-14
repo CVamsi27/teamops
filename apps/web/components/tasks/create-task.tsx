@@ -36,29 +36,33 @@ import { toast } from "@workspace/ui/components/toast";
 import { useProjects } from "@/hooks/useProjects";
 import { PRIORITY_OPTIONS, STATUS_OPTIONS } from "@/lib/const";
 
-function DatePicker({ 
-  value, 
-  onChange 
-}: { 
-  value?: string; 
+function DatePicker({
+  value,
+  onChange,
+}: {
+  value?: string;
   onChange: (date: string) => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(
-    value ? new Date(value) : undefined
+    value ? new Date(value) : undefined,
   );
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     }
 
     if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside);
     }
   }, [isOpen]);
 
@@ -125,10 +129,9 @@ function DatePicker({
 export default function CreateTask() {
   const create = useCreateTask();
   const { list: projectsQuery } = useProjects();
-  
-  // Get today's date in YYYY-MM-DD format
-  const today = new Date().toISOString().split('T')[0];
-  
+
+  const today = new Date().toISOString().split("T")[0];
+
   const form = useForm({
     defaultValues: {
       title: "",

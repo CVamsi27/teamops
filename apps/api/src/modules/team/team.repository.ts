@@ -43,7 +43,10 @@ export class TeamRepository {
     return this.map(t);
   }
 
-  async createWithMembership(payload: CreateTeam, creatorUserId: string): Promise<Team> {
+  async createWithMembership(
+    payload: CreateTeam,
+    creatorUserId: string
+  ): Promise<Team> {
     const t = await this.prisma.team.create({
       data: {
         name: payload.name,

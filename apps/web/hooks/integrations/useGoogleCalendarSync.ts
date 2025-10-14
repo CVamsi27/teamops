@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { api } from "@/lib/api";
 import { toast } from "@workspace/ui/components/toast";
-import { SyncStatusSchema, SyncResponseSchema, type SyncStatus, type SyncResponse } from "@workspace/api";
+import {
+  SyncStatusSchema,
+  SyncResponseSchema,
+  type SyncStatus,
+  type SyncResponse,
+} from "@workspace/api";
 
 export function useGoogleCalendarSync() {
   const [isLoading, setIsLoading] = useState(false);
@@ -10,7 +15,9 @@ export function useGoogleCalendarSync() {
 
   const getSyncStatus = async (): Promise<SyncStatus | null> => {
     try {
-      const response = await api.get('/integrations/google-calendar/sync-tasks-projects');
+      const response = await api.get(
+        "/integrations/google-calendar/sync-tasks-projects",
+      );
       return SyncStatusSchema.parse(response.data);
     } catch (error) {
       toast.error("Failed to get sync status", {
@@ -24,11 +31,12 @@ export function useGoogleCalendarSync() {
   const syncTask = async (taskId?: string): Promise<SyncResponse | null> => {
     try {
       setIsLoading(true);
-      const response = await api.post('/integrations/google-calendar/sync-task', 
-        taskId ? { taskId } : {}
+      const response = await api.post(
+        "/integrations/google-calendar/sync-task",
+        taskId ? { taskId } : {},
       );
       const result = SyncResponseSchema.parse(response.data);
-      setSyncResults(prev => [...prev, result]);
+      setSyncResults((prev) => [...prev, result]);
       setLastSyncTime(new Date().toISOString());
       return result;
     } catch (error) {
@@ -42,14 +50,17 @@ export function useGoogleCalendarSync() {
     }
   };
 
-  const syncProject = async (projectId?: string): Promise<SyncResponse | null> => {
+  const syncProject = async (
+    projectId?: string,
+  ): Promise<SyncResponse | null> => {
     try {
       setIsLoading(true);
-      const response = await api.post('/integrations/google-calendar/sync-project', 
-        projectId ? { projectId } : {}
+      const response = await api.post(
+        "/integrations/google-calendar/sync-project",
+        projectId ? { projectId } : {},
       );
       const result = SyncResponseSchema.parse(response.data);
-      setSyncResults(prev => [...prev, result]);
+      setSyncResults((prev) => [...prev, result]);
       setLastSyncTime(new Date().toISOString());
       return result;
     } catch (error) {
@@ -63,16 +74,16 @@ export function useGoogleCalendarSync() {
     }
   };
 
-  const syncAll = async (): Promise<{ 
-    taskResults: SyncResponse[], 
-    projectResults: SyncResponse[] 
+  const syncAll = async (): Promise<{
+    taskResults: SyncResponse[];
+    projectResults: SyncResponse[];
   }> => {
     setIsLoading(true);
     setSyncResults([]);
-    
+
     const taskResults: SyncResponse[] = [];
     const projectResults: SyncResponse[] = [];
-    
+
     try {
       const status = await getSyncStatus();
       if (!status) {
@@ -86,7 +97,6 @@ export function useGoogleCalendarSync() {
         }
       }
 
-      // Sync projects if any
       if (status.projectsCount && status.projectsCount > 0) {
         const projectResult = await syncProject();
         if (projectResult) {
@@ -95,7 +105,7 @@ export function useGoogleCalendarSync() {
       }
 
       setLastSyncTime(new Date().toISOString());
-      
+
       return { taskResults, projectResults };
     } catch (error) {
       toast.error("Failed to sync all items", {

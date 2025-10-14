@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../infrastructure/prisma.service';
 import type { Project as PrismaProject } from '@prisma/client';
-import type { Project, CreateProjectWithCreator, UpdateProject } from '@workspace/api';
+import type {
+  Project,
+  CreateProjectWithCreator,
+  UpdateProject,
+} from '@workspace/api';
 
 @Injectable()
 export class ProjectRepository {

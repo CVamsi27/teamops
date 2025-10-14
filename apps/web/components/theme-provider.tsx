@@ -1,18 +1,21 @@
-"use client"
+"use client";
 
-import { type ReactNode, useEffect, useState } from "react"
-import { ThemeProvider as NextThemesProvider } from "next-themes"
+import { type ReactNode, useEffect, useState } from "react";
+import { ThemeProvider as NextThemesProvider } from "next-themes";
 
-export function ThemeProvider({ children, ...props }: { children: ReactNode } & Parameters<typeof NextThemesProvider>[0]) {
-  const [mounted, setMounted] = useState(false)
+export function ThemeProvider({
+  children,
+  ...props
+}: { children: ReactNode } & Parameters<typeof NextThemesProvider>[0]) {
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+  }, []);
 
   if (!mounted) {
-    return <>{children}</>
+    return <>{children}</>;
   }
 
-  return <NextThemesProvider {...props}>{children}</NextThemesProvider>
+  return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
 }

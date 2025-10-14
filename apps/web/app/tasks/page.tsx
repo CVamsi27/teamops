@@ -4,7 +4,16 @@ import { useProjects } from "@/hooks/useProjects";
 import { Button } from "@workspace/ui/components/button";
 import { Card, CardContent } from "@workspace/ui/components/card";
 import { Badge } from "@workspace/ui/components/badge";
-import { Plus, Edit, Trash2, CheckCircle, Circle, Clock, AlertTriangle, Eye } from "lucide-react";
+import {
+  Plus,
+  Edit,
+  Trash2,
+  CheckCircle,
+  Circle,
+  Clock,
+  AlertTriangle,
+  Eye,
+} from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import {
@@ -26,54 +35,62 @@ export default function TasksPage() {
 
   const handleDelete = (taskId: string) => {
     setDeletingTask(taskId);
-    // tasksList.remove.mutate({ id: taskId }, {
-    //   onSuccess: () => {
-    //     setDeletingTask(null);
-    //   },
-    //   onError: () => {
-    //     setDeletingTask(null);
-    //   }
-    // });
   };
 
   const getProjectName = (projectId: string) => {
-    const project = projectsList.data?.find(p => p.id === projectId);
-    return project?.name || 'Unknown Project';
+    const project = projectsList.data?.find((p) => p.id === projectId);
+    return project?.name || "Unknown Project";
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'TODO': return <Circle className="h-4 w-4" />;
-      case 'IN_PROGRESS': return <Clock className="h-4 w-4" />;
-      case 'DONE': return <CheckCircle className="h-4 w-4" />;
-      default: return <Circle className="h-4 w-4" />;
+      case "TODO":
+        return <Circle className="h-4 w-4" />;
+      case "IN_PROGRESS":
+        return <Clock className="h-4 w-4" />;
+      case "DONE":
+        return <CheckCircle className="h-4 w-4" />;
+      default:
+        return <Circle className="h-4 w-4" />;
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'TODO': return 'secondary';
-      case 'IN_PROGRESS': return 'default';
-      case 'DONE': return 'default';
-      default: return 'secondary';
+      case "TODO":
+        return "secondary";
+      case "IN_PROGRESS":
+        return "default";
+      case "DONE":
+        return "default";
+      default:
+        return "secondary";
     }
   };
 
   const getPriorityIcon = (priority?: string) => {
     switch (priority) {
-      case 'HIGH': return <AlertTriangle className="h-4 w-4 text-red-500" />;
-      case 'MEDIUM': return <AlertTriangle className="h-4 w-4 text-orange-500" />;
-      case 'LOW': return <Circle className="h-4 w-4 text-yellow-500" />;
-      default: return <Circle className="h-4 w-4 text-muted-foreground" />;
+      case "HIGH":
+        return <AlertTriangle className="h-4 w-4 text-red-500" />;
+      case "MEDIUM":
+        return <AlertTriangle className="h-4 w-4 text-orange-500" />;
+      case "LOW":
+        return <Circle className="h-4 w-4 text-yellow-500" />;
+      default:
+        return <Circle className="h-4 w-4 text-muted-foreground" />;
     }
   };
 
   const getPriorityColor = (priority?: string) => {
     switch (priority) {
-      case 'HIGH': return 'destructive';
-      case 'MEDIUM': return 'default';
-      case 'LOW': return 'secondary';
-      default: return 'outline';
+      case "HIGH":
+        return "destructive";
+      case "MEDIUM":
+        return "default";
+      case "LOW":
+        return "secondary";
+      default:
+        return "outline";
     }
   };
 
@@ -82,7 +99,7 @@ export default function TasksPage() {
     const date = new Date(dateString);
     const now = new Date();
     const isOverdue = date < now;
-    
+
     return {
       formatted: date.toLocaleDateString(),
       isOverdue,
@@ -150,7 +167,7 @@ export default function TasksPage() {
         ) : (
           tasksList.list.data?.map((task) => {
             const dueDate = formatDueDate(task.dueDate || undefined);
-            
+
             return (
               <Card key={task.id} className="hover:shadow-md transition-shadow">
                 <CardContent className="p-6">
@@ -158,9 +175,7 @@ export default function TasksPage() {
                     <div className="flex-1 min-w-0 space-y-3">
                       {/* Title and Status */}
                       <div className="flex items-start gap-3">
-                        <div className="mt-1">
-                          {getStatusIcon(task.status)}
-                        </div>
+                        <div className="mt-1">{getStatusIcon(task.status)}</div>
                         <div className="flex-1 min-w-0">
                           <h3 className="text-lg font-semibold truncate">
                             {task.title}
@@ -175,24 +190,32 @@ export default function TasksPage() {
 
                       {/* Metadata */}
                       <div className="flex flex-wrap items-center gap-2">
-                        <Badge variant={getStatusColor(task.status)} className="text-xs">
-                          {task.status.replace('_', ' ')}
+                        <Badge
+                          variant={getStatusColor(task.status)}
+                          className="text-xs"
+                        >
+                          {task.status.replace("_", " ")}
                         </Badge>
-                        
+
                         {task.priority && (
-                          <Badge variant={getPriorityColor(task.priority)} className="text-xs flex items-center gap-1">
+                          <Badge
+                            variant={getPriorityColor(task.priority)}
+                            className="text-xs flex items-center gap-1"
+                          >
                             {getPriorityIcon(task.priority)}
                             {task.priority}
                           </Badge>
                         )}
-                        
+
                         <Badge variant="outline" className="text-xs">
-                          {getProjectName(task.projectId || '')}
+                          {getProjectName(task.projectId || "")}
                         </Badge>
-                        
+
                         {dueDate && (
-                          <Badge 
-                            variant={dueDate.isOverdue ? "destructive" : "secondary"} 
+                          <Badge
+                            variant={
+                              dueDate.isOverdue ? "destructive" : "secondary"
+                            }
                             className="text-xs"
                           >
                             Due: {dueDate.formatted}
@@ -200,7 +223,7 @@ export default function TasksPage() {
                         )}
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center gap-2 flex-shrink-0">
                       <Button variant="outline" size="sm" asChild>
                         <Link href={`/tasks/${task.id}`}>
@@ -208,31 +231,34 @@ export default function TasksPage() {
                           <span className="hidden sm:inline ml-2">View</span>
                         </Link>
                       </Button>
-                      
+
                       <Button variant="outline" size="sm" asChild>
                         <Link href={`/tasks/${task.id}/edit`}>
                           <Edit className="h-4 w-4" />
                           <span className="hidden sm:inline ml-2">Edit</span>
                         </Link>
                       </Button>
-                      
+
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button 
-                            variant="outline" 
+                          <Button
+                            variant="outline"
                             size="sm"
                             className="text-destructive hover:text-destructive"
                             disabled={deletingTask === task.id}
                           >
                             <Trash2 className="h-4 w-4" />
-                            <span className="hidden sm:inline ml-2">Delete</span>
+                            <span className="hidden sm:inline ml-2">
+                              Delete
+                            </span>
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
                             <AlertDialogTitle>Delete Task</AlertDialogTitle>
                             <AlertDialogDescription>
-                              Are you sure you want to delete &quot;{task.title}&quot;? This action cannot be undone.
+                              Are you sure you want to delete &quot;{task.title}
+                              &quot;? This action cannot be undone.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>

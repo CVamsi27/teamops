@@ -13,12 +13,18 @@ import {
 import { TeamService } from './team.service';
 import { ZodValidationPipe } from '../../common/zod-validation.pipe';
 import { ValidateResponse } from '../../common/response-validation.decorator';
-import { 
-  CreateTeamSchema, 
+import {
+  CreateTeamSchema,
   UpdateTeamSchema,
-  TeamSchema 
+  TeamSchema,
+  TeamDeletionInfoSchema,
 } from '@workspace/api';
-import type { Team, CreateTeam, UpdateTeam } from '@workspace/api';
+import type {
+  Team,
+  CreateTeam,
+  UpdateTeam,
+  TeamDeletionInfo,
+} from '@workspace/api';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { z } from 'zod';
 
@@ -39,10 +45,16 @@ export class TeamController {
     return this.service.get(id);
   }
 
+  @Get(':id/deletion-info')
+  @ValidateResponse(TeamDeletionInfoSchema)
+  async getDeletionInfo(@Param('id') id: string): Promise<TeamDeletionInfo> {
+    return this.service.getTeamDeletionInfo(id);
+  }
+
   @Post()
   @ValidateResponse(TeamSchema)
   async create(
-    @Body(new ZodValidationPipe(CreateTeamSchema)) body: CreateTeam, 
+    @Body(new ZodValidationPipe(CreateTeamSchema)) body: CreateTeam,
     @Request() req: any
   ): Promise<Team> {
     return this.service.create(body, req.user.userId);

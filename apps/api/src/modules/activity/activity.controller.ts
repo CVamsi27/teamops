@@ -20,7 +20,7 @@ export class ActivityController {
   @ValidateResponse(z.array(ActivityEventSchema))
   async getActivitiesByEntity(
     @Param('entityType') entityType: string,
-    @Param('entityId') entityId: string,
+    @Param('entityId') entityId: string
   ) {
     return this.activityService.getActivitiesByEntity(entityType, entityId);
   }

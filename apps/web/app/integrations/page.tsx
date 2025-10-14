@@ -2,10 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@workspace/ui/components/card";
 import { Button } from "@workspace/ui/components/button";
 import { toast } from "@workspace/ui/components/toast";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@workspace/ui/components/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@workspace/ui/components/tooltip";
 import { GoogleCalendarIntegration } from "@/components/integrations/google-calendar-integration";
 import { Settings, MessageSquare, Zap, Info } from "lucide-react";
 
@@ -14,36 +23,32 @@ export default function IntegrationsPage() {
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
-    // Check for OAuth callback parameters
-    const success = searchParams.get('success');
-    const error = searchParams.get('error');
-    const message = searchParams.get('message');
-    const expiryDate = searchParams.get('expiryDate');
+    const success = searchParams.get("success");
+    const error = searchParams.get("error");
+    const message = searchParams.get("message");
+    const expiryDate = searchParams.get("expiryDate");
 
-    if (success === 'true') {
-      const toastMessage = message || 'Google Calendar connected successfully!';
-      const expiryText = expiryDate 
+    if (success === "true") {
+      const toastMessage = message || "Google Calendar connected successfully!";
+      const expiryText = expiryDate
         ? `Access token expires: ${new Date(parseInt(expiryDate)).toLocaleString()}`
-        : '';
-      
+        : "";
+
       toast.success(toastMessage, {
         description: expiryText,
         duration: 5000,
       });
-      
-      // Force refresh of Google Calendar integration component
-      setRefreshKey(prev => prev + 1);
-      
-      // Clear URL parameters
-      window.history.replaceState({}, '', '/integrations');
+
+      setRefreshKey((prev) => prev + 1);
+
+      window.history.replaceState({}, "", "/integrations");
     } else if (error) {
-      const errorMessage = message || 'Failed to connect Google Calendar';
+      const errorMessage = message || "Failed to connect Google Calendar";
       toast.error(errorMessage, {
         duration: 5000,
       });
-      
-      // Clear URL parameters
-      window.history.replaceState({}, '', '/integrations');
+
+      window.history.replaceState({}, "", "/integrations");
     }
   }, [searchParams]);
 
@@ -97,9 +102,7 @@ export default function IntegrationsPage() {
               <p className="text-muted-foreground mb-6">
                 Get notifications and updates directly in your Slack channels.
               </p>
-              <Button disabled>
-                Coming Soon
-              </Button>
+              <Button disabled>Coming Soon</Button>
             </div>
           </CardContent>
         </Card>
@@ -135,13 +138,13 @@ export default function IntegrationsPage() {
           <CardContent>
             <div className="text-center py-8">
               <Zap className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Automate with Zapier</h3>
+              <h3 className="text-lg font-semibold mb-2">
+                Automate with Zapier
+              </h3>
               <p className="text-muted-foreground mb-6">
                 Connect TeamOps with 6,000+ apps to automate your workflows.
               </p>
-              <Button disabled>
-                Coming Soon
-              </Button>
+              <Button disabled>Coming Soon</Button>
             </div>
           </CardContent>
         </Card>

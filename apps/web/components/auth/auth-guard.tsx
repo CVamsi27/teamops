@@ -13,7 +13,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const isPublicRoute = (PUBLIC_ROUTES as readonly string[]).includes(pathname);
 
   const me = useMe({ enabled: !isPublicRoute });
-  
+
   useEffect(() => {
     if (isPublicRoute) return;
 
@@ -31,7 +31,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
       const timer = setTimeout(() => {
         setShouldRedirect(true);
       }, 1000);
-      
+
       return () => clearTimeout(timer);
     }
   }, [me.isLoading, me.data, me.isError, isPublicRoute]);

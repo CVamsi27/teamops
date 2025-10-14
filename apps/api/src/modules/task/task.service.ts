@@ -37,18 +37,19 @@ export class TaskService implements OnModuleDestroy {
 
   private async initializeKafka() {
     try {
-      // Check if we have KAFKA_BROKERS for traditional Kafka setup
       if (!process.env.KAFKA_BROKERS) {
-        this.logger.warn('KAFKA_BROKERS not configured. Traditional Kafka setup skipped.');
+        this.logger.warn(
+          'KAFKA_BROKERS not configured. Traditional Kafka setup skipped.'
+        );
         this.kafkaEnabled = false;
         return;
       }
-      
+
       const brokers = process.env.KAFKA_BROKERS.split(',');
       this.kafka = new Kafka({
         clientId: 'teamops-task-producer',
         brokers,
-        logLevel: process.env.APP_ENV === 'production' ? 2 : 1, 
+        logLevel: process.env.APP_ENV === 'production' ? 2 : 1,
       });
 
       this.kafkaProducer = this.kafka.producer({
@@ -85,17 +86,15 @@ export class TaskService implements OnModuleDestroy {
 
   async create(dto: CreateTaskWithCreator): Promise<Task> {
     const t = await this.repo.create(dto);
-    
-    // Get user name from database
+
     const userInfo = await this.repo['prisma'].user.findUnique({
       where: { id: dto.createdById },
-      select: { name: true, email: true }
+      select: { name: true, email: true },
     });
-    
+
     const userName = userInfo?.name || userInfo?.email || 'Unknown User';
     const userEmail = userInfo?.email || 'unknown@example.com';
-    
-    // Track activity
+
     try {
       await this.activityService.trackTaskActivity(
         'task_created',
@@ -108,7 +107,7 @@ export class TaskService implements OnModuleDestroy {
     } catch (error) {
       this.logger.warn('Failed to track activity:', error);
     }
-    
+
     const event: TaskCreatedEvent = {
       id: t.id,
       title: t.title,
@@ -120,28 +119,29 @@ export class TaskService implements OnModuleDestroy {
     return t;
   }
 
-  async update(id: string, dto: UpdateTask, user: { userId: string; email: string }): Promise<Task> {
+  async update(
+    id: string,
+    dto: UpdateTask,
+    user: { userId: string; email: string }
+  ): Promise<Task> {
     const oldTask = await this.repo.findOne(id);
     if (!oldTask) throw new NotFoundException('Task not found');
-    
+
     const t = await this.repo.update(id, dto);
     if (!t) throw new NotFoundException('Task not found');
-    
-    // Get user name from database
+
     const userInfo = await this.repo['prisma'].user.findUnique({
       where: { id: user.userId },
-      select: { name: true, email: true }
+      select: { name: true, email: true },
     });
-    
+
     const userName = userInfo?.name || userInfo?.email || 'Unknown User';
-    
-    // Determine activity type based on status change
+
     let activityType: 'task_updated' | 'task_completed' = 'task_updated';
     if (dto.status === 'DONE' && oldTask.status !== 'DONE') {
       activityType = 'task_completed';
     }
-    
-    // Track activity with metadata about what changed
+
     const metadata: Record<string, unknown> = {};
     if (dto.status && dto.status !== oldTask.status) {
       metadata.oldStatus = oldTask.status;
@@ -154,7 +154,7 @@ export class TaskService implements OnModuleDestroy {
     if (dto.dueDate !== oldTask.dueDate) {
       metadata.oldDueDate = oldTask.dueDate;
       metadata.newDueDate = dto.dueDate;
-      // Also track due date changes specifically
+
       if (dto.dueDate !== oldTask.dueDate) {
         try {
           await this.activityService.trackTaskActivity(
@@ -171,7 +171,7 @@ export class TaskService implements OnModuleDestroy {
         }
       }
     }
-    
+
     try {
       await this.activityService.trackTaskActivity(
         activityType,
@@ -185,7 +185,7 @@ export class TaskService implements OnModuleDestroy {
     } catch (error) {
       this.logger.warn('Failed to track activity:', error);
     }
-    
+
     const event: TaskUpdatedEvent = {
       id: t.id,
       status: t.status,
@@ -196,19 +196,20 @@ export class TaskService implements OnModuleDestroy {
     return t;
   }
 
-  async remove(id: string, user: { userId: string; email: string }): Promise<void> {
+  async remove(
+    id: string,
+    user: { userId: string; email: string }
+  ): Promise<void> {
     const task = await this.repo.findOne(id);
     if (!task) throw new NotFoundException('Task not found');
-    
-    // Get user name from database
+
     const userInfo = await this.repo['prisma'].user.findUnique({
       where: { id: user.userId },
-      select: { name: true, email: true }
+      select: { name: true, email: true },
     });
-    
+
     const userName = userInfo?.name || userInfo?.email || 'Unknown User';
-    
-    // Track activity before deletion
+
     try {
       await this.activityService.trackTaskActivity(
         'task_deleted',
@@ -221,7 +222,7 @@ export class TaskService implements OnModuleDestroy {
     } catch (error) {
       this.logger.warn('Failed to track activity:', error);
     }
-    
+
     const ok = await this.repo.delete(id);
     if (!ok) throw new NotFoundException('Task not found');
   }
@@ -255,6 +256,8 @@ export class TaskService implements OnModuleDestroy {
   async onModuleDestroy() {
     try {
       if (this.kafkaProducer) await this.kafkaProducer.disconnect();
-    } catch {}
+    } catch (error) {
+      this.logger.warn('Error disconnecting Kafka producer:', error);
+    }
   }
 }

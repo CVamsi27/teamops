@@ -10,13 +10,16 @@ export class GoogleCalendarService {
     this.oauth2Client = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_SECRET,
-      process.env.GOOGLE_CALENDAR_REDIRECT_URI || `${process.env.NEXT_PUBLIC_API_URL}/integrations/google-calendar/callback`
+      process.env.GOOGLE_CALENDAR_REDIRECT_URI ||
+        `${process.env.NEXT_PUBLIC_API_URL}/integrations/google-calendar/callback`
     );
   }
 
   async getAuthUrl(userId?: string): Promise<string> {
     if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
-      throw new Error('Google Calendar credentials not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables.');
+      throw new Error(
+        'Google Calendar credentials not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables.'
+      );
     }
 
     const scopes = [
@@ -51,15 +54,15 @@ export class GoogleCalendarService {
       };
     }
 
-    // Check if token is expired
-    const isExpired = user.googleTokenExpiry && new Date() > user.googleTokenExpiry;
-    
+    const isExpired =
+      user.googleTokenExpiry && new Date() > user.googleTokenExpiry;
+
     return {
       connected: true,
       hasValidToken: !isExpired,
       expiryDate: user.googleTokenExpiry,
-      message: isExpired 
-        ? 'Google Calendar connected but token expired. Reconnection may be required.' 
+      message: isExpired
+        ? 'Google Calendar connected but token expired. Reconnection may be required.'
         : 'Google Calendar connected successfully',
     };
   }
@@ -108,28 +111,32 @@ export class GoogleCalendarService {
 
   async handleCallback(code: string, userId: string) {
     if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
-      throw new Error('Google Calendar credentials not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables.');
+      throw new Error(
+        'Google Calendar credentials not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables.'
+      );
     }
 
     try {
       const { tokens } = await this.oauth2Client.getToken(code);
-      
-      // Save tokens to database
+
       await this.prisma.user.update({
         where: { id: userId },
         data: {
           googleCalendarToken: tokens.access_token,
           googleRefreshToken: tokens.refresh_token,
-          googleTokenExpiry: tokens.expiry_date ? new Date(tokens.expiry_date) : null,
+          googleTokenExpiry: tokens.expiry_date
+            ? new Date(tokens.expiry_date)
+            : null,
         },
       });
-      
+
       return {
         success: true,
         accessToken: tokens.access_token,
         refreshToken: tokens.refresh_token,
         expiryDate: tokens.expiry_date,
-        message: 'Google Calendar connected successfully. You can now sync tasks and projects.',
+        message:
+          'Google Calendar connected successfully. You can now sync tasks and projects.',
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -139,7 +146,9 @@ export class GoogleCalendarService {
 
   async syncEvents(userId: string, accessToken: string, refreshToken: string) {
     if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
-      throw new Error('Google Calendar credentials not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables.');
+      throw new Error(
+        'Google Calendar credentials not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables.'
+      );
     }
 
     try {
@@ -148,8 +157,11 @@ export class GoogleCalendarService {
         refresh_token: refreshToken,
       });
 
-      const calendar = google.calendar({ version: 'v3', auth: this.oauth2Client });
-      
+      const calendar = google.calendar({
+        version: 'v3',
+        auth: this.oauth2Client,
+      });
+
       const now = new Date();
       const futureDate = new Date();
       futureDate.setMonth(futureDate.getMonth() + 1);
@@ -170,9 +182,16 @@ export class GoogleCalendarService {
     }
   }
 
-  async createEvent(userId: string, event: any, accessToken: string, refreshToken: string) {
+  async createEvent(
+    userId: string,
+    event: any,
+    accessToken: string,
+    refreshToken: string
+  ) {
     if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
-      throw new Error('Google Calendar credentials not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables.');
+      throw new Error(
+        'Google Calendar credentials not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables.'
+      );
     }
 
     try {
@@ -181,7 +200,10 @@ export class GoogleCalendarService {
         refresh_token: refreshToken,
       });
 
-      const calendar = google.calendar({ version: 'v3', auth: this.oauth2Client });
+      const calendar = google.calendar({
+        version: 'v3',
+        auth: this.oauth2Client,
+      });
 
       const calendarEvent = {
         summary: event.title,
@@ -215,9 +237,16 @@ export class GoogleCalendarService {
     }
   }
 
-  async updateEvent(eventId: string, event: any, accessToken: string, refreshToken: string) {
+  async updateEvent(
+    eventId: string,
+    event: any,
+    accessToken: string,
+    refreshToken: string
+  ) {
     if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
-      throw new Error('Google Calendar credentials not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables.');
+      throw new Error(
+        'Google Calendar credentials not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables.'
+      );
     }
 
     try {
@@ -226,7 +255,10 @@ export class GoogleCalendarService {
         refresh_token: refreshToken,
       });
 
-      const calendar = google.calendar({ version: 'v3', auth: this.oauth2Client });
+      const calendar = google.calendar({
+        version: 'v3',
+        auth: this.oauth2Client,
+      });
 
       const calendarEvent = {
         summary: event.title,
@@ -254,9 +286,15 @@ export class GoogleCalendarService {
     }
   }
 
-  async deleteEvent(eventId: string, accessToken: string, refreshToken: string) {
+  async deleteEvent(
+    eventId: string,
+    accessToken: string,
+    refreshToken: string
+  ) {
     if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
-      throw new Error('Google Calendar credentials not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables.');
+      throw new Error(
+        'Google Calendar credentials not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables.'
+      );
     }
 
     try {
@@ -265,7 +303,10 @@ export class GoogleCalendarService {
         refresh_token: refreshToken,
       });
 
-      const calendar = google.calendar({ version: 'v3', auth: this.oauth2Client });
+      const calendar = google.calendar({
+        version: 'v3',
+        auth: this.oauth2Client,
+      });
 
       await calendar.events.delete({
         calendarId: 'primary',
@@ -278,8 +319,6 @@ export class GoogleCalendarService {
       throw new Error(`Failed to delete event: ${message}`);
     }
   }
-
-  // New methods for syncing tasks and projects
 
   async syncUserTasksAndProjects(userId: string) {
     try {
@@ -304,8 +343,8 @@ export class GoogleCalendarService {
         },
       });
 
-      const projects = memberships.flatMap(membership => 
-        membership.team.projects
+      const projects = memberships.flatMap(
+        (membership) => membership.team.projects
       );
 
       const results = {
@@ -325,7 +364,12 @@ export class GoogleCalendarService {
     }
   }
 
-  async syncTaskToCalendar(taskId: string, userId: string, accessToken: string, refreshToken: string) {
+  async syncTaskToCalendar(
+    taskId: string,
+    userId: string,
+    accessToken: string,
+    refreshToken: string
+  ) {
     try {
       const task = await this.prisma.task.findUnique({
         where: { id: taskId },
@@ -340,7 +384,9 @@ export class GoogleCalendarService {
       }
 
       if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
-        throw new Error('Google Calendar credentials not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables.');
+        throw new Error(
+          'Google Calendar credentials not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables.'
+        );
       }
 
       this.oauth2Client.setCredentials({
@@ -348,7 +394,10 @@ export class GoogleCalendarService {
         refresh_token: refreshToken,
       });
 
-      const calendar = google.calendar({ version: 'v3', auth: this.oauth2Client });
+      const calendar = google.calendar({
+        version: 'v3',
+        auth: this.oauth2Client,
+      });
 
       const eventStartTime = new Date(task.dueDate);
       eventStartTime.setHours(eventStartTime.getHours() - 1);
@@ -390,7 +439,12 @@ export class GoogleCalendarService {
     }
   }
 
-  async syncProjectToCalendar(projectId: string, userId: string, accessToken: string, refreshToken: string) {
+  async syncProjectToCalendar(
+    projectId: string,
+    userId: string,
+    accessToken: string,
+    refreshToken: string
+  ) {
     try {
       const project = await this.prisma.project.findUnique({
         where: { id: projectId },
@@ -405,7 +459,9 @@ export class GoogleCalendarService {
       }
 
       if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
-        throw new Error('Google Calendar credentials not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables.');
+        throw new Error(
+          'Google Calendar credentials not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables.'
+        );
       }
 
       this.oauth2Client.setCredentials({
@@ -413,7 +469,10 @@ export class GoogleCalendarService {
         refresh_token: refreshToken,
       });
 
-      const calendar = google.calendar({ version: 'v3', auth: this.oauth2Client });
+      const calendar = google.calendar({
+        version: 'v3',
+        auth: this.oauth2Client,
+      });
 
       const projectDeadline = new Date();
       projectDeadline.setDate(projectDeadline.getDate() + 30);
@@ -456,10 +515,10 @@ export class GoogleCalendarService {
   private getTaskPriorityColor(priority: string): string {
     const colorMap = {
       P1: '11', // Red - Highest priority
-      P2: '6',  // Orange - High priority  
-      P3: '3',  // Purple - Medium priority
+      P2: '6', // Orange - High priority
+      P3: '3', // Purple - Medium priority
       P4: '10', // Green - Low priority
-      P5: '8',  // Gray - Lowest priority
+      P5: '8', // Gray - Lowest priority
     };
     return colorMap[priority] || '1'; // Default to blue
   }

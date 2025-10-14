@@ -7,27 +7,36 @@ import { Loader2 } from "lucide-react";
 
 interface RoleGuardProps {
   children: ReactNode;
-  allowedRoles?: ('ADMIN' | 'MEMBER' | 'VIEWER')[];
+  allowedRoles?: ("ADMIN" | "MEMBER" | "VIEWER")[];
   redirectTo?: string;
   fallback?: ReactNode;
 }
 
-export function RoleGuard({ 
-  children, 
-  allowedRoles = ['ADMIN', 'MEMBER', 'VIEWER'], 
+export function RoleGuard({
+  children,
+  allowedRoles = ["ADMIN", "MEMBER", "VIEWER"],
   redirectTo = "/dashboard",
-  fallback 
+  fallback,
 }: RoleGuardProps) {
   const { data: user, isLoading, error } = useMe();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && (!user || (error && 'response' in error && (error as { response: { status: number } }).response?.status === 401))) {
+    if (
+      !isLoading &&
+      (!user ||
+        (error &&
+          "response" in error &&
+          (error as { response: { status: number } }).response?.status === 401))
+    ) {
       router.push("/auth/login");
       return;
     }
 
-    if (user && !allowedRoles.includes(user.role as "ADMIN" | "MEMBER" | "VIEWER")) {
+    if (
+      user &&
+      !allowedRoles.includes(user.role as "ADMIN" | "MEMBER" | "VIEWER")
+    ) {
       router.push(redirectTo);
     }
   }, [user, isLoading, error, router, allowedRoles, redirectTo]);
@@ -45,13 +54,15 @@ export function RoleGuard({
   }
 
   if (!allowedRoles.includes(user.role as "ADMIN" | "MEMBER" | "VIEWER")) {
-    return fallback || (
-      <div className="text-center py-12">
-        <h2 className="text-xl font-semibold mb-2">Access Denied</h2>
-        <p className="text-muted-foreground">
-          You don&apos;t have permission to access this page.
-        </p>
-      </div>
+    return (
+      fallback || (
+        <div className="text-center py-12">
+          <h2 className="text-xl font-semibold mb-2">Access Denied</h2>
+          <p className="text-muted-foreground">
+            You don&apos;t have permission to access this page.
+          </p>
+        </div>
+      )
     );
   }
 

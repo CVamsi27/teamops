@@ -16,12 +16,11 @@ export const TaskUpdatedEventSchema = z.object({
   updatedAt: ISODateString,
 });
 
-// Activity event schemas
 export const ActivityEventSchema = z.object({
   id: ID,
   type: z.enum([
     'task_created',
-    'task_updated', 
+    'task_updated',
     'task_completed',
     'task_deleted',
     'project_created',
@@ -32,7 +31,7 @@ export const ActivityEventSchema = z.object({
     'member_added',
     'member_removed',
     'comment_added',
-    'due_date_changed'
+    'due_date_changed',
   ]),
   userId: ID,
   userName: z.string(),

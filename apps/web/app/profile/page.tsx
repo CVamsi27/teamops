@@ -11,7 +11,13 @@ export default function ProfilePage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!userLoading && (!user || (error && 'response' in error && (error as { response: { status: number } }).response?.status === 401))) {
+    if (
+      !userLoading &&
+      (!user ||
+        (error &&
+          "response" in error &&
+          (error as { response: { status: number } }).response?.status === 401))
+    ) {
       router.push("/auth/login");
     }
   }, [user, userLoading, error, router]);

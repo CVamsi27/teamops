@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ID, ISODateString, Role, TimestampFields } from './common';
+import { ID, ISODateString, Role } from './common';
 
 export const CreateMembershipSchema = z
   .object({
@@ -19,23 +19,28 @@ export const MembershipSchema = CreateMembershipSchema.extend({
   createdAt: ISODateString.optional(),
 }).strict();
 
-// Team invite and role management schemas
-export const InviteMemberSchema = z.object({
-  email: z.string().email(),
-  role: Role.default('MEMBER'),
-  teamId: ID,
-}).strict();
+export const InviteMemberSchema = z
+  .object({
+    email: z.string().email(),
+    role: Role.default('MEMBER'),
+    teamId: ID,
+  })
+  .strict();
 
-export const AssignRoleSchema = z.object({
-  userId: ID,
-  role: Role,
-  teamId: ID,
-}).strict();
+export const AssignRoleSchema = z
+  .object({
+    userId: ID,
+    role: Role,
+    teamId: ID,
+  })
+  .strict();
 
-export const RemoveMemberSchema = z.object({
-  userId: ID,
-  teamId: ID,
-}).strict();
+export const RemoveMemberSchema = z
+  .object({
+    userId: ID,
+    teamId: ID,
+  })
+  .strict();
 
 export type CreateMembership = z.infer<typeof CreateMembershipSchema>;
 export type UpdateMembership = z.infer<typeof UpdateMembershipSchema>;

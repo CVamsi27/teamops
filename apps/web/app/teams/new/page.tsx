@@ -6,7 +6,12 @@ import { type CreateTeam } from "@workspace/api";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Textarea } from "@workspace/ui/components/textarea";
-import { Card, CardHeader, CardTitle, CardContent } from "@workspace/ui/components/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@workspace/ui/components/card";
 import { Label } from "@workspace/ui/components/label";
 import { toast } from "@workspace/ui/components/toast";
 import { ArrowLeft, Plus } from "lucide-react";
@@ -15,7 +20,7 @@ import Link from "next/link";
 export default function NewTeamPage() {
   const router = useRouter();
   const { create } = useTeams();
-  
+
   const form = useForm<CreateTeam>({
     defaultValues: {
       name: "",
@@ -33,7 +38,7 @@ export default function NewTeamPage() {
           description: "Please try again with valid information.",
           duration: 5000,
         });
-      }
+      },
     });
   };
 
@@ -69,7 +74,9 @@ export default function NewTeamPage() {
               <Label htmlFor="name">Team Name *</Label>
               <Input
                 id="name"
-                {...form.register("name", { required: "Team name is required" })}
+                {...form.register("name", {
+                  required: "Team name is required",
+                })}
                 placeholder="Enter team name"
                 className="text-base"
               />
@@ -85,12 +92,13 @@ export default function NewTeamPage() {
               <Textarea
                 id="description"
                 {...form.register("description")}
-                placeholder="Describe your team&apos;s purpose and goals..."
+                placeholder="Describe your team's purpose and goals..."
                 rows={4}
                 className="text-base resize-none"
               />
               <p className="text-xs text-muted-foreground">
-                Optional: Provide a brief description of your team&apos;s mission and objectives
+                Optional: Provide a brief description of your team&apos;s
+                mission and objectives
               </p>
             </div>
 
@@ -98,8 +106,8 @@ export default function NewTeamPage() {
               <Button type="button" variant="outline" asChild>
                 <Link href="/teams">Cancel</Link>
               </Button>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={create.isPending || !form.watch("name")}
               >
                 {create.isPending ? "Creating..." : "Create Team"}

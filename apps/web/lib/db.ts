@@ -1,40 +1,49 @@
-import { sql } from '@vercel/postgres';
+import { sql } from "@vercel/postgres";
 
 export const db = {
   user: {
-    findUnique: async ({ where }: { where: { email?: string; id?: number } }) => {
-      if (where.email === 'test@example.com' || where.id === 1) {
+    findUnique: async ({
+      where,
+    }: {
+      where: { email?: string; id?: number };
+    }) => {
+      if (where.email === "test@example.com" || where.id === 1) {
         return {
           id: 1,
-          email: 'test@example.com',
-          name: 'Test User',
-          password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewRuHVjHyW9XBo6u', // "password"
+          email: "test@example.com",
+          name: "Test User",
+          password:
+            "$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewRuHVjHyW9XBo6u", // "password"
           createdAt: new Date(),
-          updatedAt: new Date()
+          updatedAt: new Date(),
         };
       }
       return null;
     },
-    
-    create: async ({ data }: { data: { email: string; password: string; name: string } }) => {
+
+    create: async ({
+      data,
+    }: {
+      data: { email: string; password: string; name: string };
+    }) => {
       return {
         id: Math.floor(Math.random() * 1000),
         email: data.email,
         name: data.name,
         password: data.password,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
-    }
+    },
   },
-  
+
   team: {
     findMany: async ({ where, include }: any) => {
       return [
         {
           id: 1,
-          name: 'Development Team',
-          description: 'Main development team',
+          name: "Development Team",
+          description: "Main development team",
           ownerId: 1,
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -43,25 +52,25 @@ export const db = {
               id: 1,
               userId: 1,
               teamId: 1,
-              role: 'OWNER',
+              role: "OWNER",
               user: {
                 id: 1,
-                email: 'test@example.com',
-                name: 'Test User'
-              }
-            }
+                email: "test@example.com",
+                name: "Test User",
+              },
+            },
           ],
           projects: [
             {
               id: 1,
-              name: 'TeamOps App',
-              status: 'ACTIVE'
-            }
-          ]
-        }
+              name: "TeamOps App",
+              status: "ACTIVE",
+            },
+          ],
+        },
       ];
     },
-    
+
     create: async ({ data, include }: any) => {
       return {
         id: Math.floor(Math.random() * 1000),
@@ -75,20 +84,19 @@ export const db = {
             id: Math.floor(Math.random() * 1000),
             userId: data.ownerId,
             teamId: Math.floor(Math.random() * 1000),
-            role: 'OWNER',
+            role: "OWNER",
             user: {
               id: data.ownerId,
-              email: 'test@example.com',
-              name: 'Test User'
-            }
-          }
+              email: "test@example.com",
+              name: "Test User",
+            },
+          },
         ],
-        projects: []
+        projects: [],
       };
-    }
+    },
   },
 
-  // Direct SQL query function for when we need raw queries
   query: async (query: string, params: any[] = []) => {
     try {
       if (process.env.POSTGRES_URL) {
@@ -97,13 +105,12 @@ export const db = {
         return { rows: [], rowCount: 0 };
       }
     } catch (error) {
-      console.error('Database query error:', error);
+      console.error("Database query error:", error);
       throw error;
     }
-  }
+  },
 };
 
-// Connection check
 export async function checkDatabaseConnection() {
   try {
     if (process.env.POSTGRES_URL) {
@@ -113,7 +120,7 @@ export async function checkDatabaseConnection() {
       return false;
     }
   } catch (error) {
-    console.error('❌ Database connection failed:', error);
+    console.error("❌ Database connection failed:", error);
     return false;
   }
 }

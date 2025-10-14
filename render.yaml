@@ -53,13 +53,17 @@ services:
       - key: KAFKAJS_NO_PARTITIONER_WARNING
         value: 1
       - key: SMTP_HOST
-        sync: false
+        value: smtp.mailgun.org
       - key: SMTP_PORT
-        sync: false
+        value: 587
       - key: SMTP_USER
         sync: false
       - key: SMTP_PASS
         sync: false
+      - key: SMTP_FROM_EMAIL
+        sync: false
+      - key: SMTP_FROM_NAME
+        value: TeamOps
     healthCheckPath: /api/health
 
   - type: web

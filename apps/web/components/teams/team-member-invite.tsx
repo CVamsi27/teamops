@@ -7,8 +7,20 @@ import { Card, CardContent } from "@workspace/ui/components/card";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@workspace/ui/components/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@workspace/ui/components/dialog";
 import { Badge } from "@workspace/ui/components/badge";
 import { toast } from "@workspace/ui/components/toast";
 import { type InviteMember } from "@workspace/api";
@@ -22,13 +34,17 @@ interface TeamMemberInviteProps {
   onInviteSent?: () => void;
 }
 
-export function TeamMemberInvite({ teamId, teamName, onInviteSent }: TeamMemberInviteProps) {
+export function TeamMemberInvite({
+  teamId,
+  teamName,
+  onInviteSent,
+}: TeamMemberInviteProps) {
   const [isOpen, setIsOpen] = useState(false);
   const inviteMember = useInviteMember();
 
   const form = useForm<InviteMemberForm>({
     defaultValues: {
-      role: 'MEMBER',
+      role: "MEMBER",
     },
   });
 
@@ -43,32 +59,47 @@ export function TeamMemberInvite({ teamId, teamName, onInviteSent }: TeamMemberI
           onInviteSent?.();
         },
         onError: (error: unknown) => {
-          const errorMessage = (error && typeof error === 'object' && 'response' in error && error.response && 
-            typeof error.response === 'object' && 'data' in error.response && error.response.data &&
-            typeof error.response.data === 'object' && 'message' in error.response.data) 
-            ? (error.response.data as { message: string }).message 
-            : "Failed to send invitation";
+          const errorMessage =
+            error &&
+            typeof error === "object" &&
+            "response" in error &&
+            error.response &&
+            typeof error.response === "object" &&
+            "data" in error.response &&
+            error.response.data &&
+            typeof error.response.data === "object" &&
+            "message" in error.response.data
+              ? (error.response.data as { message: string }).message
+              : "Failed to send invitation";
           toast.error(errorMessage);
         },
-      }
+      },
     );
   };
 
   const getRoleIcon = (role: string) => {
     switch (role) {
-      case 'ADMIN': return <Shield className="h-4 w-4" />;
-      case 'MEMBER': return <Users className="h-4 w-4" />;
-      case 'VIEWER': return <Eye className="h-4 w-4" />;
-      default: return <Users className="h-4 w-4" />;
+      case "ADMIN":
+        return <Shield className="h-4 w-4" />;
+      case "MEMBER":
+        return <Users className="h-4 w-4" />;
+      case "VIEWER":
+        return <Eye className="h-4 w-4" />;
+      default:
+        return <Users className="h-4 w-4" />;
     }
   };
 
   const getRoleDescription = (role: string) => {
     switch (role) {
-      case 'ADMIN': return 'Full access to team settings, projects, and members';
-      case 'MEMBER': return 'Can create and manage tasks, view all team content';
-      case 'VIEWER': return 'Read-only access to team content and tasks';
-      default: return '';
+      case "ADMIN":
+        return "Full access to team settings, projects, and members";
+      case "MEMBER":
+        return "Can create and manage tasks, view all team content";
+      case "VIEWER":
+        return "Read-only access to team content and tasks";
+      default:
+        return "";
     }
   };
 
@@ -87,7 +118,7 @@ export function TeamMemberInvite({ teamId, teamName, onInviteSent }: TeamMemberI
             Send an invitation to join <strong>{teamName}</strong>
           </p>
         </DialogHeader>
-        
+
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email Address</Label>
@@ -112,7 +143,9 @@ export function TeamMemberInvite({ teamId, teamName, onInviteSent }: TeamMemberI
             <Label htmlFor="role">Role</Label>
             <Select
               value={form.watch("role")}
-              onValueChange={(value: "ADMIN" | "MEMBER" | "VIEWER") => form.setValue("role", value)}
+              onValueChange={(value: "ADMIN" | "MEMBER" | "VIEWER") =>
+                form.setValue("role", value)
+              }
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select a role" />
@@ -150,9 +183,7 @@ export function TeamMemberInvite({ teamId, teamName, onInviteSent }: TeamMemberI
               <CardContent className="pt-4">
                 <div className="flex items-center space-x-2 mb-2">
                   {getRoleIcon(form.watch("role"))}
-                  <Badge variant="outline">
-                    {form.watch("role")}
-                  </Badge>
+                  <Badge variant="outline">{form.watch("role")}</Badge>
                 </div>
                 <p className="text-sm text-muted-foreground">
                   {getRoleDescription(form.watch("role"))}

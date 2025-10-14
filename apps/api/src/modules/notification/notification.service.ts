@@ -23,7 +23,7 @@ export class NotificationService implements OnModuleInit, OnModuleDestroy {
 
   constructor(
     private gateway: NotificationGateway,
-    private notificationRepository: NotificationRepository,
+    private notificationRepository: NotificationRepository
   ) {
     if (process.env.KAFKA_ENABLED === 'true') {
       this.initializeKafka();
@@ -36,13 +36,14 @@ export class NotificationService implements OnModuleInit, OnModuleDestroy {
 
   private initializeKafka() {
     try {
-      // Check if we have KAFKA_BROKERS for traditional Kafka setup
       if (!process.env.KAFKA_BROKERS) {
-        this.logger.warn('KAFKA_BROKERS not configured. Traditional Kafka setup skipped.');
+        this.logger.warn(
+          'KAFKA_BROKERS not configured. Traditional Kafka setup skipped.'
+        );
         this.kafkaEnabled = false;
         return;
       }
-      
+
       const brokers = process.env.KAFKA_BROKERS.split(',');
       this.kafka = new Kafka({
         clientId: 'teamops-notify',
@@ -112,21 +113,19 @@ export class NotificationService implements OnModuleInit, OnModuleDestroy {
       data: createNotificationDto.metadata,
       read: false,
     };
-    
+
     const notification = await this.notificationRepository.create(createData);
-    
-    // Broadcast to user via WebSocket
+
     this.gateway.broadcast('notification', notification);
-    
+
     return notification;
   }
 
   async createFromApi(createData: CreateNotification) {
     const notification = await this.notificationRepository.create(createData);
-    
-    // Broadcast to user via WebSocket
+
     this.gateway.broadcast('notification', notification);
-    
+
     return notification;
   }
 
@@ -134,38 +133,50 @@ export class NotificationService implements OnModuleInit, OnModuleDestroy {
     userId: string,
     page: number = 1,
     limit: number = 20,
-    unreadOnly: boolean = false,
+    unreadOnly: boolean = false
   ) {
     return this.notificationRepository.findManyForUser(
       userId,
       page,
       limit,
-      unreadOnly,
+      unreadOnly
     );
   }
 
   async findOne(id: string, userId: string) {
     const notification = await this.notificationRepository.findById(id);
-    
+
     if (!notification) {
       throw new NotFoundException('Notification not found');
     }
-    
+
     if (notification.userId !== userId) {
       throw new ForbiddenException('Access denied');
     }
-    
+
     return notification;
   }
 
-  async update(id: string, updateNotificationDto: UpdateNotificationDto, userId: string) {
+  async update(
+    id: string,
+    updateNotificationDto: UpdateNotificationDto,
+    userId: string
+  ) {
     const notification = await this.findOne(id, userId);
     const updateData = {
-      ...(updateNotificationDto.title && { title: updateNotificationDto.title }),
-      ...(updateNotificationDto.message && { message: updateNotificationDto.message }),
+      ...(updateNotificationDto.title && {
+        title: updateNotificationDto.title,
+      }),
+      ...(updateNotificationDto.message && {
+        message: updateNotificationDto.message,
+      }),
       ...(updateNotificationDto.type && { type: updateNotificationDto.type }),
-      ...(updateNotificationDto.metadata && { data: updateNotificationDto.metadata }),
-      ...(updateNotificationDto.isRead !== undefined && { read: updateNotificationDto.isRead }),
+      ...(updateNotificationDto.metadata && {
+        data: updateNotificationDto.metadata,
+      }),
+      ...(updateNotificationDto.isRead !== undefined && {
+        read: updateNotificationDto.isRead,
+      }),
     };
     return this.notificationRepository.update(id, updateData);
   }

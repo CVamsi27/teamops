@@ -18,7 +18,7 @@ export class ResponseValidationInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const responseSchema = this.reflector.getAllAndOverride<ZodType<any>>(
       RESPONSE_SCHEMA_KEY,
-      [context.getHandler(), context.getClass()],
+      [context.getHandler(), context.getClass()]
     );
 
     if (!responseSchema) {
@@ -35,17 +35,16 @@ export class ResponseValidationInterceptor implements NestInterceptor {
             error: error.issues || error.message,
             data,
           });
-          
-          // In development, throw the error. In production, log and return the data
+
           if (process.env.NODE_ENV === 'development') {
             throw new BadRequestException(
-              `Response validation failed: ${error.message}`,
+              `Response validation failed: ${error.message}`
             );
           }
-          
+
           return data;
         }
-      }),
+      })
     );
   }
 }

@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../infrastructure/prisma.service';
 import type { Notification as PrismaNotification } from '@prisma/client';
-import type { Notification, CreateNotification, UpdateNotification } from '@workspace/api';
+import type {
+  Notification,
+  CreateNotification,
+  UpdateNotification,
+} from '@workspace/api';
 
 @Injectable()
 export class NotificationRepository {
@@ -19,7 +23,7 @@ export class NotificationRepository {
     userId: string,
     page: number = 1,
     limit: number = 20,
-    unreadOnly: boolean = false,
+    unreadOnly: boolean = false
   ) {
     const skip = (page - 1) * limit;
     const where = {
@@ -73,7 +77,10 @@ export class NotificationRepository {
     return this.map(notification);
   }
 
-  async update(id: string, payload: UpdateNotification): Promise<Notification | null> {
+  async update(
+    id: string,
+    payload: UpdateNotification
+  ): Promise<Notification | null> {
     try {
       const notification = await this.prisma.notification.update({
         where: { id },

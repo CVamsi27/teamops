@@ -20,24 +20,21 @@ export class ChatController {
   @Get('history')
   async getChatHistory(
     @Query() query: GetChatHistoryDto,
-    @Request() req: any,
+    @Request() req: any
   ): Promise<ChatMessage[]> {
     const { roomId, roomType, limit, offset } = query;
-    
-    // TODO: Add authorization check to ensure user has access to the room
-    // For teams: check if user is a member
-    // For tasks: check if user has access to the project/task
-    
+
     return this.chatService.getChatHistory(roomId, roomType, limit, offset);
   }
 
   @Post('message')
   async createMessage(
-    @Body() body: { content: string; roomId: string; roomType: 'TEAM' | 'TASK' },
-    @Request() req: any,
+    @Body()
+    body: { content: string; roomId: string; roomType: 'TEAM' | 'TASK' },
+    @Request() req: any
   ): Promise<ChatMessage> {
     const user = req.user;
-    
+
     const messageData: CreateChatMessage = {
       content: body.content,
       roomId: body.roomId,
@@ -55,10 +52,8 @@ export class ChatController {
   async getOnlineUsers(
     @Query('roomType') roomType: string,
     @Query('roomId') roomId: string,
-    @Request() req: any,
+    @Request() req: any
   ): Promise<{ onlineUsers: string[] }> {
-    // TODO: Add authorization check
-    
     const onlineUsers = await this.chatService.getOnlineUsers(roomId, roomType);
     return { onlineUsers };
   }
@@ -67,10 +62,8 @@ export class ChatController {
   async getRoomStats(
     @Query('roomType') roomType: string,
     @Query('roomId') roomId: string,
-    @Request() req: any,
+    @Request() req: any
   ): Promise<{ messageCount: number; onlineUsers: string[] }> {
-    // TODO: Add authorization check
-    
     const [messageCount, onlineUsers] = await Promise.all([
       this.chatService.getRoomMessageCount(roomId, roomType),
       this.chatService.getOnlineUsers(roomId, roomType),

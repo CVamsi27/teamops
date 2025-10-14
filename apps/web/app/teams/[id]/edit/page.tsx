@@ -6,7 +6,12 @@ import { type UpdateTeam } from "@workspace/api";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Textarea } from "@workspace/ui/components/textarea";
-import { Card, CardHeader, CardTitle, CardContent } from "@workspace/ui/components/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@workspace/ui/components/card";
 import { Label } from "@workspace/ui/components/label";
 import { toast } from "@workspace/ui/components/toast";
 import { ArrowLeft, Edit, Loader2 } from "lucide-react";
@@ -17,10 +22,10 @@ export default function EditTeamPage() {
   const params = useParams();
   const router = useRouter();
   const teamId = params.id as string;
-  
+
   const { get, update } = useTeams();
   const teamQuery = get(teamId);
-  
+
   const form = useForm<UpdateTeam>({
     defaultValues: {
       name: "",
@@ -50,7 +55,7 @@ export default function EditTeamPage() {
             duration: 5000,
           });
         },
-      }
+      },
     );
   };
 
@@ -131,7 +136,9 @@ export default function EditTeamPage() {
               <Label htmlFor="name">Team Name *</Label>
               <Input
                 id="name"
-                {...form.register("name", { required: "Team name is required" })}
+                {...form.register("name", {
+                  required: "Team name is required",
+                })}
                 placeholder="Enter team name"
                 className="text-base"
               />
@@ -152,7 +159,8 @@ export default function EditTeamPage() {
                 className="text-base resize-none"
               />
               <p className="text-xs text-muted-foreground">
-                Optional: Provide a brief description of your team&apos;s mission and objectives
+                Optional: Provide a brief description of your team&apos;s
+                mission and objectives
               </p>
             </div>
 
@@ -160,8 +168,8 @@ export default function EditTeamPage() {
               <Button type="button" variant="outline" asChild>
                 <Link href="/teams">Cancel</Link>
               </Button>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={update.isPending || !form.watch("name")}
               >
                 {update.isPending ? "Updating..." : "Update Team"}

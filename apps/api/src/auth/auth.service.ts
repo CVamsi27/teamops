@@ -55,9 +55,7 @@ export class AuthService {
     return user;
   }
 
-  async generateToken(
-    user: User
-  ): Promise<RegisterResponse> {
+  async generateToken(user: User): Promise<RegisterResponse> {
     const payload: TokenPayload = {
       sub: user.id,
       email: user.email,
@@ -80,7 +78,7 @@ export class AuthService {
     name: string
   ): Promise<RegisterResponse> {
     const existing = await this.prisma.user.findUnique({ where: { email } });
-    
+
     if (existing) {
       if (existing.passwordHash) {
         throw new ConflictException('USER_EXISTS_LOGIN');
@@ -116,10 +114,7 @@ export class AuthService {
     return user;
   }
 
-  async login(
-    email: string,
-    password: string
-  ): Promise<LoginResponse> {
+  async login(email: string, password: string): Promise<LoginResponse> {
     const user = await this.validateUser(email, password);
     return await this.signToken(user.id, user.email, user.role);
   }
@@ -131,12 +126,12 @@ export class AuthService {
   ): Promise<RegisterResponse> {
     const payload: TokenPayload = { sub: userId, email, role };
     const token = this.jwt.sign(payload);
-    
-    const user = await this.prisma.user.findUnique({ 
+
+    const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { name: true }
+      select: { name: true },
     });
-    
+
     return {
       access_token: token,
       user: { id: userId, email, name: user?.name || 'Unknown User' },

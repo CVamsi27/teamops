@@ -2,14 +2,25 @@
 
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@workspace/ui/components/card";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { Badge } from "@workspace/ui/components/badge";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import { toast } from "@workspace/ui/components/toast";
-import { type UpdateUser, type UserProfile, UserProfileSchema, UpdateUserSchema } from "@workspace/api";
+import {
+  type UpdateUser,
+  type UserProfile,
+  UserProfileSchema,
+  UpdateUserSchema,
+} from "@workspace/api";
 import { ErrorDisplay } from "@/components/ui/error-display";
 import { useApiQuery } from "@/hooks/api/useApiQuery";
 import { useApiMutation } from "@/hooks/api/useApiMutation";
@@ -17,19 +28,25 @@ import { useApiMutation } from "@/hooks/api/useApiMutation";
 export function ProfileSettings() {
   const [isEditing, setIsEditing] = useState(false);
 
-  const { data: profile, isLoading, isError, error, refetch } = useApiQuery<UserProfile>(
-    ['user-profile'],
-    '/users/me',
-    UserProfileSchema
+  const {
+    data: profile,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useApiQuery<UserProfile>(
+    ["user-profile"],
+    "/users/me",
+    UserProfileSchema,
   );
 
   const updateProfile = useApiMutation<UserProfile, UpdateUser>(
-    '/users/me',
-    ['user-profile'],
+    "/users/me",
+    ["user-profile"],
     UpdateUserSchema,
     {
-      method: 'put',
-    }
+      method: "put",
+    },
   );
 
   const form = useForm<UpdateUser>({
@@ -58,9 +75,10 @@ export function ProfileSettings() {
       });
     } catch (error: unknown) {
       toast.error("Failed to update profile", {
-        description: (error && typeof error === 'object' && 'message' in error) 
-          ? (error as { message: string }).message 
-          : "Please try again later.",
+        description:
+          error && typeof error === "object" && "message" in error
+            ? (error as { message: string }).message
+            : "Please try again later.",
         duration: 5000,
       });
     }
@@ -109,8 +127,8 @@ export function ProfileSettings() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <ErrorDisplay 
-            error={error as Error} 
+          <ErrorDisplay
+            error={error as Error}
             onRetry={() => refetch()}
             title="Failed to load profile"
           />
@@ -133,10 +151,14 @@ export function ProfileSettings() {
 
   const getRoleBadgeVariant = (role: string) => {
     switch (role) {
-      case 'ADMIN': return 'destructive';
-      case 'MEMBER': return 'default';
-      case 'VIEWER': return 'secondary';
-      default: return 'outline';
+      case "ADMIN":
+        return "destructive";
+      case "MEMBER":
+        return "default";
+      case "VIEWER":
+        return "secondary";
+      default:
+        return "outline";
     }
   };
 
@@ -194,7 +216,15 @@ export function ProfileSettings() {
           <div className="space-y-2">
             <Label>Role</Label>
             <div>
-              <Badge variant={getRoleBadgeVariant(profile.role) as "default" | "secondary" | "destructive" | "outline"}>
+              <Badge
+                variant={
+                  getRoleBadgeVariant(profile.role) as
+                    | "default"
+                    | "secondary"
+                    | "destructive"
+                    | "outline"
+                }
+              >
                 {profile.role}
               </Badge>
             </div>
@@ -208,7 +238,8 @@ export function ProfileSettings() {
               <Label>Account Provider</Label>
               <div>
                 <Badge variant="outline">
-                  {profile.provider.charAt(0).toUpperCase() + profile.provider.slice(1)}
+                  {profile.provider.charAt(0).toUpperCase() +
+                    profile.provider.slice(1)}
                 </Badge>
               </div>
               <p className="text-sm text-muted-foreground">
@@ -220,15 +251,12 @@ export function ProfileSettings() {
           <div className="flex items-center space-x-2 pt-4">
             {isEditing ? (
               <>
-                <Button 
-                  type="submit" 
-                  disabled={updateProfile.isPending}
-                >
+                <Button type="submit" disabled={updateProfile.isPending}>
                   {updateProfile.isPending ? "Saving..." : "Save Changes"}
                 </Button>
-                <Button 
-                  type="button" 
-                  variant="outline" 
+                <Button
+                  type="button"
+                  variant="outline"
                   onClick={handleCancel}
                   disabled={updateProfile.isPending}
                 >
@@ -236,10 +264,7 @@ export function ProfileSettings() {
                 </Button>
               </>
             ) : (
-              <Button 
-                type="button" 
-                onClick={() => setIsEditing(true)}
-              >
+              <Button type="button" onClick={() => setIsEditing(true)}>
                 Edit Profile
               </Button>
             )}

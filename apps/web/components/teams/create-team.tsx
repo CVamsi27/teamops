@@ -84,7 +84,7 @@ export default function CreateTeams() {
                   <FormLabel>Description (optional)</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Describe your team&apos;s purpose and goals..."
+                      placeholder="Describe your team's purpose and goals..."
                       rows={3}
                       {...field}
                       value={field.value || ""}

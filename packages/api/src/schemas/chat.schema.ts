@@ -1,12 +1,15 @@
 import { z } from 'zod';
-import { ID, ISODateString, TimestampFields } from './common';
+import { ID, TimestampFields } from './common';
 
 export const ChatRoomType = z.enum(['TEAM', 'TASK']);
 export const ChatMessageType = z.enum(['MESSAGE', 'SYSTEM']);
 
 export const CreateChatMessageSchema = z
   .object({
-    content: z.string().min(1, 'Message content is required').max(1000, 'Message too long'),
+    content: z
+      .string()
+      .min(1, 'Message content is required')
+      .max(1000, 'Message too long'),
     roomId: ID,
     roomType: ChatRoomType,
     messageType: ChatMessageType.default('MESSAGE'),
@@ -23,7 +26,10 @@ export const ChatMessageSchema = CreateChatMessageSchema.extend({
 
 export const SendMessageSchema = z
   .object({
-    content: z.string().min(1, 'Message content is required').max(1000, 'Message too long'),
+    content: z
+      .string()
+      .min(1, 'Message content is required')
+      .max(1000, 'Message too long'),
     roomId: ID,
     roomType: ChatRoomType,
   })

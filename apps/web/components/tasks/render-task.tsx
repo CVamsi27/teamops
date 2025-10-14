@@ -12,7 +12,9 @@ import { Eye } from "lucide-react";
 import Link from "next/link";
 
 function TaskCardContent() {
-  const { list: { data, isLoading, isError } } = useTasks();
+  const {
+    list: { data, isLoading, isError },
+  } = useTasks();
 
   if (isLoading) {
     return (
@@ -50,7 +52,10 @@ function TaskCardContent() {
   return (
     <CardContent className="flex flex-col card-spacing">
       {data.map((t) => (
-        <div key={t.id} className="padding-card rounded border flex justify-between items-center">
+        <div
+          key={t.id}
+          className="padding-card rounded border flex justify-between items-center"
+        >
           <div className="flex-1">
             <div className="font-medium">{t.title}</div>
             <div className="text-sm text-muted-foreground">

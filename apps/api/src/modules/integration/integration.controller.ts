@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Patch, Body, Req, UseGuards, Query, Request, Res } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Body,
+  Req,
+  UseGuards,
+  Query,
+  Request,
+  Res,
+} from '@nestjs/common';
 import type { Response } from 'express';
 import { IntegrationService } from './integration.service';
 import { GoogleCalendarService } from './google-calendar.service';
@@ -18,7 +29,7 @@ interface AuthenticatedRequest extends Request {
 export class IntegrationController {
   constructor(
     private integrationService: IntegrationService,
-    private googleCalendarService: GoogleCalendarService,
+    private googleCalendarService: GoogleCalendarService
   ) {}
 
   @Get('google-calendar')
@@ -56,7 +67,8 @@ export class IntegrationController {
     } catch (error) {
       return {
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to refresh calendar',
+        message:
+          error instanceof Error ? error.message : 'Failed to refresh calendar',
       };
     }
   }
@@ -79,63 +91,82 @@ export class IntegrationController {
   @Get('google-calendar/callback')
   @Public()
   async handleGoogleCallback(
-    @Query('code') code: string, 
+    @Query('code') code: string,
     @Query('state') state?: string,
     @Res() res?: Response
   ) {
     if (!code) {
-      // Redirect to frontend with error
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-      return res.redirect(`${frontendUrl}/integrations?error=missing_code&message=Authorization code is required`);
+      return res.redirect(
+        `${frontendUrl}/integrations?error=missing_code&message=Authorization code is required`
+      );
     }
-    
+
     try {
       let userId: string;
       if (state) {
         try {
           userId = Buffer.from(state, 'base64').toString();
         } catch (error) {
-          const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-          return res.redirect(`${frontendUrl}/integrations?error=invalid_state&message=Invalid state parameter`);
+          const frontendUrl =
+            process.env.FRONTEND_URL || 'http://localhost:3000';
+          return res.redirect(
+            `${frontendUrl}/integrations?error=invalid_state&message=Invalid state parameter`
+          );
         }
       } else {
         const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-        return res.redirect(`${frontendUrl}/integrations?error=missing_state&message=User context is required`);
+        return res.redirect(
+          `${frontendUrl}/integrations?error=missing_state&message=User context is required`
+        );
       }
-      
-      const result = await this.googleCalendarService.handleCallback(code, userId);
-      
-      // Redirect to frontend with success
+
+      const result = await this.googleCalendarService.handleCallback(
+        code,
+        userId
+      );
+
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
       const params = new URLSearchParams({
         success: 'true',
         message: 'Google Calendar connected successfully',
         accessToken: result.accessToken,
         refreshToken: result.refreshToken,
-        expiryDate: result.expiryDate.toString()
+        expiryDate: result.expiryDate.toString(),
       });
-      
+
       return res.redirect(`${frontendUrl}/integrations?${params.toString()}`);
     } catch (error) {
-      // Redirect to frontend with error
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      return res.redirect(`${frontendUrl}/integrations?error=oauth_failed&message=${encodeURIComponent(errorMessage)}`);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error occurred';
+      return res.redirect(
+        `${frontendUrl}/integrations?error=oauth_failed&message=${encodeURIComponent(errorMessage)}`
+      );
     }
   }
 
   @Post('google-calendar/callback')
   @UseGuards(JwtAuthGuard)
-  async handleGoogleCallbackPost(@Req() req: AuthenticatedRequest, @Body() body: { code: string }) {
+  async handleGoogleCallbackPost(
+    @Req() req: AuthenticatedRequest,
+    @Body() body: { code: string }
+  ) {
     const userId = req.user!.id || req.user!.userId;
     return await this.googleCalendarService.handleCallback(body.code, userId);
   }
 
   @Patch('google-calendar/settings')
   @UseGuards(JwtAuthGuard)
-  async updateCalendarSettings(@Req() req: AuthenticatedRequest, @Body() settings: any) {
+  async updateCalendarSettings(
+    @Req() req: AuthenticatedRequest,
+    @Body() settings: any
+  ) {
     const userId = req.user!.id || req.user!.userId;
-    return await this.integrationService.updateCalendarSettings(userId, settings);
+    return await this.integrationService.updateCalendarSettings(
+      userId,
+      settings
+    );
   }
 
   @Post('google-calendar/disconnect')
@@ -154,7 +185,10 @@ export class IntegrationController {
 
   @Post('google-calendar/sync-tasks-projects')
   @UseGuards(JwtAuthGuard)
-  async syncTasksAndProjects(@Req() req: AuthenticatedRequest, @Body() body: { accessToken: string; refreshToken: string }) {
+  async syncTasksAndProjects(
+    @Req() req: AuthenticatedRequest,
+    @Body() body: { accessToken: string; refreshToken: string }
+  ) {
     const userId = req.user!.id || req.user!.userId;
     return await this.googleCalendarService.syncUserTasksAndProjects(userId);
   }
@@ -162,14 +196,14 @@ export class IntegrationController {
   @Post('google-calendar/sync-task')
   @UseGuards(JwtAuthGuard)
   async syncTask(
-    @Req() req: AuthenticatedRequest, 
+    @Req() req: AuthenticatedRequest,
     @Body() body: { taskId: string; accessToken: string; refreshToken: string }
   ) {
     const userId = req.user!.id || req.user!.userId;
     return await this.googleCalendarService.syncTaskToCalendar(
-      body.taskId, 
-      userId, 
-      body.accessToken, 
+      body.taskId,
+      userId,
+      body.accessToken,
       body.refreshToken
     );
   }
@@ -177,14 +211,15 @@ export class IntegrationController {
   @Post('google-calendar/sync-project')
   @UseGuards(JwtAuthGuard)
   async syncProject(
-    @Req() req: AuthenticatedRequest, 
-    @Body() body: { projectId: string; accessToken: string; refreshToken: string }
+    @Req() req: AuthenticatedRequest,
+    @Body()
+    body: { projectId: string; accessToken: string; refreshToken: string }
   ) {
     const userId = req.user!.id || req.user!.userId;
     return await this.googleCalendarService.syncProjectToCalendar(
-      body.projectId, 
-      userId, 
-      body.accessToken, 
+      body.projectId,
+      userId,
+      body.accessToken,
       body.refreshToken
     );
   }

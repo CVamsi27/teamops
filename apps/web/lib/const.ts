@@ -13,14 +13,14 @@ export const STATUS_OPTIONS = [
 ] as const;
 
 export const PUBLIC_ROUTES = [
-  '/',
-  '/auth',
-  '/auth/login',
-  '/auth/register',
-  '/pricing',
-  '/contact',
-  '/404',
-  '/error',
+  "/",
+  "/auth",
+  "/auth/login",
+  "/auth/register",
+  "/pricing",
+  "/contact",
+  "/404",
+  "/error",
 ] as const;
 
-export type PublicRoute = typeof PUBLIC_ROUTES[number];
+export type PublicRoute = (typeof PUBLIC_ROUTES)[number];

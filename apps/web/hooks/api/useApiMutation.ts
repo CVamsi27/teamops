@@ -34,7 +34,9 @@ export function useApiMutation<TData, TPayload extends Record<string, any>>(
             payload,
             zodError: zodError.issues || zodError.message,
           });
-          throw new Error(`Invalid payload for ${endpoint}: ${zodError.message}`);
+          throw new Error(
+            `Invalid payload for ${endpoint}: ${zodError.message}`,
+          );
         }
 
         const finalEndpoint = options?.buildEndpoint
@@ -63,17 +65,22 @@ export function useApiMutation<TData, TPayload extends Record<string, any>>(
             statusText: apiError.response.statusText,
             data: apiError.response.data,
           });
-          
+
           if (apiError.response.status === 401) {
-            throw new Error('Unauthorized: Please login again');
+            throw new Error("Unauthorized: Please login again");
           } else if (apiError.response.status === 403) {
-            throw new Error('Forbidden: You do not have permission to perform this action');
+            throw new Error(
+              "Forbidden: You do not have permission to perform this action",
+            );
           } else if (apiError.response.status === 404) {
-            throw new Error('Resource not found');
+            throw new Error("Resource not found");
           } else if (apiError.response.status >= 500) {
-            throw new Error('Server error: Please try again later');
+            throw new Error("Server error: Please try again later");
           } else {
-            throw new Error(apiError.response.data?.message || `Request failed with status ${apiError.response.status}`);
+            throw new Error(
+              apiError.response.data?.message ||
+                `Request failed with status ${apiError.response.status}`,
+            );
           }
         } else if (apiError.request) {
           console.error(`Network error for ${endpoint}:`, {
@@ -81,7 +88,7 @@ export function useApiMutation<TData, TPayload extends Record<string, any>>(
             method,
             message: apiError.message,
           });
-          throw new Error('Network error: Please check your connection');
+          throw new Error("Network error: Please check your connection");
         } else {
           console.error(`Unknown error for ${endpoint}:`, apiError);
           throw apiError;
@@ -108,7 +115,7 @@ export function useApiMutation<TData, TPayload extends Record<string, any>>(
         error,
         variables,
       });
-      
+
       if (context?.previous) {
         qc.setQueryData(queryKey, context.previous);
       }

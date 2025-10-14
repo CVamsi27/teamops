@@ -19,7 +19,7 @@ export class AppController {
       status: 'ok',
       timestamp: new Date().toISOString(),
       service: 'teamops-api',
-      version: '1.0.0'
+      version: '1.0.0',
     };
   }
 }

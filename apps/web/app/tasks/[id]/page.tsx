@@ -3,19 +3,31 @@
 import { useParams } from "next/navigation";
 import { useTasks } from "@/hooks/tasks/useTasks";
 import { useProjects } from "@/hooks/useProjects";
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@workspace/ui/components/card";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import { LiveChat } from "@/components/chat/live-chat";
 import { ActivityTimeline } from "@/components/activity/activity-timeline";
-import { CheckCircle, Circle, Clock, Calendar, User, ArrowLeft } from "lucide-react";
+import {
+  CheckCircle,
+  Circle,
+  Clock,
+  Calendar,
+  User,
+  ArrowLeft,
+} from "lucide-react";
 import Link from "next/link";
 
 export default function TaskDetailPage() {
   const params = useParams();
   const taskId = params.id as string;
-  
+
   const { get } = useTasks();
   const { list: projectsQuery } = useProjects();
   const taskQuery = get(taskId);
@@ -31,12 +43,12 @@ export default function TaskDetailPage() {
             </Link>
           </Button>
         </div>
-        
+
         <div className="space-y-4">
           <Skeleton className="h-8 w-[300px]" />
           <Skeleton className="h-4 w-[500px]" />
         </div>
-        
+
         <div className="grid gap-6 lg:grid-cols-2">
           <Card>
             <CardContent className="py-12">
@@ -64,7 +76,7 @@ export default function TaskDetailPage() {
             </Link>
           </Button>
         </div>
-        
+
         <Card>
           <CardContent className="py-12 text-center">
             <p className="text-muted-foreground">
@@ -77,32 +89,44 @@ export default function TaskDetailPage() {
   }
 
   const task = taskQuery.data;
-  const project = projectsQuery.data?.find(p => p.id === task.projectId);
+  const project = projectsQuery.data?.find((p) => p.id === task.projectId);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'TODO': return <Circle className="h-5 w-5 text-gray-500" />;
-      case 'IN_PROGRESS': return <Clock className="h-5 w-5 text-blue-500" />;
-      case 'DONE': return <CheckCircle className="h-5 w-5 text-green-500" />;
-      default: return <Circle className="h-5 w-5 text-gray-500" />;
+      case "TODO":
+        return <Circle className="h-5 w-5 text-gray-500" />;
+      case "IN_PROGRESS":
+        return <Clock className="h-5 w-5 text-blue-500" />;
+      case "DONE":
+        return <CheckCircle className="h-5 w-5 text-green-500" />;
+      default:
+        return <Circle className="h-5 w-5 text-gray-500" />;
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'HIGH': return 'destructive';
-      case 'MEDIUM': return 'default';
-      case 'LOW': return 'secondary';
-      default: return 'secondary';
+      case "HIGH":
+        return "destructive";
+      case "MEDIUM":
+        return "default";
+      case "LOW":
+        return "secondary";
+      default:
+        return "secondary";
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'TODO': return 'outline';
-      case 'IN_PROGRESS': return 'default';
-      case 'DONE': return 'secondary';
-      default: return 'outline';
+      case "TODO":
+        return "outline";
+      case "IN_PROGRESS":
+        return "default";
+      case "DONE":
+        return "secondary";
+      default:
+        return "outline";
     }
   };
 
@@ -122,9 +146,7 @@ export default function TaskDetailPage() {
             {task.title}
           </h1>
           {task.description && (
-            <p className="text-muted-foreground mt-2">
-              {task.description}
-            </p>
+            <p className="text-muted-foreground mt-2">{task.description}</p>
           )}
         </div>
       </div>
@@ -141,14 +163,30 @@ export default function TaskDetailPage() {
             <div className="space-y-4">
               <div>
                 <h3 className="font-medium mb-2">Status</h3>
-                <Badge variant={getStatusColor(task.status) as "default" | "secondary" | "destructive" | "outline"}>
-                  {task.status.replace('_', ' ')}
+                <Badge
+                  variant={
+                    getStatusColor(task.status) as
+                      | "default"
+                      | "secondary"
+                      | "destructive"
+                      | "outline"
+                  }
+                >
+                  {task.status.replace("_", " ")}
                 </Badge>
               </div>
 
               <div>
                 <h3 className="font-medium mb-2">Priority</h3>
-                <Badge variant={getPriorityColor(task.priority) as "default" | "secondary" | "destructive" | "outline"}>
+                <Badge
+                  variant={
+                    getPriorityColor(task.priority) as
+                      | "default"
+                      | "secondary"
+                      | "destructive"
+                      | "outline"
+                  }
+                >
                   {task.priority}
                 </Badge>
               </div>
@@ -157,13 +195,11 @@ export default function TaskDetailPage() {
                 <h3 className="font-medium mb-2">Project</h3>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline">
-                    {project?.name || 'Unknown Project'}
+                    {project?.name || "Unknown Project"}
                   </Badge>
                   {project && (
                     <Button variant="ghost" size="sm" asChild>
-                      <Link href={`/projects/${project.id}`}>
-                        View Project
-                      </Link>
+                      <Link href={`/projects/${project.id}`}>View Project</Link>
                     </Button>
                   )}
                 </div>
@@ -178,11 +214,11 @@ export default function TaskDetailPage() {
                     Due Date
                   </h3>
                   <p className="text-muted-foreground">
-                    {new Date(task.dueDate).toLocaleDateString('en-US', {
-                      weekday: 'long',
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
+                    {new Date(task.dueDate).toLocaleDateString("en-US", {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
                     })}
                   </p>
                 </div>
@@ -194,9 +230,7 @@ export default function TaskDetailPage() {
                     <User className="h-4 w-4" />
                     Assignee
                   </h3>
-                  <Badge variant="outline">
-                    {task.assigneeId}
-                  </Badge>
+                  <Badge variant="outline">{task.assigneeId}</Badge>
                 </div>
               )}
 
@@ -226,20 +260,12 @@ export default function TaskDetailPage() {
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Live Chat */}
         <div>
-          <LiveChat 
-            roomId={taskId}
-            roomType="task"
-            roomName={task.title}
-          />
+          <LiveChat roomId={taskId} roomType="task" roomName={task.title} />
         </div>
 
         {/* Activity Timeline */}
         <div>
-          <ActivityTimeline 
-            entityId={taskId}
-            entityType="task"
-            limit={20}
-          />
+          <ActivityTimeline entityId={taskId} entityType="task" limit={20} />
         </div>
       </div>
 
@@ -251,19 +277,13 @@ export default function TaskDetailPage() {
         <CardContent>
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" asChild>
-              <Link href={`/tasks/${taskId}/edit`}>
-                Edit Task
-              </Link>
+              <Link href={`/tasks/${taskId}/edit`}>Edit Task</Link>
             </Button>
-            {task.status !== 'DONE' && (
-              <Button variant="default">
-                Mark as Complete
-              </Button>
+            {task.status !== "DONE" && (
+              <Button variant="default">Mark as Complete</Button>
             )}
             <Button variant="outline" asChild>
-              <Link href="/tasks/new">
-                Create Related Task
-              </Link>
+              <Link href="/tasks/new">Create Related Task</Link>
             </Button>
           </div>
         </CardContent>

@@ -4,20 +4,10 @@ import { type Team } from "@workspace/api";
 import { Button } from "@workspace/ui/components/button";
 import { Card, CardContent } from "@workspace/ui/components/card";
 import { Badge } from "@workspace/ui/components/badge";
-import { Plus, Edit, Trash2, Users, Eye } from "lucide-react";
+import { Plus, Edit, Users, Eye } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@workspace/ui/components/alert-dialog";
+import { TeamDeletionDialog } from "@/components/teams/team-deletion-dialog";
 import { TeamMemberInvite } from "@/components/teams/team-member-invite";
 
 export default function TeamsPage() {
@@ -26,14 +16,17 @@ export default function TeamsPage() {
 
   const handleDelete = (teamId: string) => {
     setDeletingTeam(teamId);
-    remove.mutate({ id: teamId }, {
-      onSuccess: () => {
-        setDeletingTeam(null);
+    remove.mutate(
+      { id: teamId },
+      {
+        onSuccess: () => {
+          setDeletingTeam(null);
+        },
+        onError: () => {
+          setDeletingTeam(null);
+        },
       },
-      onError: () => {
-        setDeletingTeam(null);
-      }
-    });
+    );
   };
 
   if (list.isLoading) {
@@ -104,7 +97,10 @@ export default function TeamsPage() {
                       <h3 className="text-lg font-semibold truncate">
                         {team.name}
                       </h3>
-                      <Badge variant="secondary" className="flex items-center gap-1">
+                      <Badge
+                        variant="secondary"
+                        className="flex items-center gap-1"
+                      >
                         <Users className="h-3 w-3" />
                         Team
                       </Badge>
@@ -115,7 +111,7 @@ export default function TeamsPage() {
                       </p>
                     )}
                   </div>
-                  
+
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <Button variant="outline" size="sm" asChild>
                       <Link href={`/teams/${team.id}`}>
@@ -123,49 +119,22 @@ export default function TeamsPage() {
                         <span className="hidden sm:inline ml-2">View</span>
                       </Link>
                     </Button>
-                    
-                    <TeamMemberInvite 
-                      teamId={team.id} 
-                      teamName={team.name} 
-                    />
-                    
+
+                    <TeamMemberInvite teamId={team.id} teamName={team.name} />
+
                     <Button variant="outline" size="sm" asChild>
                       <Link href={`/teams/${team.id}/edit`}>
                         <Edit className="h-4 w-4" />
                         <span className="hidden sm:inline ml-2">Edit</span>
                       </Link>
                     </Button>
-                    
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          className="text-destructive hover:text-destructive"
-                          disabled={deletingTeam === team.id}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          <span className="hidden sm:inline ml-2">Delete</span>
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Delete Team</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Are you sure you want to delete &quot;{team.name}&quot;? This action cannot be undone and will remove all associated projects and tasks.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => handleDelete(team.id)}
-                            className="bg-destructive hover:bg-destructive/90"
-                          >
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+
+                    <TeamDeletionDialog
+                      teamId={team.id}
+                      teamName={team.name}
+                      onConfirmDelete={() => handleDelete(team.id)}
+                      isDeleting={deletingTeam === team.id}
+                    />
                   </div>
                 </div>
               </CardContent>

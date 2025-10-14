@@ -7,8 +7,19 @@ import { type CreateProject } from "@workspace/api";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Textarea } from "@workspace/ui/components/textarea";
-import { Card, CardHeader, CardTitle, CardContent } from "@workspace/ui/components/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@workspace/ui/components/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select";
 import { Label } from "@workspace/ui/components/label";
 import { toast } from "@workspace/ui/components/toast";
 import { ArrowLeft, Plus } from "lucide-react";
@@ -18,7 +29,7 @@ export default function NewProjectPage() {
   const router = useRouter();
   const { create } = useProjects();
   const teamsQuery = useTeams();
-  
+
   const form = useForm<CreateProject>({
     defaultValues: {
       name: "",
@@ -73,7 +84,9 @@ export default function NewProjectPage() {
               <Label htmlFor="name">Project Name *</Label>
               <Input
                 id="name"
-                {...form.register("name", { required: "Project name is required" })}
+                {...form.register("name", {
+                  required: "Project name is required",
+                })}
                 placeholder="Enter project name"
                 className="text-base"
               />
@@ -94,7 +107,8 @@ export default function NewProjectPage() {
                 className="text-base resize-none"
               />
               <p className="text-xs text-muted-foreground">
-                Optional: Provide a brief description of the project goals and scope
+                Optional: Provide a brief description of the project goals and
+                scope
               </p>
             </div>
 
@@ -123,7 +137,10 @@ export default function NewProjectPage() {
               {!teamsQuery.list.data?.length && (
                 <p className="text-sm text-muted-foreground">
                   You need to be part of a team to create a project.{" "}
-                  <Link href="/teams" className="underline hover:text-foreground">
+                  <Link
+                    href="/teams"
+                    className="underline hover:text-foreground"
+                  >
                     Create or join a team first
                   </Link>
                 </p>
@@ -134,9 +151,13 @@ export default function NewProjectPage() {
               <Button type="button" variant="outline" asChild>
                 <Link href="/projects">Cancel</Link>
               </Button>
-              <Button 
-                type="submit" 
-                disabled={create.isPending || !form.watch("teamId") || !form.watch("name")}
+              <Button
+                type="submit"
+                disabled={
+                  create.isPending ||
+                  !form.watch("teamId") ||
+                  !form.watch("name")
+                }
               >
                 {create.isPending ? "Creating..." : "Create Project"}
               </Button>

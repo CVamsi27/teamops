@@ -13,12 +13,15 @@ export function SiteHeader() {
   const { mutate: logout } = useLogout();
 
   const handleLogout = () => {
-    logout({}, {
-      onSuccess: () => {
-        AuthUtils.clearToken();
-        window.location.href = "/";
-      }
-    });
+    logout(
+      {},
+      {
+        onSuccess: () => {
+          AuthUtils.clearToken();
+          window.location.href = "/";
+        },
+      },
+    );
   };
 
   return (
@@ -32,8 +35,8 @@ export function SiteHeader() {
           </div>
 
           {/* Logo */}
-          <Link 
-            href="/" 
+          <Link
+            href="/"
             className="flex items-center space-x-2 text-xl font-bold transition-colors hover:text-primary"
           >
             <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
@@ -57,7 +60,7 @@ export function SiteHeader() {
         <div className="flex items-center space-x-2">
           {user && <NotificationCenter />}
           <ModeToggle />
-          
+
           {user ? (
             <UserAvatar user={user} onLogout={handleLogout} />
           ) : (
@@ -76,12 +79,11 @@ export function SiteHeader() {
   );
 }
 
-// Navigation Link Component with consistent hover effects
-function NavLink({ 
-  href, 
-  children 
-}: { 
-  href: string; 
+function NavLink({
+  href,
+  children,
+}: {
+  href: string;
   children: React.ReactNode;
 }) {
   return (

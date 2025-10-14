@@ -10,10 +10,10 @@ import Link from "next/link";
 export default function EditTaskPage() {
   const params = useParams();
   const taskId = params.id as string;
-  
+
   const { get } = useTasks();
   const taskQuery = get(taskId);
-  
+
   if (taskQuery.isLoading) {
     return (
       <div className="max-w-2xl mx-auto space-y-6">

@@ -14,14 +14,20 @@ export class IntegrationService {
   }
 
   async updateCalendarSettings(userId: string, settings: any) {
-    throw new Error('Calendar settings update not yet implemented. Database schema migration required.');
+    throw new Error(
+      'Calendar settings update not yet implemented. Database schema migration required.'
+    );
   }
 
   async disconnectCalendar(userId: string) {
-    throw new Error('Calendar disconnect not yet implemented. Database schema migration required.');
+    throw new Error(
+      'Calendar disconnect not yet implemented. Database schema migration required.'
+    );
   }
 
   async syncCalendar(userId: string) {
-    throw new Error('Calendar sync not yet implemented. Database schema migration required.');
+    throw new Error(
+      'Calendar sync not yet implemented. Database schema migration required.'
+    );
   }
 }

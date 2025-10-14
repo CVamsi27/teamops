@@ -5,6 +5,7 @@ This guide provides step-by-step instructions for deploying TeamOps using free c
 ## 📋 Prerequisites
 
 Before starting, ensure you have:
+
 - [x] Node.js 18+ installed
 - [x] Git repository access
 - [x] Terminal/Command line access
@@ -12,14 +13,17 @@ Before starting, ensure you have:
 ## 🎯 Choose Your Deployment Strategy
 
 ### Option 1: Vercel Only (Recommended for MVP)
+
 **Best for**: Quick deployment, simple setup, $0 cost
 **Architecture**: Next.js with API routes
 
-### Option 2: Vercel + Railway (Backend Separation) 
+### Option 2: Vercel + Railway (Backend Separation)
+
 **Best for**: Microservices, traditional separation
 **Architecture**: Next.js frontend + NestJS backend
 
 ### Option 3: Render.com (100% Free Forever)
+
 **Best for**: Long-term free hosting
 **Architecture**: Full-stack on Render
 
@@ -42,9 +46,11 @@ cp .env.example .env.local
 ### Step 2: Set Up Free Services
 
 #### 2a. Neon Database (Already Done ✅)
+
 Skip this step since you mentioned Neon is already set up.
 
 #### 2b. Upstash Redis
+
 1. Visit [upstash.com](https://upstash.com)
 2. Sign up with GitHub
 3. Create Redis Database:
@@ -59,6 +65,7 @@ Skip this step since you mentioned Neon is already set up.
    ```
 
 #### 2c. Upstash Kafka
+
 1. In Upstash Console, go to Kafka section
 2. Create Kafka Cluster:
    - Click "Create Cluster"
@@ -216,6 +223,7 @@ npm run deploy:vercel
 ### Step 4: Configure Cross-Origin
 
 Update Vercel environment variables:
+
 - `NEXT_PUBLIC_API_URL` → Your Railway backend URL
 
 ---
@@ -277,11 +285,13 @@ npm run deploy:railway         # Railway backend
 ## 🧪 Testing Your Deployment
 
 ### Test Frontend
+
 ```bash
 curl https://your-app.vercel.app
 ```
 
 ### Test Backend API
+
 ```bash
 # Test backend health (if deployed separately)
 curl https://your-api.railway.app/api/health
@@ -291,7 +301,9 @@ curl https://your-api.railway.app/api/auth/profile
 ```
 
 ### Test Full Stack Integration
+
 Visit your frontend URL and:
+
 1. **Register/Login** - Test authentication flow
 2. **Create Team** - Test team management
 3. **Create Project** - Test project functionality
@@ -303,21 +315,25 @@ Visit your frontend URL and:
 ### Check Logs
 
 **Vercel:**
+
 ```bash
 vercel logs https://your-app.vercel.app
 ```
 
 **Railway:**
+
 ```bash
 railway logs
 ```
 
 **Render:**
+
 - Check logs in Render Dashboard
 
 ### Common Issues & Solutions
 
 #### 1. Environment Variables Not Loading
+
 ```bash
 # Vercel: Check dashboard → Settings → Environment Variables
 # Redeploy after adding variables
@@ -325,6 +341,7 @@ vercel --prod
 ```
 
 #### 2. Database Connection Issues
+
 ```bash
 # Verify DATABASE_URL format
 # Check Neon database is active
@@ -332,6 +349,7 @@ vercel --prod
 ```
 
 #### 3. Upstash Connection Errors
+
 ```bash
 # Verify URLs and tokens in Upstash Console
 # Check regions match your deployment location
@@ -339,6 +357,7 @@ vercel --prod
 ```
 
 #### 4. CORS Issues (Split Deployment)
+
 ```bash
 # Ensure NEXT_PUBLIC_API_URL points to correct backend
 # Check backend CORS configuration
@@ -347,13 +366,13 @@ vercel --prod
 
 ## 📊 Deployment Comparison
 
-| Feature | Vercel Only | Vercel + Railway | Render.com |
-|---------|-------------|------------------|------------|
-| **Setup Time** | 15 minutes | 30 minutes | 20 minutes |
-| **Free Tier** | Forever | 2-3 months | Forever |
-| **Complexity** | Simple | Medium | Simple |
-| **Scalability** | High | Very High | Medium |
-| **Best For** | MVP, Startups | Enterprise | Long-term free |
+| Feature         | Vercel Only   | Vercel + Railway | Render.com     |
+| --------------- | ------------- | ---------------- | -------------- |
+| **Setup Time**  | 15 minutes    | 30 minutes       | 20 minutes     |
+| **Free Tier**   | Forever       | 2-3 months       | Forever        |
+| **Complexity**  | Simple        | Medium           | Simple         |
+| **Scalability** | High          | Very High        | Medium         |
+| **Best For**    | MVP, Startups | Enterprise       | Long-term free |
 
 ## 🎉 Success Checklist
 

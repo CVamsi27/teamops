@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ID, ISODateString, Role, TimestampFields } from './common';
+import { ID, ISODateString, Role } from './common';
 
 export const InviteSchema = z
   .object({

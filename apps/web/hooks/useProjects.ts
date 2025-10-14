@@ -17,11 +17,12 @@ export function useProjects() {
     z.array(ProjectSchema),
   );
 
-  const get = (projectId: string) => useApiQuery<Project>(
-    ["projects", projectId],
-    `/projects/${projectId}`,
-    ProjectSchema,
-  );
+  const get = (projectId: string) =>
+    useApiQuery<Project>(
+      ["projects", projectId],
+      `/projects/${projectId}`,
+      ProjectSchema,
+    );
 
   const create = useApiMutation<Project, CreateProject>(
     "/projects",

@@ -47,14 +47,14 @@ export const AuthUtils = {
   saveToken: (token: string) => {
     AuthStorage.setToken(token, 14);
   },
-  
+
   clearToken: () => {
     AuthStorage.clearToken();
   },
-  
+
   isAuthenticated: () => {
     return AuthStorage.isAuthenticated();
-  }
+  },
 };
 
 export function useMe(options?: { enabled?: boolean }) {

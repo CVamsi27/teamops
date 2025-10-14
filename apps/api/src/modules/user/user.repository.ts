@@ -82,6 +82,6 @@ export class UserRepository {
         updatedAt: true,
       },
     });
-    return users.map(user => this.transformPublicUser(user));
+    return users.map((user) => this.transformPublicUser(user));
   }
 }

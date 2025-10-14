@@ -5,20 +5,10 @@ import { type Project } from "@workspace/api";
 import { Button } from "@workspace/ui/components/button";
 import { Card, CardContent } from "@workspace/ui/components/card";
 import { Badge } from "@workspace/ui/components/badge";
-import { Plus, Edit, Trash2, FolderOpen, Users } from "lucide-react";
+import { Plus, Edit, FolderOpen, Users } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@workspace/ui/components/alert-dialog";
+import { ProjectDeletionDialog } from "@/components/projects/project-deletion-dialog";
 
 export default function ProjectsPage() {
   const { list, remove } = useProjects();
@@ -27,19 +17,22 @@ export default function ProjectsPage() {
 
   const handleDelete = (projectId: string) => {
     setDeletingProject(projectId);
-    remove.mutate({ id: projectId }, {
-      onSuccess: () => {
-        setDeletingProject(null);
+    remove.mutate(
+      { id: projectId },
+      {
+        onSuccess: () => {
+          setDeletingProject(null);
+        },
+        onError: () => {
+          setDeletingProject(null);
+        },
       },
-      onError: () => {
-        setDeletingProject(null);
-      }
-    });
+    );
   };
 
   const getTeamName = (teamId: string) => {
-    const team = teamsQuery.list.data?.find(t => t.id === teamId);
-    return team?.name || 'Unknown Team';
+    const team = teamsQuery.list.data?.find((t) => t.id === teamId);
+    return team?.name || "Unknown Team";
   };
 
   if (list.isLoading) {
@@ -102,7 +95,10 @@ export default function ProjectsPage() {
           </Card>
         ) : (
           list.data?.map((project: Project) => (
-            <Card key={project.id} className="hover:shadow-md transition-shadow">
+            <Card
+              key={project.id}
+              className="hover:shadow-md transition-shadow"
+            >
               <CardContent className="p-6">
                 <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
                   <div className="flex-1 min-w-0">
@@ -110,7 +106,10 @@ export default function ProjectsPage() {
                       <h3 className="text-lg font-semibold truncate">
                         {project.name}
                       </h3>
-                      <Badge variant="secondary" className="flex items-center gap-1">
+                      <Badge
+                        variant="secondary"
+                        className="flex items-center gap-1"
+                      >
                         <Users className="h-3 w-3" />
                         {getTeamName(project.teamId)}
                       </Badge>
@@ -121,7 +120,7 @@ export default function ProjectsPage() {
                       </p>
                     )}
                   </div>
-                  
+
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <Button variant="outline" size="sm" asChild>
                       <Link href={`/projects/${project.id}/edit`}>
@@ -129,37 +128,13 @@ export default function ProjectsPage() {
                         <span className="hidden sm:inline ml-2">Edit</span>
                       </Link>
                     </Button>
-                    
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          className="text-destructive hover:text-destructive"
-                          disabled={deletingProject === project.id}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          <span className="hidden sm:inline ml-2">Delete</span>
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Delete Project</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Are you sure you want to delete &quot;{project.name}&quot;? This action cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => handleDelete(project.id)}
-                            className="bg-destructive hover:bg-destructive/90"
-                          >
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+
+                    <ProjectDeletionDialog
+                      projectId={project.id}
+                      projectName={project.name}
+                      onConfirmDelete={() => handleDelete(project.id)}
+                      isDeleting={deletingProject === project.id}
+                    />
                   </div>
                 </div>
               </CardContent>

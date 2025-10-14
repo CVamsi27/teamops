@@ -2,20 +2,20 @@ name: Build, Test & Deploy
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 env:
-  NODE_VERSION: '20'
-  PNPM_VERSION: '10'
+  NODE_VERSION: "20"
+  PNPM_VERSION: "10"
 
 jobs:
   # Always run tests and build
   test-and-build:
     name: Test & Build
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -30,6 +30,19 @@ jobs:
         with:
           version: ${{ env.PNPM_VERSION }}
 
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
@@ -42,50 +55,35 @@ jobs:
       - name: Run security audit
         run: pnpm audit --audit-level moderate || echo "Audit completed with warnings"
 
-  # Only deploy if secrets are configured
-  deploy-vercel:
-    name: Deploy to Vercel
+  # Deployment notice (Render auto-deploys via render.yaml)
+  deployment-status:
+    name: Deployment Status
     runs-on: ubuntu-latest
     needs: test-and-build
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Check if Vercel secrets are available
-        id: check-secrets
-        run: |
-          if [ -n "${{ secrets.VERCEL_TOKEN }}" ] && [ -n "${{ secrets.VERCEL_ORG_ID }}" ] && [ -n "${{ secrets.VERCEL_PROJECT_ID }}" ]; then
-            echo "secrets-available=true" >> $GITHUB_OUTPUT
-            echo "✅ Vercel secrets are configured"
-          else
-            echo "secrets-available=false" >> $GITHUB_OUTPUT
-            echo "❌ Vercel secrets not configured"
-          fi
-
-      - name: Deploy to Vercel
-        if: steps.check-secrets.outputs.secrets-available == 'true'
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          working-directory: ./apps/web
-          vercel-args: '--prod'
-
-      - name: Manual deployment notice
-        if: steps.check-secrets.outputs.secrets-available == 'false'
+      - name: Deployment Information
         run: |
           echo "✅ Build and tests passed!"
-          echo "🚀 To deploy manually, run:"
-          echo "   npm run deploy:free"
-          echo "   or"
-          echo "   npm run deploy:vercel"
           echo ""
-          echo "📋 To enable automatic deployment:"
-          echo "   1. Add VERCEL_TOKEN to repository secrets"
-          echo "   2. Add VERCEL_ORG_ID to repository secrets"  
-          echo "   3. Add VERCEL_PROJECT_ID to repository secrets"
+          echo "🚀 **Deployment Options:**"
           echo ""
-          echo "📖 See docs/ACTIONS_SETUP.md for detailed instructions"
+          echo "**🔄 Automatic (Recommended):**"
+          echo "   - Render auto-deploys from this commit via render.yaml"
+          echo "   - Monitor at: https://dashboard.render.com"
+          echo ""
+          echo "**⚡ Manual Deployment:**"
+          echo "   - Render: Push to main branch (automatic)"
+          echo "   - Vercel: npm run deploy:vercel"
+          echo "   - Railway: npm run deploy:railway"
+          echo ""
+          echo "**� Health Check URLs:**"
+          echo "   - API: https://teamops-api.onrender.com/api/health"
+          echo "   - Web: https://teamops-web.onrender.com"
+          echo ""
+          echo "**� CI/CD Workflows Available:**"
+          echo "   - deploy-render.yml (Render + API triggers)"
+          echo "   - deploy-vercel-railway.yml (Split deployment)"
+          echo ""
+          echo "📖 See docs/DEPLOYMENT_STEPS.md for detailed instructions"

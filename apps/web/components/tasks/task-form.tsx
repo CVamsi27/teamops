@@ -7,8 +7,19 @@ import { type CreateTask, type UpdateTask, type Task } from "@workspace/api";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Textarea } from "@workspace/ui/components/textarea";
-import { Card, CardHeader, CardTitle, CardContent } from "@workspace/ui/components/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@workspace/ui/components/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select";
 import { Label } from "@workspace/ui/components/label";
 import { toast } from "@workspace/ui/components/toast";
 import { ArrowLeft, Plus, Edit, Calendar } from "lucide-react";
@@ -35,9 +46,9 @@ export function TaskForm({ mode, task, onSuccess }: TaskFormProps) {
   const router = useRouter();
   const { create, update } = useTasks();
   const { list: projectsQuery } = useProjects();
-  
-  const today = new Date().toISOString().split('T')[0];
-  
+
+  const today = new Date().toISOString().split("T")[0];
+
   const form = useForm<TaskFormData>({
     defaultValues: {
       title: "",
@@ -56,7 +67,9 @@ export function TaskForm({ mode, task, onSuccess }: TaskFormProps) {
         description: task.description || "",
         status: task.status,
         priority: task.priority,
-        dueDate: task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : today,
+        dueDate: task.dueDate
+          ? new Date(task.dueDate).toISOString().split("T")[0]
+          : today,
       });
     }
   }, [task, form, mode, today]);
@@ -71,7 +84,7 @@ export function TaskForm({ mode, task, onSuccess }: TaskFormProps) {
         projectId: data.projectId!,
         dueDate: data.dueDate || null,
       };
-      
+
       create.mutate(createData, {
         onSuccess: () => {
           onSuccess?.();
@@ -92,7 +105,7 @@ export function TaskForm({ mode, task, onSuccess }: TaskFormProps) {
         status: data.status,
         dueDate: data.dueDate ? new Date(data.dueDate).toISOString() : null,
       };
-      
+
       update.mutate(
         { id: task.id, payload: updateData },
         {
@@ -106,13 +119,16 @@ export function TaskForm({ mode, task, onSuccess }: TaskFormProps) {
               duration: 5000,
             });
           },
-        }
+        },
       );
     }
   };
 
   const isLoading = mode === "create" ? create.isPending : update.isPending;
-  const project = mode === "edit" && task ? projectsQuery.data?.find(p => p.id === task.projectId) : null;
+  const project =
+    mode === "edit" && task
+      ? projectsQuery.data?.find((p) => p.id === task.projectId)
+      : null;
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -128,10 +144,9 @@ export function TaskForm({ mode, task, onSuccess }: TaskFormProps) {
             {mode === "create" ? "Create New Task" : "Edit Task"}
           </h1>
           <p className="text-muted-foreground">
-            {mode === "create" 
+            {mode === "create"
               ? "Add a new task to track your work and progress"
-              : `Update the details for "${task?.title}"`
-            }
+              : `Update the details for "${task?.title}"`}
           </p>
         </div>
       </div>
@@ -139,7 +154,11 @@ export function TaskForm({ mode, task, onSuccess }: TaskFormProps) {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            {mode === "create" ? <Plus className="h-5 w-5" /> : <Edit className="h-5 w-5" />}
+            {mode === "create" ? (
+              <Plus className="h-5 w-5" />
+            ) : (
+              <Edit className="h-5 w-5" />
+            )}
             Task Details
           </CardTitle>
         </CardHeader>
@@ -149,7 +168,9 @@ export function TaskForm({ mode, task, onSuccess }: TaskFormProps) {
               <Label htmlFor="title">Task Title *</Label>
               <Input
                 id="title"
-                {...form.register("title", { required: "Task title is required" })}
+                {...form.register("title", {
+                  required: "Task title is required",
+                })}
                 placeholder="Enter task title"
                 className="text-base"
               />
@@ -200,7 +221,10 @@ export function TaskForm({ mode, task, onSuccess }: TaskFormProps) {
                 {!projectsQuery.data?.length && (
                   <p className="text-sm text-muted-foreground">
                     No projects available.{" "}
-                    <Link href="/projects/new" className="underline hover:text-foreground">
+                    <Link
+                      href="/projects/new"
+                      className="underline hover:text-foreground"
+                    >
                       Create a project first
                     </Link>
                   </p>
@@ -210,9 +234,12 @@ export function TaskForm({ mode, task, onSuccess }: TaskFormProps) {
               <div className="space-y-2">
                 <Label>Project *</Label>
                 <div className="text-sm text-muted-foreground p-3 border rounded-md bg-muted/30">
-                  <strong>Current Project:</strong> {project?.name || "Unknown Project"}
+                  <strong>Current Project:</strong>{" "}
+                  {project?.name || "Unknown Project"}
                   <br />
-                  <em>Project assignment cannot be changed when editing a task</em>
+                  <em>
+                    Project assignment cannot be changed when editing a task
+                  </em>
                 </div>
               </div>
             )}
@@ -221,7 +248,9 @@ export function TaskForm({ mode, task, onSuccess }: TaskFormProps) {
               <div className="space-y-2">
                 <Label htmlFor="priority">Priority</Label>
                 <Select
-                  onValueChange={(value) => form.setValue("priority", value as TaskFormData["priority"])}
+                  onValueChange={(value) =>
+                    form.setValue("priority", value as TaskFormData["priority"])
+                  }
                   value={form.watch("priority")}
                 >
                   <SelectTrigger>
@@ -240,7 +269,9 @@ export function TaskForm({ mode, task, onSuccess }: TaskFormProps) {
               <div className="space-y-2">
                 <Label htmlFor="status">Status</Label>
                 <Select
-                  onValueChange={(value) => form.setValue("status", value as TaskFormData["status"])}
+                  onValueChange={(value) =>
+                    form.setValue("status", value as TaskFormData["status"])
+                  }
                   value={form.watch("status")}
                 >
                   <SelectTrigger>
@@ -249,10 +280,9 @@ export function TaskForm({ mode, task, onSuccess }: TaskFormProps) {
                   <SelectContent>
                     {STATUS_OPTIONS.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
-                        {option.value === "TODO"} 
-                        {option.value === "IN_PROGRESS"} 
-                        {option.value === "DONE"} 
-                        {" "}{option.label}
+                        {option.value === "TODO"}
+                        {option.value === "IN_PROGRESS"}
+                        {option.value === "DONE"} {option.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -272,7 +302,9 @@ export function TaskForm({ mode, task, onSuccess }: TaskFormProps) {
                 <Calendar className="absolute right-3 top-3 h-4 w-4 text-muted-foreground pointer-events-none" />
               </div>
               <p className="text-xs text-muted-foreground">
-                {mode === "create" ? "Default is set to today's date" : "Optional: Update the due date"}
+                {mode === "create"
+                  ? "Default is set to today's date"
+                  : "Optional: Update the due date"}
               </p>
             </div>
 
@@ -280,18 +312,21 @@ export function TaskForm({ mode, task, onSuccess }: TaskFormProps) {
               <Button type="button" variant="outline" asChild>
                 <Link href="/tasks">Cancel</Link>
               </Button>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={
-                  isLoading || 
-                  !form.watch("title") || 
+                  isLoading ||
+                  !form.watch("title") ||
                   (mode === "create" && !form.watch("projectId"))
                 }
               >
-                {isLoading 
-                  ? (mode === "create" ? "Creating..." : "Updating...") 
-                  : (mode === "create" ? "Create Task" : "Update Task")
-                }
+                {isLoading
+                  ? mode === "create"
+                    ? "Creating..."
+                    : "Updating..."
+                  : mode === "create"
+                    ? "Create Task"
+                    : "Update Task"}
               </Button>
             </div>
           </form>

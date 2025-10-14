@@ -1,8 +1,5 @@
 "use client";
-import {
-  QueryClient,
-  QueryClientProvider,
-} from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactNode, useState, useEffect } from "react";
 
 import AuthGuard from "@/components/auth/auth-guard";
@@ -25,7 +22,7 @@ export default function Providers({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const socket = initSocket(queryClient);
-    
+
     return () => {
       socket.disconnect();
     };
@@ -39,9 +36,7 @@ export default function Providers({ children }: { children: ReactNode }) {
       disableTransitionOnChange
     >
       <QueryClientProvider client={queryClient}>
-        <AuthGuard>
-          {children}
-        </AuthGuard>
+        <AuthGuard>{children}</AuthGuard>
       </QueryClientProvider>
     </ThemeProvider>
   );

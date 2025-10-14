@@ -61,17 +61,29 @@ export default function HomePage() {
           {
             tier: "Pricing",
             price: "Coming Soon",
-            features: ["Flexible plans for all team sizes", "Early access available", "Enterprise options"],
+            features: [
+              "Flexible plans for all team sizes",
+              "Early access available",
+              "Enterprise options",
+            ],
           },
           {
             tier: "Features",
             price: "Full-Stack",
-            features: ["Team management & RBAC", "Projects & task tracking", "Real-time updates"],
+            features: [
+              "Team management & RBAC",
+              "Projects & task tracking",
+              "Real-time updates",
+            ],
           },
           {
             tier: "Contact",
             price: "Get Started",
-            features: ["Demo available", "Enterprise inquiries", "Custom solutions"],
+            features: [
+              "Demo available",
+              "Enterprise inquiries",
+              "Custom solutions",
+            ],
           },
         ].map((p) => (
           <Card key={p.tier}>

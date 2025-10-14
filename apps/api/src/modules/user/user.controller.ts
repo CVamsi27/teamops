@@ -1,19 +1,12 @@
-import {
-  Controller,
-  Get,
-  Put,
-  Body,
-  Param,
-  Req,
-} from '@nestjs/common';
+import { Controller, Get, Put, Body, Param, Req } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ZodValidationPipe } from '../../common/zod-validation.pipe';
 import { ValidateResponse } from '../../common/response-validation.decorator';
-import { 
-  UpdateUserSchema, 
+import {
+  UpdateUserSchema,
   PublicUserSchema,
-  type UpdateUser, 
-  type PublicUser 
+  type UpdateUser,
+  type PublicUser,
 } from '@workspace/api';
 
 interface AuthenticatedRequest extends Request {
@@ -38,7 +31,7 @@ export class UserController {
   @ValidateResponse(PublicUserSchema)
   async updateMyProfile(
     @Req() req: AuthenticatedRequest,
-    @Body(new ZodValidationPipe(UpdateUserSchema)) data: UpdateUser,
+    @Body(new ZodValidationPipe(UpdateUserSchema)) data: UpdateUser
   ): Promise<PublicUser> {
     return this.userService.updateProfile(req.user!.userId, data);
   }
@@ -47,7 +40,7 @@ export class UserController {
   @ValidateResponse(PublicUserSchema)
   async getUserById(
     @Param('id') id: string,
-    @Req() req: AuthenticatedRequest,
+    @Req() req: AuthenticatedRequest
   ): Promise<PublicUser> {
     return this.userService.getUserById(id, req.user!.userId);
   }

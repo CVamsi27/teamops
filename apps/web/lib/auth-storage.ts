@@ -1,14 +1,16 @@
-// Token storage utility for persistent authentication
 export class AuthStorage {
-  private static readonly TOKEN_KEY = 'teamops_auth_token';
-  private static readonly EXPIRY_KEY = 'teamops_auth_expiry';
+  private static readonly TOKEN_KEY = "teamops_auth_token";
+  private static readonly EXPIRY_KEY = "teamops_auth_expiry";
   private static readonly DEFAULT_EXPIRY_DAYS = 7; // 7 days
 
   /**
    * Store authentication token with expiry
    */
-  static setToken(token: string, expiryDays: number = this.DEFAULT_EXPIRY_DAYS): void {
-    if (typeof window === 'undefined') return;
+  static setToken(
+    token: string,
+    expiryDays: number = this.DEFAULT_EXPIRY_DAYS,
+  ): void {
+    if (typeof window === "undefined") return;
 
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + expiryDays);
@@ -21,7 +23,7 @@ export class AuthStorage {
    * Get stored authentication token if valid
    */
   static getToken(): string | null {
-    if (typeof window === 'undefined') return null;
+    if (typeof window === "undefined") return null;
 
     const token = localStorage.getItem(this.TOKEN_KEY);
     const expiry = localStorage.getItem(this.EXPIRY_KEY);
@@ -46,7 +48,7 @@ export class AuthStorage {
    * Clear stored authentication data
    */
   static clearToken(): void {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
 
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.EXPIRY_KEY);
@@ -63,7 +65,7 @@ export class AuthStorage {
    * Get remaining days until token expires
    */
   static getDaysUntilExpiry(): number | null {
-    if (typeof window === 'undefined') return null;
+    if (typeof window === "undefined") return null;
 
     const expiry = localStorage.getItem(this.EXPIRY_KEY);
     if (!expiry) return null;
@@ -79,7 +81,9 @@ export class AuthStorage {
   /**
    * Extend token expiry by specified days
    */
-  static extendToken(additionalDays: number = this.DEFAULT_EXPIRY_DAYS): boolean {
+  static extendToken(
+    additionalDays: number = this.DEFAULT_EXPIRY_DAYS,
+  ): boolean {
     const token = this.getToken();
     if (!token) return false;
 

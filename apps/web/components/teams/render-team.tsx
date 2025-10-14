@@ -50,7 +50,10 @@ function TeamCardContent() {
   return (
     <CardContent className="flex flex-col card-spacing">
       {data.map((t) => (
-        <div key={t.id} className="padding-card rounded border flex justify-between items-center">
+        <div
+          key={t.id}
+          className="padding-card rounded border flex justify-between items-center"
+        >
           <div className="flex-1">
             <div className="font-medium">{t.name}</div>
             <div className="text-sm text-muted-foreground">{t.description}</div>

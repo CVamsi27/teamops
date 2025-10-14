@@ -12,11 +12,7 @@ import {
 } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { ValidateResponse } from '../../common/response-validation.decorator';
-import { 
-  CreateTaskSchema, 
-  UpdateTaskSchema,
-  TaskSchema 
-} from '@workspace/api';
+import { CreateTaskSchema, UpdateTaskSchema, TaskSchema } from '@workspace/api';
 import type { Task, CreateTask, UpdateTask } from '@workspace/api';
 import { ZodValidationPipe } from '../../common/zod-validation.pipe';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';

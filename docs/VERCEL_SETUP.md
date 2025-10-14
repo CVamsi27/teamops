@@ -5,26 +5,29 @@
 Since the automated script requires interactive login, here's how to deploy manually:
 
 ### Step 1: Setup Vercel Account
+
 1. Go to [vercel.com](https://vercel.com) and sign up/login
 2. Install Vercel CLI globally: `npm i -g vercel`
 3. Login: `vercel login`
 
 ### Step 2: Deploy from Web Directory
+
 ```bash
 cd apps/web
 vercel
 ```
 
 ### Step 3: Setup Vercel Databases
+
 After your project is created on Vercel:
 
 1. **Go to Vercel Dashboard** → Your Project → Storage
-2. **Create Postgres Database**: 
+2. **Create Postgres Database**:
    - Click "Create Database" → "Postgres"
    - Name: `teamops-db`
    - Connect to project
 3. **Create KV Store**:
-   - Click "Create Database" → "KV" 
+   - Click "Create Database" → "KV"
    - Name: `teamops-cache`
    - Connect to project
 4. **Create Blob Storage**:
@@ -33,12 +36,13 @@ After your project is created on Vercel:
    - Connect to project
 
 ### Step 4: Set Environment Variables
+
 In your Vercel project settings → Environment Variables:
 
 ```bash
 # Will be auto-set when you connect databases:
 POSTGRES_URL=          # Auto-generated
-KV_REST_API_URL=       # Auto-generated  
+KV_REST_API_URL=       # Auto-generated
 KV_REST_API_TOKEN=     # Auto-generated
 BLOB_READ_WRITE_TOKEN= # Auto-generated
 
@@ -48,6 +52,7 @@ NODE_ENV=production
 ```
 
 ### Step 5: Deploy
+
 ```bash
 vercel --prod
 ```
@@ -62,6 +67,7 @@ npm run dev
 ```
 
 ### Test Endpoints:
+
 - **Health Check**: `GET http://localhost:3001/api/health`
 - **Register**: `POST http://localhost:3001/api/auth/register`
   ```json
@@ -74,7 +80,7 @@ npm run dev
 - **Login**: `POST http://localhost:3001/api/auth/login`
   ```json
   {
-    "email": "test@example.com", 
+    "email": "test@example.com",
     "password": "password"
   }
   ```
@@ -84,6 +90,7 @@ npm run dev
 ## 📊 What's Working Now:
 
 ✅ **Authentication System**:
+
 - JWT token creation and validation
 - Password hashing with bcrypt
 - Secure HTTP-only cookies
@@ -91,16 +98,19 @@ npm run dev
 - Email format validation
 
 ✅ **Mock Database Layer**:
+
 - User registration and login
 - Teams CRUD operations
 - Development-friendly mock responses
 
 ✅ **API Routes**:
+
 - `http://localhost:3001/api/health` - Health check (NestJS backend)
 - `http://localhost:3001/api/auth/*` - Authentication endpoints
 - `http://localhost:3001/api/teams` - Teams management
 
 ✅ **Architecture**:
+
 - Clean separation: Frontend (port 3000) + Backend (port 3001)
 - NestJS backend with proper services and controllers
 - PostgreSQL database with Prisma ORM
@@ -120,12 +130,13 @@ npm run dev
   - 1 concurrent build
 
 - **Pro ($20/month)**: Production ready
-  - 1TB bandwidth  
+  - 1TB bandwidth
   - Faster builds
   - Team collaboration
   - Analytics included
 
 **Additional costs**:
+
 - Postgres: ~$20/month (shared resources)
 - KV Store: ~$5/month
 - Blob Storage: ~$10/month

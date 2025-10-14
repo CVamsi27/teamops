@@ -23,7 +23,7 @@ export class NotificationController {
     @Request() req: any,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
-    @Query('unread') unread?: string,
+    @Query('unread') unread?: string
   ) {
     const userId = req.user.id;
     const pageNum = parseInt(page) || 1;
@@ -34,7 +34,7 @@ export class NotificationController {
       userId,
       pageNum,
       limitNum,
-      unreadOnly,
+      unreadOnly
     );
 
     if (!page && !limit) {
@@ -59,7 +59,7 @@ export class NotificationController {
   @Post()
   async create(
     @Body() createNotificationDto: CreateNotification,
-    @Request() req: any,
+    @Request() req: any
   ) {
     return this.notificationService.createFromApi({
       ...createNotificationDto,
@@ -83,7 +83,7 @@ export class NotificationController {
   async update(
     @Param('id') id: string,
     @Body() updateNotificationDto: any,
-    @Request() req: any,
+    @Request() req: any
   ) {
     const userId = req.user.id;
     return this.notificationService.update(id, updateNotificationDto, userId);

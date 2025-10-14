@@ -46,7 +46,10 @@ export class ActivityService {
     }));
   }
 
-  async getActivitiesByEntity(entityType: string, entityId: string): Promise<ActivityEvent[]> {
+  async getActivitiesByEntity(
+    entityType: string,
+    entityId: string
+  ): Promise<ActivityEvent[]> {
     const activities = await this.prisma.activity.findMany({
       where: {
         entityType,
@@ -80,7 +83,7 @@ export class ActivityService {
     metadata?: Record<string, unknown>;
   }): Promise<ActivityEvent> {
     const activityType = data.type.toUpperCase() as ActivityType;
-    
+
     const activity = await this.prisma.activity.create({
       data: {
         type: activityType,
@@ -90,7 +93,7 @@ export class ActivityService {
         entityId: data.entityId,
         entityName: data.entityName,
         entityType: data.entityType,
-        metadata: data.metadata as any || {},
+        metadata: (data.metadata as any) || {},
       },
     });
 
@@ -108,9 +111,13 @@ export class ActivityService {
     };
   }
 
-  // Helper method to track task activities
   async trackTaskActivity(
-    type: 'task_created' | 'task_updated' | 'task_completed' | 'task_deleted' | 'due_date_changed',
+    type:
+      | 'task_created'
+      | 'task_updated'
+      | 'task_completed'
+      | 'task_deleted'
+      | 'due_date_changed',
     taskId: string,
     taskTitle: string,
     userId: string,
@@ -130,7 +137,6 @@ export class ActivityService {
     });
   }
 
-  // Helper method to track project activities
   async trackProjectActivity(
     type: 'project_created' | 'project_updated' | 'project_deleted',
     projectId: string,
@@ -152,7 +158,6 @@ export class ActivityService {
     });
   }
 
-  // Helper method to track team activities
   async trackTeamActivity(
     type: 'team_created' | 'team_updated' | 'member_added' | 'member_removed',
     teamId: string,

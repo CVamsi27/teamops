@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ID, ISODateString, TimestampFields } from './common';
+import { ID, TimestampFields } from './common';
 
 export const CreateProjectSchema = z
   .object({
@@ -33,7 +33,9 @@ export const ProjectWithStatsSchema = ProjectSchema.extend({
 }).strict();
 
 export type CreateProject = z.infer<typeof CreateProjectSchema>;
-export type CreateProjectWithCreator = z.infer<typeof CreateProjectWithCreatorSchema>;
+export type CreateProjectWithCreator = z.infer<
+  typeof CreateProjectWithCreatorSchema
+>;
 export type UpdateProject = z.infer<typeof UpdateProjectSchema>;
 export type Project = z.infer<typeof ProjectSchema>;
 export type ProjectWithStats = z.infer<typeof ProjectWithStatsSchema>;

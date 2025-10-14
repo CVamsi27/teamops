@@ -13,12 +13,18 @@ import { ProjectService } from './project.service';
 import { TeamService } from '../team/team.service';
 import { ZodValidationPipe } from '../../common/zod-validation.pipe';
 import { ValidateResponse } from '../../common/response-validation.decorator';
-import { 
-  CreateProjectSchema, 
+import {
+  CreateProjectSchema,
   UpdateProjectSchema,
-  ProjectSchema 
+  ProjectSchema,
+  ProjectDeletionInfoSchema,
 } from '@workspace/api';
-import type { Project, CreateProject, UpdateProject } from '@workspace/api';
+import type {
+  Project,
+  CreateProject,
+  UpdateProject,
+  ProjectDeletionInfo,
+} from '@workspace/api';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { z } from 'zod';
 
@@ -27,7 +33,7 @@ import { z } from 'zod';
 export class ProjectController {
   constructor(
     private readonly service: ProjectService,
-    private readonly teamService: TeamService,
+    private readonly teamService: TeamService
   ) {}
 
   @Get()
@@ -35,12 +41,12 @@ export class ProjectController {
   async list(@Request() req: any): Promise<Project[]> {
     const userId = req.user.userId;
     const userTeams = await this.teamService.getMyTeams(userId);
-    const teamIds = userTeams.map(team => team.id);
-    
+    const teamIds = userTeams.map((team) => team.id);
+
     const projectArrays = await Promise.all(
-      teamIds.map(teamId => this.service.getProjectsByTeam(teamId))
+      teamIds.map((teamId) => this.service.getProjectsByTeam(teamId))
     );
-    
+
     return projectArrays.flat();
   }
 
@@ -50,11 +56,17 @@ export class ProjectController {
     return this.service.get(id);
   }
 
+  @Get(':id/deletion-info')
+  @ValidateResponse(ProjectDeletionInfoSchema)
+  async getDeletionInfo(@Param('id') id: string): Promise<ProjectDeletionInfo> {
+    return this.service.getProjectDeletionInfo(id);
+  }
+
   @Post()
   @ValidateResponse(ProjectSchema)
   async create(
     @Body(new ZodValidationPipe(CreateProjectSchema)) body: CreateProject,
-    @Request() req: any,
+    @Request() req: any
   ): Promise<Project> {
     const projectWithCreator = {
       ...body,
@@ -67,7 +79,7 @@ export class ProjectController {
   @ValidateResponse(ProjectSchema)
   async update(
     @Param('id') id: string,
-    @Body(new ZodValidationPipe(UpdateProjectSchema)) body: UpdateProject,
+    @Body(new ZodValidationPipe(UpdateProjectSchema)) body: UpdateProject
   ): Promise<Project> {
     return this.service.update(id, body);
   }

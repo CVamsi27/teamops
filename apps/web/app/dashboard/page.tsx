@@ -10,7 +10,13 @@ export default function DashboardPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!userLoading && (!user || (error && 'response' in error && (error as { response: { status: number } }).response?.status === 401))) {
+    if (
+      !userLoading &&
+      (!user ||
+        (error &&
+          "response" in error &&
+          (error as { response: { status: number } }).response?.status === 401))
+    ) {
       router.push("/auth/login");
     }
   }, [user, userLoading, error, router]);
@@ -32,7 +38,8 @@ export default function DashboardPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
         <p className="text-muted-foreground">
-          Welcome back, {user.name || user.email}! Here&apos;s what&apos;s happening.
+          Welcome back, {user.name || user.email}! Here&apos;s what&apos;s
+          happening.
         </p>
       </div>
       <DashboardOverview />

@@ -12,6 +12,7 @@
 **TeamOps** is a comprehensive **team management and collaboration platform** that streamlines project coordination, task management, and real-time communication. Built with modern technologies and designed for scalability, it demonstrates best practices in full-stack development, microservices architecture, and cloud-native deployment.
 
 ### **🎯 Key Highlights**
+
 - 🚀 **Modern Tech Stack** — Next.js 15, NestJS, TypeScript, Prisma
 - ⚡ **Real-Time Features** — WebSockets, live notifications, instant updates
 - 🏗️ **Scalable Architecture** — Microservices, event-driven design
@@ -23,6 +24,7 @@
 ## **🚀 Quick Start**
 
 ### **🎬 One-Click Deploy**
+
 ```bash
 # Clone and setup
 git clone https://github.com/CVamsi27/teamops.git
@@ -35,12 +37,14 @@ pnpm dev
 ```
 
 ### **☁️ Free Cloud Deployment**
+
 - **🌐 Frontend**: [Vercel](https://vercel.com) - Auto-deploy from GitHub
 - **⚙️ Backend**: [Render](https://render.com) - Uses included `render.yaml`
 - **🗄️ Database**: [Neon](https://neon.tech) - Serverless PostgreSQL
 - **💾 Cache/Events**: [Upstash](https://upstash.com) - Redis & Kafka (optional)
 
 ### **📚 Documentation**
+
 - 📖 [Complete Setup Guide](docs/README.md)
 - 🏗️ [Architecture Overview](docs/ARCHITECTURE.md)
 - 🚀 [Deployment Guide](docs/DEPLOYMENT_STEPS.md)
@@ -50,18 +54,18 @@ pnpm dev
 
 ## **🛠️ Tech Stack**
 
-| Layer | Technology | Purpose |
-|-------|------------|---------|
-| **Frontend** | [Next.js 15](https://nextjs.org/) + TypeScript + TailwindCSS + shadcn/ui | Modern React framework with SSR |
-| **Backend** | [NestJS](https://nestjs.com/) + TypeScript + Prisma ORM | Scalable Node.js microservices |
-| **Database** | [PostgreSQL](https://www.postgresql.org/) + [Neon](https://neon.tech) | Serverless PostgreSQL database |
-| **Real-Time** | [Socket.IO](https://socket.io/) + WebSockets | Live notifications & updates |
-| **Authentication** | JWT + Google OAuth + Passport.js | Secure user authentication |
-| **Caching** | [Upstash Redis](https://upstash.com/) (optional) | Performance optimization |
-| **Events** | [Upstash Kafka](https://upstash.com/) (optional) | Event-driven architecture |
-| **Deployment** | [Render](https://render.com/) + [Vercel](https://vercel.com/) | Cloud-native hosting |
-| **Package Manager** | [pnpm](https://pnpm.io/) + [Turbo](https://turbo.build/) | Efficient monorepo management |
-| **Email** | SMTP + Nodemailer | Team invitations & notifications |
+| Layer               | Technology                                                               | Purpose                          |
+| ------------------- | ------------------------------------------------------------------------ | -------------------------------- |
+| **Frontend**        | [Next.js 15](https://nextjs.org/) + TypeScript + TailwindCSS + shadcn/ui | Modern React framework with SSR  |
+| **Backend**         | [NestJS](https://nestjs.com/) + TypeScript + Prisma ORM                  | Scalable Node.js microservices   |
+| **Database**        | [PostgreSQL](https://www.postgresql.org/) + [Neon](https://neon.tech)    | Serverless PostgreSQL database   |
+| **Real-Time**       | [Socket.IO](https://socket.io/) + WebSockets                             | Live notifications & updates     |
+| **Authentication**  | JWT + Google OAuth + Passport.js                                         | Secure user authentication       |
+| **Caching**         | [Upstash Redis](https://upstash.com/) (optional)                         | Performance optimization         |
+| **Events**          | [Upstash Kafka](https://upstash.com/) (optional)                         | Event-driven architecture        |
+| **Deployment**      | [Render](https://render.com/) + [Vercel](https://vercel.com/)            | Cloud-native hosting             |
+| **Package Manager** | [pnpm](https://pnpm.io/) + [Turbo](https://turbo.build/)                 | Efficient monorepo management    |
+| **Email**           | SMTP + Nodemailer                                                        | Team invitations & notifications |
 
 ---
 
@@ -93,6 +97,7 @@ pnpm dev
 ## **🏗️ Architecture**
 
 ### **System Overview**
+
 ```
 ┌─────────────────┐    HTTP/WebSocket    ┌─────────────────┐
 │   Frontend      │◄───────────────────►│   Backend       │
@@ -111,6 +116,7 @@ pnpm dev
 ```
 
 ### **Project Structure**
+
 ```
 teamops/
 ├── apps/
@@ -146,31 +152,36 @@ teamops/
 ## **📅 Roadmap**
 
 ### **v1.0 – MVP** ✅
+
 - ✅ User authentication & team management
-- ✅ Project & task CRUD operations  
+- ✅ Project & task CRUD operations
 - ✅ Real-time notifications via WebSockets
 - ✅ Basic chat functionality
 - ✅ Google Calendar integration
 
 ### **v2.0 – Enhanced Collaboration**
+
 - 💬 **Advanced Chat Features** → Threads, file sharing, emoji reactions
 - 📆 **Integration Hub** → Slack, Microsoft Teams, Jira connectors
 - 🗓️ **Project Timelines** → Gantt charts, milestone tracking
 - ⚡ **Full Kafka Integration** → Event-driven architecture expansion
 
 ### **v3.0 – Enterprise Features**
+
 - 📊 **Advanced Analytics** → Burndown charts, velocity tracking, performance KPIs
 - 🔄 **Custom Workflows** → Define unique task pipelines per team
 - 🏢 **Multi-Tenancy Support** → Separate data for multiple organizations
 - 🛡️ **Role-Based API Access** → Granular permissions and access control
 
 ### **v4.0 – AI-Powered Productivity**
+
 - 🤖 **AI Task Suggestions** → Smart recommendations based on past activity
 - 📅 **AI-Generated Project Timelines** → Intelligent project planning
 - 🔔 **Predictive Alerts** → Early warnings for potential delays
 - 📈 **Smart Analytics** → AI-driven insights and productivity recommendations
 
 ### **v5.0 – Open Source Focus**
+
 - 📜 **Complete API Documentation** → OpenAPI/Swagger specifications
 - 🤝 **Contributor Guide** → Easy onboarding for open source contributors
 - 🐳 **Docker Setup** → Containerized development environment
@@ -181,11 +192,13 @@ teamops/
 ## **🛠️ Development Setup**
 
 ### **Prerequisites**
-- Node.js 20+ 
+
+- Node.js 20+
 - pnpm (recommended) or npm
 - PostgreSQL database (local or Neon)
 
 ### **1. Clone & Install**
+
 ```bash
 git clone https://github.com/CVamsi27/teamops.git
 cd teamops
@@ -193,6 +206,7 @@ pnpm install
 ```
 
 ### **2. Environment Setup**
+
 ```bash
 # Copy environment template
 cp .env.example .env
@@ -203,6 +217,7 @@ cp .env.example .env
 ```
 
 ### **3. Database Setup**
+
 ```bash
 # Generate Prisma client
 cd apps/api && pnpm exec prisma generate
@@ -215,6 +230,7 @@ pnpm exec prisma db seed
 ```
 
 ### **4. Start Development**
+
 ```bash
 # Start both frontend and backend
 pnpm dev
@@ -225,6 +241,7 @@ pnpm dev:api    # Backend only (port 3001)
 ```
 
 ### **5. Access Application**
+
 - 🌐 **Frontend**: http://localhost:3000
 - ⚙️ **Backend API**: http://localhost:3001/api
 - 📊 **Database Studio**: `pnpm prisma:studio`
@@ -234,6 +251,7 @@ pnpm dev:api    # Backend only (port 3001)
 ## **☁️ Production Deployment**
 
 ### **Render (Recommended - Free Tier)**
+
 ```bash
 # 1. Push to GitHub
 git push origin main
@@ -244,6 +262,7 @@ git push origin main
 ```
 
 **Required Environment Variables:**
+
 ```env
 DATABASE_URL=your_neon_connection_string
 JWT_SECRET=your_secret_key
@@ -252,6 +271,7 @@ GOOGLE_CLIENT_SECRET=your_google_oauth_secret (optional)
 ```
 
 ### **Alternative Deployments**
+
 - **Vercel + Railway**: Frontend on Vercel, API on Railway
 - **AWS**: ECS/EKS for containers, RDS for database
 - **Google Cloud**: Cloud Run + Cloud SQL
@@ -264,6 +284,7 @@ GOOGLE_CLIENT_SECRET=your_google_oauth_secret (optional)
 We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
 ### **Development Workflow**
+
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Commit changes (`git commit -m 'Add amazing feature'`)
@@ -271,6 +292,7 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 5. Open a Pull Request
 
 ### **Code Standards**
+
 - TypeScript for type safety
 - ESLint + Prettier for code formatting
 - Jest for testing
@@ -295,12 +317,14 @@ MIT © [Vamsi Krishna](https://github.com/CVamsi27)
 ## 🚀 **Quick Start Deployment**
 
 ### **One-Command Deployment**
+
 ```bash
 # Interactive deployment wizard
 npm run deploy:free
 ```
 
 ### **Quick Setup**
+
 ```bash
 # 1. Copy environment template
 cp .env.example .env.local
@@ -319,11 +343,13 @@ npm run deploy:vercel
 ```
 
 ### **Free Hosting Options**
+
 - **Vercel**: $0/month (Recommended)
-- **Railway**: $0 for first few months  
+- **Railway**: $0 for first few months
 - **Render**: $0/month forever
 
 ### **CI/CD Ready**
+
 - ✅ GitHub Actions configured
 - ✅ Automatic testing on PR
 - ✅ Optional auto-deploy to production
@@ -401,7 +427,7 @@ npm run deploy:vercel
 ```
 apps/web/
  ├── app/                  # Next.js 13+ app directory
- │   ├── dashboard/        # Dashboard pages  
+ │   ├── dashboard/        # Dashboard pages
  │   ├── projects/         # Project management
  │   ├── tasks/           # Task management
  │   └── profile/         # User profile
@@ -523,12 +549,14 @@ npm run dev
 ## **🌎 Deployment**
 
 ### **Free Cloud Deployment**
+
 - **Frontend** → [Vercel](https://vercel.com) (Free)
 - **Backend** → [Railway](https://railway.app) or [Render](https://render.com) (Free)
 - **Database** → [Neon](https://neon.tech) (Free PostgreSQL)
 - **Cache & Events** → [Upstash](https://upstash.com) (Free Redis + Kafka)
 
 ### **Alternative: Enterprise**
+
 - **Backend** → AWS ECS/EKS, Google Cloud Run
 - **Database** → AWS RDS, Google Cloud SQL
 - **File Storage** → AWS S3, Google Cloud Storage

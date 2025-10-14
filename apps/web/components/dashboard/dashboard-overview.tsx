@@ -1,11 +1,25 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@workspace/ui/components/card";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import { useDashboard } from "@/hooks/useDashboard";
 import { Skeleton } from "@workspace/ui/components/skeleton";
-import { CalendarDays, Clock, Users, FolderOpen, CheckCircle, Circle, AlertCircle } from "lucide-react";
+import {
+  CalendarDays,
+  Clock,
+  Users,
+  FolderOpen,
+  CheckCircle,
+  Circle,
+  AlertCircle,
+} from "lucide-react";
 import Link from "next/link";
 
 export function DashboardOverview() {
@@ -46,19 +60,27 @@ export function DashboardOverview() {
 
   const getPriorityColor = (priority?: string) => {
     switch (priority) {
-      case 'HIGH': return 'destructive';
-      case 'MEDIUM': return 'default';
-      case 'LOW': return 'secondary';
-      default: return 'secondary';
+      case "HIGH":
+        return "destructive";
+      case "MEDIUM":
+        return "default";
+      case "LOW":
+        return "secondary";
+      default:
+        return "secondary";
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'TODO': return <Circle className="h-4 w-4" />;
-      case 'IN_PROGRESS': return <Clock className="h-4 w-4" />;
-      case 'DONE': return <CheckCircle className="h-4 w-4" />;
-      default: return <Circle className="h-4 w-4" />;
+      case "TODO":
+        return <Circle className="h-4 w-4" />;
+      case "IN_PROGRESS":
+        return <Clock className="h-4 w-4" />;
+      case "DONE":
+        return <CheckCircle className="h-4 w-4" />;
+      default:
+        return <Circle className="h-4 w-4" />;
     }
   };
 
@@ -73,7 +95,9 @@ export function DashboardOverview() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {dashboard.taskStats.todo + dashboard.taskStats.inProgress + dashboard.taskStats.done}
+              {dashboard.taskStats.todo +
+                dashboard.taskStats.inProgress +
+                dashboard.taskStats.done}
             </div>
             <p className="text-xs text-muted-foreground">
               {dashboard.taskStats.inProgress} in progress
@@ -83,11 +107,15 @@ export function DashboardOverview() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Projects</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Active Projects
+            </CardTitle>
             <FolderOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{dashboard.activeProjects.length}</div>
+            <div className="text-2xl font-bold">
+              {dashboard.activeProjects.length}
+            </div>
             <p className="text-xs text-muted-foreground">
               Across {dashboard.myTeams.length} teams
             </p>
@@ -101,22 +129,22 @@ export function DashboardOverview() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{dashboard.myTeams.length}</div>
-            <p className="text-xs text-muted-foreground">
-              Team memberships
-            </p>
+            <p className="text-xs text-muted-foreground">Team memberships</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Upcoming Tasks</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Upcoming Tasks
+            </CardTitle>
             <CalendarDays className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{dashboard.upcomingTasks.length}</div>
-            <p className="text-xs text-muted-foreground">
-              Due this week
-            </p>
+            <div className="text-2xl font-bold">
+              {dashboard.upcomingTasks.length}
+            </div>
+            <p className="text-xs text-muted-foreground">Due this week</p>
           </CardContent>
         </Card>
       </div>
@@ -125,9 +153,7 @@ export function DashboardOverview() {
       <Card>
         <CardHeader>
           <CardTitle>Upcoming Tasks</CardTitle>
-          <CardDescription>
-            Tasks due in the next 7 days
-          </CardDescription>
+          <CardDescription>Tasks due in the next 7 days</CardDescription>
         </CardHeader>
         <CardContent>
           {dashboard.upcomingTasks.length === 0 ? (
@@ -137,7 +163,10 @@ export function DashboardOverview() {
           ) : (
             <div className="space-y-3">
               {dashboard.upcomingTasks.map((task) => (
-                <div key={task.id} className="flex items-center justify-between p-3 border rounded-lg">
+                <div
+                  key={task.id}
+                  className="flex items-center justify-between p-3 border rounded-lg"
+                >
                   <div className="flex items-center space-x-3">
                     {getStatusIcon(task.status)}
                     <div>
@@ -151,7 +180,15 @@ export function DashboardOverview() {
                   </div>
                   <div className="flex items-center space-x-2">
                     {task.priority && (
-                      <Badge variant={getPriorityColor(task.priority) as "default" | "secondary" | "destructive" | "outline"}>
+                      <Badge
+                        variant={
+                          getPriorityColor(task.priority) as
+                            | "default"
+                            | "secondary"
+                            | "destructive"
+                            | "outline"
+                        }
+                      >
                         {task.priority}
                       </Badge>
                     )}
@@ -170,9 +207,7 @@ export function DashboardOverview() {
       <Card>
         <CardHeader>
           <CardTitle>Active Projects</CardTitle>
-          <CardDescription>
-            Projects you&apos;re working on
-          </CardDescription>
+          <CardDescription>Projects you&apos;re working on</CardDescription>
         </CardHeader>
         <CardContent>
           {dashboard.activeProjects.length === 0 ? (
@@ -207,9 +242,7 @@ export function DashboardOverview() {
       <Card>
         <CardHeader>
           <CardTitle>My Teams</CardTitle>
-          <CardDescription>
-            Teams you&apos;re a member of
-          </CardDescription>
+          <CardDescription>Teams you&apos;re a member of</CardDescription>
         </CardHeader>
         <CardContent>
           {dashboard.myTeams.length === 0 ? (

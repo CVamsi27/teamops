@@ -1,17 +1,17 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { useTheme } from "next-themes"
-import { Button } from "@workspace/ui/components/button"
-import { Moon, Sun } from "lucide-react"
+import * as React from "react";
+import { useTheme } from "next-themes";
+import { Button } from "@workspace/ui/components/button";
+import { Moon, Sun } from "lucide-react";
 
 export function ModeToggle() {
-  const { setTheme, theme } = useTheme()
-  const [mounted, setMounted] = React.useState(false)
+  const { setTheme, theme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+  }, []);
 
   if (!mounted) {
     return (
@@ -19,7 +19,7 @@ export function ModeToggle() {
         <Sun className="h-4 w-4" />
         <span className="sr-only">Toggle theme</span>
       </Button>
-    )
+    );
   }
 
   return (
@@ -32,5 +32,5 @@ export function ModeToggle() {
       <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
       <span className="sr-only">Toggle theme</span>
     </Button>
-  )
+  );
 }

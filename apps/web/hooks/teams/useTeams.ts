@@ -1,15 +1,19 @@
-import { Team, TeamSchema, CreateTeam, CreateTeamSchema, UpdateTeam, UpdateTeamSchema } from "@workspace/api";
+import {
+  Team,
+  TeamSchema,
+  CreateTeam,
+  CreateTeamSchema,
+  UpdateTeam,
+  UpdateTeamSchema,
+} from "@workspace/api";
 import { z } from "zod";
 import { useApiQuery } from "@/hooks/api/useApiQuery";
 import { useApiMutation } from "@/hooks/api/useApiMutation";
 
 export function useTeams() {
   const list = useApiQuery<Team[]>(["teams"], "/teams", z.array(TeamSchema));
-  const get = (teamId: string) => useApiQuery<Team>(
-    ["teams", teamId],
-    `/teams/${teamId}`,
-    TeamSchema,
-  );
+  const get = (teamId: string) =>
+    useApiQuery<Team>(["teams", teamId], `/teams/${teamId}`, TeamSchema);
 
   const create = useApiMutation<Team, CreateTeam>(
     "/teams",
@@ -31,13 +35,15 @@ export function useTeams() {
     payload: UpdateTeamSchema,
   });
 
-  const update = useApiMutation<
-    Team,
-    { id: string; payload: UpdateTeam }
-  >("/teams", ["teams"], UpdateWithIdSchema, {
-    method: "patch",
-    buildEndpoint: (data) => `/teams/${data.id}`,
-  });
+  const update = useApiMutation<Team, { id: string; payload: UpdateTeam }>(
+    "/teams",
+    ["teams"],
+    UpdateWithIdSchema,
+    {
+      method: "patch",
+      buildEndpoint: (data) => `/teams/${data.id}`,
+    },
+  );
 
   const DeleteSchema = z.object({
     id: z.string(),

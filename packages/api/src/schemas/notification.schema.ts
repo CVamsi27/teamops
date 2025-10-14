@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ID, ISODateString, TimestampFields } from './common';
+import { ID, TimestampFields } from './common';
 
 export const NotificationSchema = z
   .object({
@@ -31,10 +31,11 @@ export const NotificationPayloadSchema = z.object({
   payload: z.unknown(),
 });
 
-// Notification action schemas
-export const MarkAsReadSchema = z.object({
-  id: ID,
-}).strict();
+export const MarkAsReadSchema = z
+  .object({
+    id: ID,
+  })
+  .strict();
 
 export const MarkAllAsReadSchema = z.object({}).strict();
 

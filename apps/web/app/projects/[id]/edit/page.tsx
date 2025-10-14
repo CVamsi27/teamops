@@ -7,7 +7,12 @@ import { type UpdateProject } from "@workspace/api";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Textarea } from "@workspace/ui/components/textarea";
-import { Card, CardHeader, CardTitle, CardContent } from "@workspace/ui/components/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@workspace/ui/components/card";
 import { Label } from "@workspace/ui/components/label";
 import { toast } from "@workspace/ui/components/toast";
 import { ArrowLeft, Edit, Loader2 } from "lucide-react";
@@ -18,11 +23,11 @@ export default function EditProjectPage() {
   const params = useParams();
   const router = useRouter();
   const projectId = params.id as string;
-  
+
   const { get, update } = useProjects();
   const teamsQuery = useTeams();
   const projectQuery = get(projectId);
-  
+
   const form = useForm<UpdateProject>({
     defaultValues: {
       name: "",
@@ -30,7 +35,6 @@ export default function EditProjectPage() {
     },
   });
 
-  // Populate form when project data loads
   useEffect(() => {
     if (projectQuery.data) {
       form.reset({
@@ -53,7 +57,7 @@ export default function EditProjectPage() {
             duration: 5000,
           });
         },
-      }
+      },
     );
   };
 
@@ -134,7 +138,9 @@ export default function EditProjectPage() {
               <Label htmlFor="name">Project Name *</Label>
               <Input
                 id="name"
-                {...form.register("name", { required: "Project name is required" })}
+                {...form.register("name", {
+                  required: "Project name is required",
+                })}
                 placeholder="Enter project name"
                 className="text-base"
               />
@@ -155,7 +161,8 @@ export default function EditProjectPage() {
                 className="text-base resize-none"
               />
               <p className="text-xs text-muted-foreground">
-                Optional: Provide a brief description of the project goals and scope
+                Optional: Provide a brief description of the project goals and
+                scope
               </p>
             </div>
 
@@ -163,7 +170,9 @@ export default function EditProjectPage() {
               <Label>Current Team</Label>
               <div className="p-3 border rounded-md bg-muted/50">
                 <p className="text-sm">
-                  {teamsQuery.list.data?.find(team => team.id === projectQuery.data?.teamId)?.name || "Unknown Team"}
+                  {teamsQuery.list.data?.find(
+                    (team) => team.id === projectQuery.data?.teamId,
+                  )?.name || "Unknown Team"}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
                   Team assignment cannot be changed after project creation
@@ -175,8 +184,8 @@ export default function EditProjectPage() {
               <Button type="button" variant="outline" asChild>
                 <Link href="/projects">Cancel</Link>
               </Button>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={update.isPending || !form.watch("name")}
               >
                 {update.isPending ? "Updating..." : "Update Project"}
