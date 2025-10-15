@@ -45,29 +45,15 @@ export function useLogout() {
 
 export const AuthUtils = {
   saveToken: (token: string) => {
-    console.log('[AuthUtils] Saving token to localStorage:', {
-      hasToken: !!token,
-      tokenLength: token?.length,
-      tokenPreview: token?.substring(0, 20) + '...',
-    });
     AuthStorage.setToken(token, 14);
-    console.log('[AuthUtils] Token saved, verifying retrieval...');
-    const retrieved = AuthStorage.getToken();
-    console.log('[AuthUtils] Token retrieval test:', {
-      retrieved: !!retrieved,
-      matches: retrieved === token,
-    });
   },
 
   clearToken: () => {
-    console.log('[AuthUtils] Clearing token');
     AuthStorage.clearToken();
   },
 
   isAuthenticated: () => {
-    const isAuth = AuthStorage.isAuthenticated();
-    console.log('[AuthUtils] isAuthenticated check:', isAuth);
-    return isAuth;
+    return AuthStorage.isAuthenticated();
   },
 };
 

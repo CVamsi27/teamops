@@ -8,14 +8,6 @@ export const api = axios.create({
 
 api.interceptors.request.use((config) => {
   const token = AuthStorage.getToken();
-  console.log('[API Interceptor] Request:', {
-    url: config.url,
-    baseURL: config.baseURL,
-    hasToken: !!token,
-    tokenPreview: token ? token.substring(0, 20) + '...' : 'none',
-    withCredentials: config.withCredentials,
-  });
-  
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -24,7 +16,17 @@ api.interceptors.request.use((config) => {
 });
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Auto-save token from login/register responses
+    if (
+      (response.config.url?.includes('/auth/login') || 
+       response.config.url?.includes('/auth/register')) &&
+      response.data?.access_token
+    ) {
+      AuthStorage.setToken(response.data.access_token, 14);
+    }
+    return response;
+  },
   (error) => {
     if (error.response?.status === 401) {
       AuthStorage.clearToken();

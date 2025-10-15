@@ -101,16 +101,21 @@ export class AuthService {
 
   async validateUser(email: string, password: string): Promise<User | null> {
     const user = await this.prisma.user.findUnique({ where: { email } });
+    
     if (!user) {
       throw new UnauthorizedException('EMAIL_NOT_FOUND');
     }
+    
     if (!user.passwordHash) {
       throw new UnauthorizedException('USE_GOOGLE_LOGIN');
     }
+    
     const ok = await bcrypt.compare(password, user.passwordHash);
+    
     if (!ok) {
       throw new UnauthorizedException('INVALID_PASSWORD');
     }
+    
     return user;
   }
 
