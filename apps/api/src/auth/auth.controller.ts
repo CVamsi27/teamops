@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
-import express from 'express';
+import type { Request, Response } from 'express';
 import { ZodValidationPipe } from '../common/zod-validation.pipe';
 import { ValidateResponse } from '../common/response-validation.decorator';
 import {
@@ -30,7 +30,7 @@ import type {
   ProfileResponse,
 } from '@workspace/api';
 
-interface AuthenticatedRequest extends express.Request {
+interface AuthenticatedRequest extends Request {
   user?: {
     userId: string;
     email: string;
@@ -38,7 +38,7 @@ interface AuthenticatedRequest extends express.Request {
   };
 }
 
-interface GoogleAuthRequest extends express.Request {
+interface GoogleAuthRequest extends Request {
   user?: import('@prisma/client').User;
 }
 
@@ -58,7 +58,7 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   async googleCallback(
     @Req() req: GoogleAuthRequest,
-    @Res() res: express.Response
+    @Res() res: Response
   ) {
     const result = await this.authService.generateToken(req.user!);
     res.cookie('teamops_token', result.access_token, {
@@ -127,7 +127,7 @@ export class AuthController {
   @ValidateResponse(RegisterResponseSchema)
   async register(
     @Body(new ZodValidationPipe(RegisterSchema)) body: RegisterInput,
-    @Res({ passthrough: true }) res: express.Response
+    @Res({ passthrough: true }) res: Response
   ): Promise<RegisterResponse> {
     const result = await this.authService.register(
       body.email,
@@ -148,7 +148,7 @@ export class AuthController {
   @ValidateResponse(LoginResponseSchema)
   async login(
     @Body(new ZodValidationPipe(LoginSchema)) body: LoginInput,
-    @Res({ passthrough: true }) res: express.Response
+    @Res({ passthrough: true }) res: Response
   ): Promise<LoginResponse> {
     const result = await this.authService.login(body.email, body.password);
     
@@ -172,7 +172,7 @@ export class AuthController {
   @Post('logout')
   @ValidateResponse(LogoutResponseSchema)
   async logout(
-    @Res({ passthrough: true }) res: express.Response
+    @Res({ passthrough: true }) res: Response
   ): Promise<LogoutResponse> {
     res.clearCookie('teamops_token');
     return { ok: true };
