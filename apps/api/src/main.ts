@@ -27,7 +27,8 @@ async function bootstrap() {
 
       const isAllowed =
         allowedOrigins.includes(origin) ||
-        /^http:\/\/localhost:\d+$/.test(origin);
+        /^http:\/\/localhost:\d+$/.test(origin) ||
+        /\.vercel\.app$/.test(origin || '');
 
       if (isAllowed) {
         callback(null, true);
@@ -37,8 +38,8 @@ async function bootstrap() {
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    exposedHeaders: ['Access-Control-Allow-Credentials'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+    exposedHeaders: ['Set-Cookie', 'Access-Control-Allow-Credentials'],
   });
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   const port = process.env.PORT || 3000;
