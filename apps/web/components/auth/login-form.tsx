@@ -64,10 +64,22 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
         }
       },
       onSuccess: async (data: { access_token?: string }) => {
+        console.log('[LoginForm] Login successful, response data:', {
+          hasAccessToken: !!data?.access_token,
+          tokenLength: data?.access_token?.length,
+          fullData: data,
+        });
+        
         if (data?.access_token) {
+          console.log('[LoginForm] Saving token to storage...');
           AuthUtils.saveToken(data.access_token);
+          console.log('[LoginForm] Token saved, waiting before redirect...');
+        } else {
+          console.error('[LoginForm] No access_token in response!');
         }
+        
         await new Promise((resolve) => setTimeout(resolve, 100));
+        console.log('[LoginForm] Redirecting to dashboard...');
         router.push("/dashboard");
       },
     });

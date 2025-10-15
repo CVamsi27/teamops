@@ -150,6 +150,7 @@ export class AuthController {
     @Body(new ZodValidationPipe(LoginSchema)) body: LoginInput,
     @Res({ passthrough: true }) res: Response
   ): Promise<LoginResponse> {
+    console.log('Login attempt for email:', body.email);
     const result = await this.authService.login(body.email, body.password);
     
     const isProduction = process.env.APP_ENV === 'production';
@@ -158,6 +159,9 @@ export class AuthController {
       sameSite: isProduction ? 'none' : 'lax',
       secure: isProduction,
       hasToken: !!result.access_token,
+      tokenLength: result.access_token?.length,
+      APP_ENV: process.env.APP_ENV,
+      NODE_ENV: process.env.NODE_ENV,
     });
 
     res.cookie('teamops_token', result.access_token, {
@@ -166,6 +170,8 @@ export class AuthController {
       secure: isProduction,
       maxAge: 1000 * 60 * 60 * 24 * 7,
     });
+    
+    console.log('Cookie set, returning response with token in body');
     return result;
   }
 

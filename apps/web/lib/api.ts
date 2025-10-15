@@ -8,6 +8,14 @@ export const api = axios.create({
 
 api.interceptors.request.use((config) => {
   const token = AuthStorage.getToken();
+  console.log('[API Interceptor] Request:', {
+    url: config.url,
+    baseURL: config.baseURL,
+    hasToken: !!token,
+    tokenPreview: token ? token.substring(0, 20) + '...' : 'none',
+    withCredentials: config.withCredentials,
+  });
+  
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
