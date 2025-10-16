@@ -69,7 +69,8 @@ export class AuthController {
       path: '/',
     });
 
-    res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
+    // Redirect with token in URL so frontend can save it to localStorage
+    res.redirect(`${process.env.FRONTEND_URL}/dashboard?token=${result.access_token}`);
   }
 
   @Get('profile')

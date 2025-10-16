@@ -1,6 +1,6 @@
 "use client";
-import { useMe } from "@/hooks/useAuth";
-import { useRouter } from "next/navigation";
+import { useMe, AuthUtils } from "@/hooks/useAuth";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { DashboardOverview } from "@/components/dashboard/dashboard-overview";
 import { Loader2 } from "lucide-react";
@@ -8,6 +8,17 @@ import { Loader2 } from "lucide-react";
 export default function DashboardPage() {
   const { data: user, isLoading: userLoading, error } = useMe();
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Handle Google OAuth callback with token in URL
+  useEffect(() => {
+    const token = searchParams.get('token');
+    if (token) {
+      AuthUtils.saveToken(token);
+      // Remove token from URL
+      router.replace('/dashboard');
+    }
+  }, [searchParams, router]);
 
   useEffect(() => {
     if (

@@ -13,11 +13,17 @@ export function SiteHeader() {
   const { mutate: logout } = useLogout();
 
   const handleLogout = () => {
+    // Clear token first to ensure user is logged out even if API call fails
+    AuthUtils.clearToken();
+    
     logout(
       {},
       {
         onSuccess: () => {
-          AuthUtils.clearToken();
+          window.location.href = "/";
+        },
+        onError: () => {
+          // Still redirect even if logout API call fails
           window.location.href = "/";
         },
       },
