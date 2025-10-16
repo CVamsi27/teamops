@@ -1,11 +1,8 @@
 export class AuthStorage {
   private static readonly TOKEN_KEY = "teamops_auth_token";
   private static readonly EXPIRY_KEY = "teamops_auth_expiry";
-  private static readonly DEFAULT_EXPIRY_DAYS = 7; // 7 days
+  private static readonly DEFAULT_EXPIRY_DAYS = 7;
 
-  /**
-   * Store authentication token with expiry
-   */
   static setToken(
     token: string,
     expiryDays: number = this.DEFAULT_EXPIRY_DAYS,
@@ -19,9 +16,6 @@ export class AuthStorage {
     localStorage.setItem(this.EXPIRY_KEY, expiryDate.toISOString());
   }
 
-  /**
-   * Get stored authentication token if valid
-   */
   static getToken(): string | null {
     if (typeof window === "undefined") return null;
 
@@ -44,9 +38,6 @@ export class AuthStorage {
     return token;
   }
 
-  /**
-   * Clear stored authentication data
-   */
   static clearToken(): void {
     if (typeof window === "undefined") return;
 
@@ -54,16 +45,10 @@ export class AuthStorage {
     localStorage.removeItem(this.EXPIRY_KEY);
   }
 
-  /**
-   * Check if user is authenticated
-   */
   static isAuthenticated(): boolean {
     return this.getToken() !== null;
   }
 
-  /**
-   * Get remaining days until token expires
-   */
   static getDaysUntilExpiry(): number | null {
     if (typeof window === "undefined") return null;
 
@@ -78,9 +63,6 @@ export class AuthStorage {
     return diffDays > 0 ? diffDays : 0;
   }
 
-  /**
-   * Extend token expiry by specified days
-   */
   static extendToken(
     additionalDays: number = this.DEFAULT_EXPIRY_DAYS,
   ): boolean {

@@ -17,17 +17,34 @@ api.interceptors.request.use((config) => {
 
 api.interceptors.response.use(
   (response) => {
-    // Auto-save token from login/register responses
+    console.log('[Response Interceptor]', {
+      url: response.config.url,
+      status: response.status,
+      hasAccessToken: !!response.data?.access_token,
+      data: response.data,
+    });
+    
     if (
       (response.config.url?.includes('/auth/login') || 
        response.config.url?.includes('/auth/register')) &&
       response.data?.access_token
     ) {
+      console.log('[Response Interceptor] Saving token to localStorage');
       AuthStorage.setToken(response.data.access_token, 14);
+      console.log('[Response Interceptor] Token saved, verifying:', {
+        saved: !!AuthStorage.getToken(),
+      });
     }
     return response;
   },
   (error) => {
+    console.error('[Response Interceptor] Error:', {
+      url: error.config?.url,
+      status: error.response?.status,
+      message: error.message,
+      data: error.response?.data,
+    });
+    
     if (error.response?.status === 401) {
       AuthStorage.clearToken();
 
