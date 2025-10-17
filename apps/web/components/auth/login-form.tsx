@@ -51,16 +51,18 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
               : "Unknown error";
 
         if (errorMessage === "EMAIL_NOT_FOUND") {
-          setError("Email not found. Please register first.");
-          setTimeout(() => onSwitchToRegister(), 2000);
+          setError("Email not found. Redirecting to register...");
+          setTimeout(() => onSwitchToRegister(), 1500);
         } else if (errorMessage === "USE_GOOGLE_LOGIN") {
           setError(
-            "This email is registered with Google. Please use Google login.",
+            "This email is registered with Google. Please use the 'Continue with Google' button below.",
           );
         } else if (errorMessage === "INVALID_PASSWORD") {
-          setError("Invalid password. Please try again.");
+          setError("Incorrect password. Please try again.");
+        } else if (errorMessage.includes("401") || errorMessage.includes("Unauthorized")) {
+          setError("Invalid email or password. Please check your credentials.");
         } else {
-          setError("Login failed. Please try again.");
+          setError(`Login failed: ${errorMessage}`);
         }
       },
       onSuccess: async (data: { access_token?: string }) => {

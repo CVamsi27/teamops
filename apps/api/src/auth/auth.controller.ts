@@ -69,8 +69,7 @@ export class AuthController {
       path: '/',
     });
 
-    // Redirect with token in URL so frontend can save it to localStorage
-    res.redirect(`${process.env.FRONTEND_URL}/dashboard?token=${result.access_token}`);
+    res.redirect(`${process.env.FRONTEND_URL}/auth/google/callback?token=${result.access_token}`);
   }
 
   @Get('profile')

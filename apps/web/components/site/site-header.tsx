@@ -13,7 +13,6 @@ export function SiteHeader() {
   const { mutate: logout } = useLogout();
 
   const handleLogout = () => {
-    // Clear token first to ensure user is logged out even if API call fails
     AuthUtils.clearToken();
     
     logout(
@@ -23,7 +22,6 @@ export function SiteHeader() {
           window.location.href = "/";
         },
         onError: () => {
-          // Still redirect even if logout API call fails
           window.location.href = "/";
         },
       },
@@ -33,14 +31,11 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center px-4">
-        {/* Mobile Navigation & Logo Container */}
         <div className="flex items-center space-x-4 flex-1">
-          {/* Mobile Navigation */}
           <div className="md:hidden">
             <MobileNav user={user} />
           </div>
 
-          {/* Logo */}
           <Link
             href="/"
             className="flex items-center space-x-2 text-xl font-bold transition-colors hover:text-primary"
@@ -51,7 +46,6 @@ export function SiteHeader() {
           </Link>
         </div>
 
-        {/* Navigation */}
         <nav className="hidden md:flex items-center space-x-1">
           <NavLink href="/dashboard">Dashboard</NavLink>
           <NavLink href="/teams">Teams</NavLink>
@@ -62,7 +56,6 @@ export function SiteHeader() {
           <NavLink href="/contact">Contact</NavLink>
         </nav>
 
-        {/* Right side actions */}
         <div className="flex items-center space-x-2">
           {user && <NotificationCenter />}
           <ModeToggle />

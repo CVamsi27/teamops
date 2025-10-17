@@ -17,7 +17,6 @@ api.interceptors.request.use((config) => {
 
 api.interceptors.response.use(
   (response) => {
-    // Auto-save token from login/register responses
     const isLoginOrRegister = 
       response.config.method?.toLowerCase() === 'post' &&
       (response.config.url === '/auth/login' || 
