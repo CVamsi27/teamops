@@ -11,20 +11,35 @@ export default function GoogleCallbackPage() {
   useEffect(() => {
     const token = searchParams.get('token');
     const error = searchParams.get('error');
+    
+    console.log('[Google Callback] URL params:', {
+      hasToken: !!token,
+      tokenLength: token?.length,
+      error,
+      fullURL: typeof window !== 'undefined' ? window.location.href : 'N/A',
+      environment: process.env.NODE_ENV,
+    });
 
     if (error) {
-      console.error('Google OAuth error:', error);
+      console.error('[Google Callback] OAuth error:', error);
       router.push('/auth?error=google_oauth_failed');
       return;
     }
 
     if (token) {
-      // Save token to localStorage
+      console.log('[Google Callback] Saving token...');
       AuthUtils.saveToken(token);
-      // Redirect to dashboard
+      
+      // Verify token was saved
+      const savedToken = AuthUtils.isAuthenticated();
+      console.log('[Google Callback] Token save result:', {
+        isAuthenticated: savedToken,
+        tokenInStorage: typeof window !== 'undefined' && !!localStorage.getItem('teamops_auth_token'),
+      });
+      
       router.push('/dashboard');
     } else {
-      // No token found, redirect to login
+      console.error('[Google Callback] No token in URL parameters');
       router.push('/auth?error=no_token');
     }
   }, [searchParams, router]);
