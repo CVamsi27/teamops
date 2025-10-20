@@ -33,6 +33,12 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
       password: formData.get("password") as string,
     };
 
+    console.log('[Login] Starting login attempt:', {
+      email: payload.email,
+      environment: process.env.NODE_ENV,
+      apiURL: process.env.NEXT_PUBLIC_API_URL,
+    });
+
     login.mutate(payload, {
       onError: (error: unknown) => {
         const errorMessage =
@@ -66,9 +72,25 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
         }
       },
       onSuccess: async (data: { access_token?: string }) => {
+        console.log('[Login] Success callback triggered:', {
+          hasAccessToken: !!data?.access_token,
+          tokenLength: data?.access_token?.length,
+          environment: process.env.NODE_ENV,
+        });
+        
         if (data?.access_token) {
           AuthUtils.saveToken(data.access_token);
+          
+          // Verify token was saved
+          const savedToken = AuthUtils.isAuthenticated();
+          console.log('[Login] Token save result:', {
+            isAuthenticated: savedToken,
+            tokenInStorage: !!localStorage.getItem('teamops_auth_token'),
+          });
+        } else {
+          console.error('[Login] No access_token in success response!');
         }
+        
         await new Promise((resolve) => setTimeout(resolve, 100));
         router.push("/dashboard");
       },

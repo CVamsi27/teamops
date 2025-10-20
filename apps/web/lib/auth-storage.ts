@@ -3,26 +3,91 @@ export class AuthStorage {
   private static readonly EXPIRY_KEY = "teamops_auth_expiry";
   private static readonly DEFAULT_EXPIRY_DAYS = 7;
 
+  static isStorageAvailable(): boolean {
+    if (typeof window === "undefined") return false;
+    
+    try {
+      const test = '__localStorage_test__';
+      localStorage.setItem(test, test);
+      localStorage.removeItem(test);
+      return true;
+    } catch (error) {
+      console.error('[AuthStorage] localStorage not available:', error);
+      return false;
+    }
+  }
+
   static setToken(
     token: string,
     expiryDays: number = this.DEFAULT_EXPIRY_DAYS,
   ): void {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined") {
+      console.warn('[AuthStorage] setToken called on server side, skipping');
+      return;
+    }
 
-    const expiryDate = new Date();
-    expiryDate.setDate(expiryDate.getDate() + expiryDays);
+    const storageAvailable = this.isStorageAvailable();
+    console.log('[AuthStorage] Setting token:', {
+      tokenLength: token?.length,
+      expiryDays,
+      hasLocalStorage: typeof localStorage !== 'undefined',
+      storageAvailable,
+      environment: process.env.NODE_ENV,
+      hostname: window.location.hostname,
+      protocol: window.location.protocol,
+      userAgent: navigator.userAgent,
+    });
 
-    localStorage.setItem(this.TOKEN_KEY, token);
-    localStorage.setItem(this.EXPIRY_KEY, expiryDate.toISOString());
+    if (!storageAvailable) {
+      console.error('[AuthStorage] localStorage is not available, cannot save token');
+      return;
+    }
+
+    try {
+      const expiryDate = new Date();
+      expiryDate.setDate(expiryDate.getDate() + expiryDays);
+
+      localStorage.setItem(this.TOKEN_KEY, token);
+      localStorage.setItem(this.EXPIRY_KEY, expiryDate.toISOString());
+      
+      // Verify the token was actually saved
+      const savedToken = localStorage.getItem(this.TOKEN_KEY);
+      const savedExpiry = localStorage.getItem(this.EXPIRY_KEY);
+      console.log('[AuthStorage] Token saved verification:', {
+        tokenSaved: !!savedToken,
+        expirySaved: !!savedExpiry,
+        tokenMatches: savedToken === token,
+        expiryDate: savedExpiry,
+      });
+    } catch (error) {
+      console.error('[AuthStorage] Error setting token:', error);
+    }
   }
 
   static getToken(): string | null {
-    if (typeof window === "undefined") return null;
+    if (typeof window === "undefined") {
+      console.warn('[AuthStorage] getToken called on server side, returning null');
+      return null;
+    }
+
+    console.log('[AuthStorage] Getting token:', {
+      hasLocalStorage: typeof localStorage !== 'undefined',
+      environment: process.env.NODE_ENV,
+      hostname: window.location.hostname,
+    });
 
     const token = localStorage.getItem(this.TOKEN_KEY);
     const expiry = localStorage.getItem(this.EXPIRY_KEY);
 
+    console.log('[AuthStorage] Retrieved from localStorage:', {
+      hasToken: !!token,
+      hasExpiry: !!expiry,
+      tokenPreview: token ? `${token.substring(0, 10)}...` : null,
+      expiry,
+    });
+
     if (!token || !expiry) {
+      console.log('[AuthStorage] Missing token or expiry, clearing and returning null');
       this.clearToken();
       return null;
     }
@@ -30,11 +95,19 @@ export class AuthStorage {
     const expiryDate = new Date(expiry);
     const now = new Date();
 
+    console.log('[AuthStorage] Expiry check:', {
+      expiryDate: expiryDate.toISOString(),
+      now: now.toISOString(),
+      isExpired: now > expiryDate,
+    });
+
     if (now > expiryDate) {
+      console.log('[AuthStorage] Token expired, clearing and returning null');
       this.clearToken();
       return null;
     }
 
+    console.log('[AuthStorage] Returning valid token');
     return token;
   }
 
