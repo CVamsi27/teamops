@@ -17,6 +17,7 @@ export const PUBLIC_ROUTES = [
   "/auth",
   "/auth/login",
   "/auth/register",
+  "/auth/google/callback",
   "/pricing",
   "/contact",
   "/404",

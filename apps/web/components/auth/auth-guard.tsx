@@ -10,7 +10,17 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [shouldRedirect, setShouldRedirect] = useState(false);
 
-  const isPublicRoute = (PUBLIC_ROUTES as readonly string[]).includes(pathname);
+  // Normalize pathname to ignore query strings and empty values
+  const normalizedPath = (() => {
+    if (!pathname) return '/';
+    try {
+      return pathname.split('?')[0] || '/';
+    } catch {
+      return pathname || '/';
+    }
+  })();
+
+  const isPublicRoute = (PUBLIC_ROUTES as readonly string[]).includes(normalizedPath);
 
   const me = useMe({ enabled: !isPublicRoute });
 

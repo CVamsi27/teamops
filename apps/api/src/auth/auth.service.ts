@@ -37,6 +37,7 @@ export class AuthService {
     }
 
     let user = await this.prisma.user.findUnique({ where: { email } });
+
     if (!user) {
       user = await this.prisma.user.create({
         data: {
@@ -52,6 +53,7 @@ export class AuthService {
         data: { name: displayName },
       });
     }
+    
     return user;
   }
 

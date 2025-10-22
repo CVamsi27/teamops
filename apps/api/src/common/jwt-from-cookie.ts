@@ -3,8 +3,7 @@ import { Request } from 'express';
 export function extractJwtFromRequest(req: Request): string | null {
   const authHeader = req.headers['authorization'];
   if (authHeader && authHeader.startsWith('Bearer ')) {
-    const token = authHeader.slice(7);
-    return token;
+    return authHeader.slice(7);
   }
 
   if (req.cookies?.teamops_token) {

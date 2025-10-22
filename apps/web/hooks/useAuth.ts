@@ -12,6 +12,8 @@ import { useApiMutation } from "./api/useApiMutation";
 import { useApiQuery } from "./api/useApiQuery";
 import { AuthStorage } from "@/lib/auth-storage";
 import { z } from "zod";
+import { usePathname } from "next/navigation";
+import { PUBLIC_ROUTES } from "@/lib/const";
 
 const LogoutSchema = z.object({});
 
@@ -58,6 +60,15 @@ export const AuthUtils = {
 };
 
 export function useMe(options?: { enabled?: boolean }) {
+  // If caller does not explicitly set enabled, determine it based on the
+  // current pathname and PUBLIC_ROUTES so public pages (e.g. '/') don't
+  // trigger a profile fetch and accidental 401 -> redirect flows.
+  const pathname = usePathname();
+  const normalizedPath = (pathname ? pathname.split("?")[0] : "/") as string;
+  const isPublicRoute = (PUBLIC_ROUTES as readonly string[]).includes(normalizedPath as string);
+
+  const enabledByDefault = options?.enabled ?? !isPublicRoute;
+
   return useApiQuery<UserProfile>(["me"], "/auth/profile", UserProfileSchema, {
     retry: (failureCount, error: any) => {
       if (error?.response?.status === 401) {
@@ -66,7 +77,7 @@ export function useMe(options?: { enabled?: boolean }) {
       return failureCount < 2;
     },
     staleTime: 1000 * 60 * 5,
-    enabled: options?.enabled ?? true,
+    enabled: enabledByDefault,
     refetchOnWindowFocus: false,
     refetchOnMount: true,
   });

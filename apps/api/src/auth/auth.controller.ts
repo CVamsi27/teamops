@@ -60,20 +60,8 @@ export class AuthController {
     @Req() req: GoogleAuthRequest,
     @Res() res: Response
   ) {
-    console.log('[Google Callback] Processing Google OAuth callback:', {
-      hasUser: !!req.user,
-      userEmail: req.user?.email,
-      environment: process.env.APP_ENV,
-      frontendUrl: process.env.FRONTEND_URL,
-    });
-
     const result = await this.authService.generateToken(req.user!);
     
-    console.log('[Google Callback] Token generated:', {
-      hasToken: !!result.access_token,
-      tokenLength: result.access_token?.length,
-    });
-
     res.cookie('teamops_token', result.access_token, {
       httpOnly: true,
       sameSite: process.env.APP_ENV === 'production' ? 'none' : 'lax',
@@ -83,8 +71,6 @@ export class AuthController {
     });
 
     const redirectUrl = `${process.env.FRONTEND_URL}/auth/google/callback?token=${result.access_token}`;
-    console.log('[Google Callback] Redirecting to:', redirectUrl);
-
     res.redirect(redirectUrl);
   }
 
