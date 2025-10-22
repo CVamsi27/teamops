@@ -13,16 +13,24 @@ export function SiteHeader() {
   const { mutate: logout } = useLogout();
 
   const handleLogout = () => {
+    console.log('[Logout] Starting logout process...');
+    
+    // Clear token first
     AuthUtils.clearToken();
     
+    // Then call logout API
     logout(
       {},
       {
         onSuccess: () => {
-          window.location.href = "/";
+          console.log('[Logout] API logout successful, redirecting...');
+          // Use replace to avoid back button issues
+          window.location.replace("/");
         },
-        onError: () => {
-          window.location.href = "/";
+        onError: (error) => {
+          console.log('[Logout] API logout failed, but token cleared, redirecting...', error);
+          // Even if API fails, token is cleared so redirect anyway
+          window.location.replace("/");
         },
       },
     );

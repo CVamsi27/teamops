@@ -27,17 +27,34 @@ export default function GoogleCallbackPage() {
     }
 
     if (token) {
-      console.log('[Google Callback] Saving token...');
-      AuthUtils.saveToken(token);
-      
-      // Verify token was saved
-      const savedToken = AuthUtils.isAuthenticated();
-      console.log('[Google Callback] Token save result:', {
-        isAuthenticated: savedToken,
-        tokenInStorage: typeof window !== 'undefined' && !!localStorage.getItem('teamops_auth_token'),
+      console.log('[Google Callback] Saving token...', {
+        tokenPreview: `${token.substring(0, 20)}...`,
+        tokenLength: token.length,
       });
       
-      router.push('/dashboard');
+      AuthUtils.saveToken(token);
+      
+      // Wait a bit to ensure localStorage is updated
+      setTimeout(() => {
+        // Verify token was saved
+        const savedToken = AuthUtils.isAuthenticated();
+        const storageToken = typeof window !== 'undefined' ? localStorage.getItem('teamops_auth_token') : null;
+        
+        console.log('[Google Callback] Token save result:', {
+          isAuthenticated: savedToken,
+          hasTokenInStorage: !!storageToken,
+          storedTokenPreview: storageToken ? `${storageToken.substring(0, 20)}...` : null,
+          tokensMatch: storageToken === token,
+        });
+        
+        if (savedToken) {
+          console.log('[Google Callback] Token saved successfully, redirecting to dashboard');
+          router.push('/dashboard');
+        } else {
+          console.error('[Google Callback] Token save failed, redirecting to auth with error');
+          router.push('/auth?error=token_save_failed');
+        }
+      }, 100);
     } else {
       console.error('[Google Callback] No token in URL parameters');
       router.push('/auth?error=no_token');
