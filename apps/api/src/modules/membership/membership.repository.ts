@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../infrastructure/prisma.service';
 import type { Membership as PrismaMembership } from '@prisma/client';
-import type { Membership, CreateMembership } from '@workspace/api';
+import type { Membership, CreateMembership, Role } from '@workspace/api';
 
 @Injectable()
 export class MembershipRepository {
@@ -28,6 +28,39 @@ export class MembershipRepository {
       },
     });
     return membership ? this.map(membership) : null;
+  }
+
+  async findAllByTeamId(teamId: string): Promise<Membership[]> {
+    const memberships = await this.prisma.membership.findMany({
+      where: { teamId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+          },
+        },
+      },
+    });
+    return memberships.map((m) => ({
+      ...this.map(m),
+      user: m.user,
+    })) as any;
+  }
+
+  async updateRole(
+    userId: string,
+    teamId: string,
+    role: Role
+  ): Promise<Membership> {
+    const membership = await this.prisma.membership.update({
+      where: {
+        userId_teamId: { userId, teamId },
+      },
+      data: { role },
+    });
+    return this.map(membership);
   }
 
   private map(m: PrismaMembership): Membership {

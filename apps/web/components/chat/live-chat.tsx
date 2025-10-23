@@ -35,7 +35,7 @@ interface ChatMessage {
 
 interface LiveChatProps {
   roomId: string;
-  roomType: "team" | "task";
+  roomType: "team" | "task" | "project";
   roomName: string;
 }
 

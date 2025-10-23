@@ -4,6 +4,7 @@ export * from './schemas/user.schema';
 export * from './schemas/team.schema';
 export * from './schemas/membership.schema';
 export * from './schemas/project.schema';
+export * from './schemas/project-membership.schema';
 export * from './schemas/task.schema';
 export * from './schemas/invite.schema';
 export * from './schemas/notification.schema';
@@ -14,3 +15,4 @@ export * from './validation';
 export * from './schemas/dashboard.schema';
 export * from './types/deletion';
 export * from './validation';
+

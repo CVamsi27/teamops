@@ -1,17 +1,29 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import type {
   Team,
   CreateTeam,
   UpdateTeam,
   TeamDeletionInfo,
+  Role,
+  Membership,
 } from '@workspace/api';
 import { TeamRepository } from './team.repository';
+import { MembershipRepository } from '../membership/membership.repository';
 import { PrismaService } from '../../infrastructure/prisma.service';
+
+export interface TeamMember extends Membership {
+  user?: {
+    id: string;
+    email: string;
+    name: string | null;
+  };
+}
 
 @Injectable()
 export class TeamService {
   constructor(
     private readonly repo: TeamRepository,
+    private readonly membershipRepo: MembershipRepository,
     private readonly prisma: PrismaService
   ) {}
 
@@ -86,6 +98,135 @@ export class TeamService {
       projectsList,
       message,
     };
+  }
+
+  async getTeamMembers(teamId: string, requesterId: string): Promise<TeamMember[]> {
+    // Check if requester is a member of the team
+    const requesterMembership = await this.membershipRepo.findByUserAndTeam(
+      requesterId,
+      teamId
+    );
+    if (!requesterMembership) {
+      throw new ForbiddenException('You do not have access to this team');
+    }
+
+    const memberships = await this.prisma.membership.findMany({
+      where: { teamId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+          },
+        },
+      },
+    });
+
+    return memberships.map((m) => ({
+      id: m.id,
+      role: m.role,
+      userId: m.userId,
+      teamId: m.teamId,
+      createdAt: m.createdAt.toISOString(),
+      user: m.user,
+    })) as TeamMember[];
+  }
+
+  async updateMemberRole(
+    teamId: string,
+    userId: string,
+    role: Role,
+    requesterId: string
+  ): Promise<Membership> {
+    // Check if requester is admin of the team
+    const requesterMembership = await this.membershipRepo.findByUserAndTeam(
+      requesterId,
+      teamId
+    );
+    if (!requesterMembership) {
+      throw new ForbiddenException('You are not a member of this team');
+    }
+    if (requesterMembership.role !== 'ADMIN') {
+      throw new ForbiddenException('Only admins can change member roles');
+    }
+
+    // Check if target user is a member of the team
+    const targetMembership = await this.membershipRepo.findByUserAndTeam(
+      userId,
+      teamId
+    );
+    if (!targetMembership) {
+      throw new NotFoundException('User is not a member of this team');
+    }
+
+    // Prevent removing the last admin
+    if (
+      targetMembership.role === 'ADMIN' &&
+      role !== 'ADMIN'
+    ) {
+      const adminCount = await this.prisma.membership.count({
+        where: {
+          teamId,
+          role: 'ADMIN',
+        },
+      });
+      if (adminCount === 1) {
+        throw new ForbiddenException(
+          'Cannot remove the last admin from the team'
+        );
+      }
+    }
+
+    return this.membershipRepo.updateRole(userId, teamId, role);
+  }
+
+  async removeMember(
+    teamId: string,
+    userId: string,
+    requesterId: string
+  ): Promise<void> {
+    // Check if requester is admin of the team
+    const requesterMembership = await this.membershipRepo.findByUserAndTeam(
+      requesterId,
+      teamId
+    );
+    if (!requesterMembership) {
+      throw new ForbiddenException('You are not a member of this team');
+    }
+    if (requesterMembership.role !== 'ADMIN') {
+      throw new ForbiddenException('Only admins can remove members');
+    }
+
+    // Check if target user is a member of the team
+    const targetMembership = await this.membershipRepo.findByUserAndTeam(
+      userId,
+      teamId
+    );
+    if (!targetMembership) {
+      throw new NotFoundException('User is not a member of this team');
+    }
+
+    // Prevent removing the last admin
+    if (targetMembership.role === 'ADMIN') {
+      const adminCount = await this.prisma.membership.count({
+        where: {
+          teamId,
+          role: 'ADMIN',
+        },
+      });
+      if (adminCount === 1) {
+        throw new ForbiddenException(
+          'Cannot remove the last admin from the team'
+        );
+      }
+    }
+
+    await this.prisma.membership.delete({
+      where: {
+        userId_teamId: { userId, teamId },
+      },
+    });
   }
 
   async remove(id: string): Promise<void> {

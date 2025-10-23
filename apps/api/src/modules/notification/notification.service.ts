@@ -52,8 +52,9 @@ export class NotificationService implements OnModuleInit, OnModuleDestroy {
       });
       this.consumer = this.kafka.consumer({ groupId: 'teamops-notify-group' });
       this.kafkaEnabled = true;
-    } catch (e: any) {
-      this.logger.warn('Kafka initialization failed: ' + (e?.message ?? e));
+    } catch (error) {
+      const err = error as Error;
+      this.logger.warn('Kafka initialization failed: ' + (err?.message ?? String(error)));
       this.kafkaEnabled = false;
     }
   }
@@ -77,17 +78,19 @@ export class NotificationService implements OnModuleInit, OnModuleDestroy {
             const payload = value ? JSON.parse(value) : null;
             this.logger.log(`Consumed message from topic: ${topic}`);
             this.gateway.broadcast(topic, payload);
-          } catch (parseError: any) {
+          } catch (parseError) {
+            const err = parseError as Error;
             this.logger.warn(
-              `Failed to parse message from topic ${topic}: ${parseError.message}`
+              `Failed to parse message from topic ${topic}: ${err.message}`
             );
           }
         },
       });
 
       this.logger.log('Kafka consumer started successfully');
-    } catch (err: any) {
-      this.logger.warn('Kafka consumer start failed: ' + (err?.message ?? err));
+    } catch (error) {
+      const err = error as Error;
+      this.logger.warn('Kafka consumer start failed: ' + (err?.message ?? String(error)));
     }
   }
 
@@ -96,9 +99,10 @@ export class NotificationService implements OnModuleInit, OnModuleDestroy {
       try {
         await this.consumer.disconnect();
         this.logger.log('Kafka consumer disconnected');
-      } catch (e: any) {
+      } catch (error) {
+        const err = error as Error;
         this.logger.warn(
-          'Error disconnecting Kafka consumer: ' + (e?.message ?? e)
+          'Error disconnecting Kafka consumer: ' + (err?.message ?? String(error))
         );
       }
     }

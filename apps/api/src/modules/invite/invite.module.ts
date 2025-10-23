@@ -9,6 +9,6 @@ import { PrismaModule } from '../../infrastructure/prisma.module';
   imports: [PrismaModule],
   providers: [InviteService, InviteRepository, MembershipRepository],
   controllers: [InviteController],
-  exports: [InviteRepository, MembershipRepository],
+  exports: [InviteService, InviteRepository, MembershipRepository],
 })
 export class InviteModule {}

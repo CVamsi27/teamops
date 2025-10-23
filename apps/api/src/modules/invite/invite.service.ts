@@ -2,11 +2,12 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { InviteRepository } from './invite.repository';
 import { MembershipRepository } from '../membership/membership.repository';
 import { randomUUID } from 'crypto';
-import * as nodemailer from 'nodemailer';
+import { createTransport } from 'nodemailer';
 import type { Invite, Role } from '@workspace/api';
 
 @Injectable()
@@ -16,11 +17,37 @@ export class InviteService {
     private membershipRepo: MembershipRepository
   ) {}
 
+  private canInviteRole(inviterRole: Role, targetRole: Role): boolean {
+    if (inviterRole === 'ADMIN') {
+      return ['ADMIN', 'MEMBER', 'VIEWER'].includes(targetRole);
+    }
+    if (inviterRole === 'MEMBER') {
+      return targetRole === 'VIEWER';
+    }
+    return false;
+  }
+
   async createInvite(
     teamId: string,
     email: string,
-    role: Role
+    role: Role,
+    userId: string
   ): Promise<Invite> {
+    const membership = await this.membershipRepo.findByUserAndTeam(
+      userId,
+      teamId
+    );
+    if (!membership) {
+      throw new ForbiddenException(
+        'You are not a member of this team'
+      );
+    }
+
+    if (!this.canInviteRole(membership.role, role)) {
+      throw new ForbiddenException(
+        `Your role (${membership.role}) cannot invite users with role ${role}`
+      );
+    }
     const token = randomUUID();
     const invite = await this.inviteRepo.create({
       teamId,
@@ -29,10 +56,10 @@ export class InviteService {
       token,
     });
 
-    const transporter = nodemailer.createTransporter({
+    const transporter = createTransport({
       host: process.env.SMTP_HOST || 'smtp.mailgun.org',
       port: Number(process.env.SMTP_PORT) || 587,
-      secure: false, // Use TLS
+      secure: false,
       auth: process.env.SMTP_USER
         ? {
             user: process.env.SMTP_USER,
@@ -130,8 +157,8 @@ export class InviteService {
         },
       });
 
-      console.log(`✅ Invitation email sent successfully to ${email}`);
-    } catch (err: any) {
+    } catch (error) {
+      const err = error as Error;
       console.error(
         `❌ Failed to send invitation email to ${email}:`,
         err.message

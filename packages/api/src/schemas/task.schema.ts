@@ -39,6 +39,14 @@ export const UpdateTaskSchema = CreateTaskSchema.partial().omit({
 export const TaskSchema = CreateTaskWithCreatorSchema.extend({
   id: ID,
   ...TimestampFields,
+  assignee: z
+    .object({
+      id: ID,
+      name: z.string().nullable(),
+      email: z.email(),
+    })
+    .nullable()
+    .optional(),
 }).strict();
 
 export const TaskWithRelationsSchema = TaskSchema.extend({

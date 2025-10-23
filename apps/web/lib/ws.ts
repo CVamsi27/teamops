@@ -10,7 +10,6 @@ export function initSocket(qc: QueryClient): Socket {
   if (socket) return socket;
 
   const wsUrl = process.env.NEXT_PUBLIC_WS_URL || "http://localhost:3001";
-  console.log("Connecting to WebSocket at:", wsUrl);
 
   socket = io(wsUrl, {
     autoConnect: true,
@@ -21,12 +20,10 @@ export function initSocket(qc: QueryClient): Socket {
     withCredentials: true,
   });
 
-  socket.on("connect", () => {
-    console.log("Socket connected");
-  });
+  socket.on("connect", () => {});
 
   socket.on("disconnect", (reason) => {
-    console.log("Socket disconnected:", reason);
+    console.error("Socket disconnected:", reason);
   });
 
   socket.on("connect_error", (error) => {
@@ -50,7 +47,6 @@ export function initChatSocket(): Socket {
   if (chatSocket) return chatSocket;
 
   const wsUrl = process.env.NEXT_PUBLIC_WS_URL || "http://localhost:3001";
-  console.log("Connecting to Chat WebSocket at:", wsUrl + "/chat");
 
   chatSocket = io(wsUrl + "/chat", {
     autoConnect: true,
@@ -61,17 +57,10 @@ export function initChatSocket(): Socket {
     withCredentials: true,
   });
 
-  chatSocket.on("connect", () => {
-    console.log(
-      "Chat socket connected to",
-      wsUrl + "/chat",
-      "with ID:",
-      chatSocket?.id,
-    );
-  });
+  chatSocket.on("connect", () => {});
 
   chatSocket.on("disconnect", (reason) => {
-    console.log("Chat socket disconnected:", reason);
+    console.error("Chat socket disconnected:", reason);
   });
 
   chatSocket.on("connect_error", (error) => {

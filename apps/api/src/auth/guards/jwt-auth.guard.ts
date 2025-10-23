@@ -6,6 +6,15 @@ import {
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { IS_PUBLIC_KEY } from '../../common/public.decorator';
+import type { Role } from '@workspace/api';
+
+export interface AuthenticatedRequest {
+  user: {
+    userId: string;
+    email: string;
+    role: Role;
+  };
+}
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -24,7 +33,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     return super.canActivate(context);
   }
 
-  handleRequest(err: any, user: any, _info: any) {
+  handleRequest(err: any, user: any, _info: any): any {
     if (err || !user) {
       throw err || new UnauthorizedException();
     }

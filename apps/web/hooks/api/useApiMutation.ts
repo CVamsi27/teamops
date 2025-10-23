@@ -4,7 +4,8 @@ import {
   useQueryClient,
   UseMutationResult,
 } from "@tanstack/react-query";
-import { ZodType } from "zod";
+import { AxiosError } from "axios";
+import { ZodError, ZodType } from "zod";
 import { api } from "@/lib/api";
 
 type MutationOptions<TData, TPayload> = {
@@ -12,9 +13,16 @@ type MutationOptions<TData, TPayload> = {
   buildOptimistic?: (newItem: TPayload) => Partial<TData>;
   invalidateKeys?: string[][];
   buildEndpoint?: (payload: TPayload) => string;
+  buildPayload?: (payload: TPayload) => Record<string, unknown>;
 };
 
-export function useApiMutation<TData, TPayload extends Record<string, any>>(
+type MutationContext = {
+  previous?: unknown;
+};
+
+type ApiError = AxiosError<{ message?: string }>;
+
+export function useApiMutation<TData, TPayload extends Record<string, unknown>>(
   endpoint: string,
   queryKey: string[],
   schema: ZodType<TPayload>,
@@ -23,19 +31,20 @@ export function useApiMutation<TData, TPayload extends Record<string, any>>(
   const qc = useQueryClient();
   const method = options?.method ?? "post";
 
-  return useMutation<TData, unknown, TPayload>({
+  return useMutation<TData, unknown, TPayload, MutationContext>({
     mutationFn: async (payload: TPayload): Promise<TData> => {
       try {
         try {
           schema.parse(payload);
-        } catch (zodError: any) {
+        } catch (zodError) {
+          const error = zodError as ZodError;
           console.error(`Payload validation error for ${endpoint}:`, {
             endpoint,
             payload,
-            zodError: zodError.issues || zodError.message,
+            zodError: error.issues || error.message,
           });
           throw new Error(
-            `Invalid payload for ${endpoint}: ${zodError.message}`,
+            `Invalid payload for ${endpoint}: ${error.message}`,
           );
         }
 
@@ -46,9 +55,10 @@ export function useApiMutation<TData, TPayload extends Record<string, any>>(
         let apiCall;
         if (method === "delete") {
           apiCall = api[method](finalEndpoint);
-        } else if (method === "patch" && options?.buildEndpoint) {
-          const patchPayload =
-            "payload" in payload ? (payload as any).payload : payload;
+        } else if (method === "patch" || method === "put") {
+          const patchPayload = options?.buildPayload
+            ? options.buildPayload(payload)
+            : payload;
           apiCall = api[method](finalEndpoint, patchPayload);
         } else {
           apiCall = api[method](finalEndpoint, payload);
@@ -56,7 +66,8 @@ export function useApiMutation<TData, TPayload extends Record<string, any>>(
 
         const { data } = await apiCall;
         return data as TData;
-      } catch (apiError: any) {
+      } catch (error) {
+        const apiError = error as ApiError;
         if (apiError.response) {
           console.error(`API mutation error for ${endpoint}:`, {
             endpoint,
@@ -90,8 +101,8 @@ export function useApiMutation<TData, TPayload extends Record<string, any>>(
           });
           throw new Error("Network error: Please check your connection");
         } else {
-          console.error(`Unknown error for ${endpoint}:`, apiError);
-          throw apiError;
+          console.error(`Unknown error for ${endpoint}:`, error);
+          throw error;
         }
       }
     },
@@ -103,17 +114,16 @@ export function useApiMutation<TData, TPayload extends Record<string, any>>(
       const previous = qc.getQueryData(queryKey);
 
       const optimisticItem = options.buildOptimistic(newItem);
-      qc.setQueryData(queryKey, (old: any) => [optimisticItem, ...(old ?? [])]);
+      qc.setQueryData(queryKey, (old: unknown) => [optimisticItem, ...(Array.isArray(old) ? old : [])]);
 
       return { previous };
     },
 
-    onError: (error: any, variables: TPayload, context: any) => {
+    onError: (error: unknown, _variables: TPayload, context: MutationContext | undefined) => {
       console.error(`useApiMutation error for ${endpoint}:`, {
         endpoint,
         method,
         error,
-        variables,
       });
 
       if (context?.previous) {

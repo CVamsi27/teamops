@@ -27,6 +27,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@workspace/ui/components/alert-dialog";
+import { TasksInfoDialog } from "@/components/tasks/tasks-info-dialog";
 
 export default function TasksPage() {
   const tasksList = useTasks();
@@ -132,11 +133,14 @@ export default function TasksPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold">Tasks</h1>
-          <p className="text-muted-foreground mt-1">
-            Manage and track your tasks across all projects
-          </p>
+        <div className="flex items-center gap-3">
+          <div>
+            <h1 className="text-3xl font-bold">Tasks</h1>
+            <p className="text-muted-foreground mt-1">
+              Manage and track your tasks across all projects
+            </p>
+          </div>
+          <TasksInfoDialog />
         </div>
         <Button asChild>
           <Link href="/tasks/new">
@@ -210,6 +214,12 @@ export default function TasksPage() {
                         <Badge variant="outline" className="text-xs">
                           {getProjectName(task.projectId || "")}
                         </Badge>
+
+                        {task.assignee && (
+                          <Badge variant="outline" className="text-xs">
+                            Assigned: {task.assignee.name || task.assignee.email}
+                          </Badge>
+                        )}
 
                         {dueDate && (
                           <Badge

@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useInviteMember } from "@/hooks/teams/useTeamInvites";
+import { useMe } from "@/hooks/useAuth";
+import { useInviteMember, useTeamMembers } from "@/hooks/teams/useTeamInvites";
 import { Card, CardContent } from "@workspace/ui/components/card";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
@@ -23,7 +24,7 @@ import {
 } from "@workspace/ui/components/dialog";
 import { Badge } from "@workspace/ui/components/badge";
 import { toast } from "@workspace/ui/components/toast";
-import { type InviteMember } from "@workspace/api";
+import { type InviteMember, type Role } from "@workspace/api";
 import { UserPlus, Mail, Shield, Eye, Users } from "lucide-react";
 
 type InviteMemberForm = InviteMember;
@@ -32,15 +33,27 @@ interface TeamMemberInviteProps {
   teamId: string;
   teamName: string;
   onInviteSent?: () => void;
+  userTeamRole?: Role;
 }
 
 export function TeamMemberInvite({
   teamId,
   teamName,
   onInviteSent,
+  userTeamRole,
 }: TeamMemberInviteProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const { data: currentUser } = useMe();
   const inviteMember = useInviteMember();
+  
+  // Fetch team members to determine user's role if not provided
+  const membersQuery = useTeamMembers(teamId);
+  const userRoleFromMembers = membersQuery.data?.find(
+    (m) => m.userId === currentUser?.id
+  )?.role;
+  
+  // Use provided role or fetch from members
+  const currentUserRole = userTeamRole || userRoleFromMembers;
 
   const form = useForm<InviteMemberForm>({
     defaultValues: {
@@ -48,7 +61,33 @@ export function TeamMemberInvite({
     },
   });
 
+  // Determine available roles based on current user's role
+  const getAvailableRoles = (): Role[] => {
+    if (currentUserRole === "ADMIN") {
+      return ["ADMIN", "MEMBER", "VIEWER"];
+    }
+    if (currentUserRole === "MEMBER") {
+      return ["VIEWER"];
+    }
+    // VIEWER cannot invite anyone
+    return [];
+  };
+
+  const availableRoles = getAvailableRoles();
+  const canInvite = availableRoles.length > 0;
+
+  // Set initial role if not available
+  const currentRole = form.watch("role");
+  if (currentRole && !availableRoles.includes(currentRole) && availableRoles.length > 0) {
+    form.setValue("role", availableRoles[0] as Role);
+  }
+
   const onSubmit = (data: InviteMemberForm) => {
+    if (!canInvite) {
+      toast.error("You don't have permission to invite members");
+      return;
+    }
+
     inviteMember.mutate(
       { ...data, teamId },
       {
@@ -103,6 +142,15 @@ export function TeamMemberInvite({
     }
   };
 
+  if (!canInvite) {
+    return (
+      <Button disabled title="Your role doesn't allow inviting members">
+        <UserPlus className="h-4 w-4 mr-2" />
+        Invite Member
+      </Button>
+    );
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
@@ -151,24 +199,30 @@ export function TeamMemberInvite({
                 <SelectValue placeholder="Select a role" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="VIEWER">
-                  <div className="flex items-center space-x-2">
-                    <Eye className="h-4 w-4" />
-                    <span>Viewer</span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="MEMBER">
-                  <div className="flex items-center space-x-2">
-                    <Users className="h-4 w-4" />
-                    <span>Member</span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="ADMIN">
-                  <div className="flex items-center space-x-2">
-                    <Shield className="h-4 w-4" />
-                    <span>Admin</span>
-                  </div>
-                </SelectItem>
+                {availableRoles.includes("VIEWER") && (
+                  <SelectItem value="VIEWER">
+                    <div className="flex items-center space-x-2">
+                      <Eye className="h-4 w-4" />
+                      <span>Viewer</span>
+                    </div>
+                  </SelectItem>
+                )}
+                {availableRoles.includes("MEMBER") && (
+                  <SelectItem value="MEMBER">
+                    <div className="flex items-center space-x-2">
+                      <Users className="h-4 w-4" />
+                      <span>Member</span>
+                    </div>
+                  </SelectItem>
+                )}
+                {availableRoles.includes("ADMIN") && (
+                  <SelectItem value="ADMIN">
+                    <div className="flex items-center space-x-2">
+                      <Shield className="h-4 w-4" />
+                      <span>Admin</span>
+                    </div>
+                  </SelectItem>
+                )}
               </SelectContent>
             </Select>
             {form.formState.errors.role && (

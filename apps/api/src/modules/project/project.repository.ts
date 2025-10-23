@@ -38,6 +38,12 @@ export class ProjectRepository {
         description: payload.description ?? null,
         teamId: payload.teamId,
         createdById: payload.createdById,
+        memberships: {
+          create: {
+            userId: payload.createdById,
+            role: 'LEAD', // Creator becomes lead of the project
+          },
+        },
       },
     });
     return this.map(project);

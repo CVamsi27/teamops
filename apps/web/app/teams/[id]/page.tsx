@@ -1,7 +1,10 @@
 "use client";
 
 import { useParams } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { useTeams } from "@/hooks/teams/useTeams";
+import { useTeamMembers } from "@/hooks/teams/useTeamInvites";
+import { useMe } from "@/hooks/useAuth";
 import {
   Card,
   CardContent,
@@ -13,15 +16,32 @@ import { Button } from "@workspace/ui/components/button";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import { LiveChat } from "@/components/chat/live-chat";
 import { ActivityTimeline } from "@/components/activity/activity-timeline";
+import { TeamMembersList } from "@/components/teams/team-members-list";
+import { TeamMemberInvite } from "@/components/teams/team-member-invite";
 import { Users, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 export default function TeamDetailPage() {
   const params = useParams();
   const teamId = params.id as string;
+  const queryClient = useQueryClient();
 
   const { get } = useTeams();
+  const { data: currentUser } = useMe();
   const teamQuery = get(teamId);
+  const membersQuery = useTeamMembers(teamId);
+
+  // Find current user's role
+  const currentUserRole = membersQuery.data?.find(
+    (m) => m.userId === currentUser?.id
+  )?.role;
+
+  const handleMembersChange = async () => {
+    // Force refetch the team members
+    await queryClient.refetchQueries({
+      queryKey: ["team-members", teamId],
+    });
+  };
 
   if (teamQuery.isLoading) {
     return (
@@ -84,22 +104,34 @@ export default function TeamDetailPage() {
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" asChild>
-          <Link href="/teams">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Teams
-          </Link>
-        </Button>
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
-            <Users className="h-8 w-8" />
-            {team.name}
-          </h1>
-          {team.description && (
-            <p className="text-muted-foreground mt-2">{team.description}</p>
-          )}
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/teams">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Teams
+            </Link>
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold flex items-center gap-3">
+              <Users className="h-8 w-8" />
+              {team.name}
+            </h1>
+            {team.description && (
+              <p className="text-muted-foreground mt-2">{team.description}</p>
+            )}
+          </div>
         </div>
+
+        {/* Invite Member Button */}
+        {currentUserRole && (
+          <TeamMemberInvite
+            teamId={teamId}
+            teamName={team.name}
+            userTeamRole={currentUserRole}
+            onInviteSent={() => handleMembersChange()}
+          />
+        )}
       </div>
 
       {/* Team Info */}
@@ -136,6 +168,14 @@ export default function TeamDetailPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Team Members Section */}
+      <TeamMembersList
+        teamId={teamId}
+        isLoading={membersQuery.isLoading}
+        members={membersQuery.data}
+        onMembersChange={() => handleMembersChange()}
+      />
 
       {/* Chat and Activity Grid */}
       <div className="grid gap-6 lg:grid-cols-2">

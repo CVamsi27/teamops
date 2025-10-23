@@ -7,14 +7,19 @@ import type {
   ChatMessageType,
 } from '@workspace/api';
 
+interface ChatGateway {
+  broadcastToRoom(roomId: string, roomType: string, event: string, data: unknown): void;
+  getOnlineUsers(roomId: string, roomType: string): string[];
+}
+
 @Injectable()
 export class ChatService {
   private readonly logger = new Logger(ChatService.name);
-  private chatGateway: any; // Will be set by the gateway
+  private chatGateway: ChatGateway | null = null;
 
   constructor(private chatRepository: ChatRepository) {}
 
-  setChatGateway(gateway: any) {
+  setChatGateway(gateway: ChatGateway) {
     this.chatGateway = gateway;
   }
 
@@ -78,12 +83,17 @@ export class ChatService {
 
     const message = await this.createMessage(systemMessage);
 
-    this.chatGateway.broadcastToRoom(roomId, roomType, 'new_message', message);
+    if (this.chatGateway) {
+      this.chatGateway.broadcastToRoom(roomId, roomType, 'new_message', message);
+    }
 
     return message;
   }
 
   async getOnlineUsers(roomId: string, roomType: string): Promise<string[]> {
+    if (!this.chatGateway) {
+      return [];
+    }
     return this.chatGateway.getOnlineUsers(roomId, roomType);
   }
 
@@ -91,9 +101,11 @@ export class ChatService {
     roomId: string,
     roomType: string,
     event: string,
-    data: any
+    data: unknown
   ): Promise<void> {
-    this.chatGateway.broadcastToRoom(roomId, roomType, event, data);
+    if (this.chatGateway) {
+      this.chatGateway.broadcastToRoom(roomId, roomType, event, data);
+    }
   }
 
   async cleanupOldMessages(days: number = 90): Promise<number> {

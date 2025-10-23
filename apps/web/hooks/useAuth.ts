@@ -11,6 +11,7 @@ import {
 import { useApiMutation } from "./api/useApiMutation";
 import { useApiQuery } from "./api/useApiQuery";
 import { AuthStorage } from "@/lib/auth-storage";
+import { AxiosError } from "axios";
 import { z } from "zod";
 import { usePathname } from "next/navigation";
 import { PUBLIC_ROUTES } from "@/lib/const";
@@ -40,7 +41,7 @@ export function useRegister() {
 }
 
 export function useLogout() {
-  return useApiMutation<any, {}>("/auth/logout", ["auth"], LogoutSchema, {
+  return useApiMutation<Record<string, unknown>, Record<string, unknown>>("/auth/logout", ["auth"], LogoutSchema, {
     invalidateKeys: [["me"]],
   });
 }
@@ -59,6 +60,8 @@ export const AuthUtils = {
   },
 };
 
+type ApiError = AxiosError<{ message?: string }>;
+
 export function useMe(options?: { enabled?: boolean }) {
   // If caller does not explicitly set enabled, determine it based on the
   // current pathname and PUBLIC_ROUTES so public pages (e.g. '/') don't
@@ -70,8 +73,9 @@ export function useMe(options?: { enabled?: boolean }) {
   const enabledByDefault = options?.enabled ?? !isPublicRoute;
 
   return useApiQuery<UserProfile>(["me"], "/auth/profile", UserProfileSchema, {
-    retry: (failureCount, error: any) => {
-      if (error?.response?.status === 401) {
+    retry: (failureCount: number, error: unknown) => {
+      const apiError = error as ApiError;
+      if (apiError?.response?.status === 401) {
         return false;
       }
       return failureCount < 2;

@@ -1,6 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../infrastructure/prisma.service';
-import type { ChatMessage, CreateChatMessage } from '@workspace/api';
+import type { ChatMessage, CreateChatMessage, ChatRoomType, ChatMessageType } from '@workspace/api';
+
+type PrismaChatMessage = {
+  id: string;
+  content: string;
+  roomId: string;
+  roomType: string;
+  messageType: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
 @Injectable()
 export class ChatRepository {
@@ -18,7 +31,7 @@ export class ChatRepository {
         userEmail: payload.userEmail,
       },
     });
-    return this.map(message);
+    return this.map(message as unknown as PrismaChatMessage);
   }
 
   async findByRoom(
@@ -30,20 +43,20 @@ export class ChatRepository {
     const messages = await this.prisma.chatMessage.findMany({
       where: {
         roomId,
-        roomType: roomType as any,
+        roomType: roomType as ChatRoomType,
       },
       orderBy: { createdAt: 'desc' },
       take: limit,
       skip: offset,
     });
-    return messages.reverse().map(this.map);
+    return messages.reverse().map((msg) => this.map(msg as unknown as PrismaChatMessage));
   }
 
   async countByRoom(roomId: string, roomType: string): Promise<number> {
     return this.prisma.chatMessage.count({
       where: {
         roomId,
-        roomType: roomType as any,
+        roomType: roomType as ChatRoomType,
       },
     });
   }
@@ -63,13 +76,13 @@ export class ChatRepository {
     return result.count;
   }
 
-  private map(message: any): ChatMessage {
+  private map(message: PrismaChatMessage): ChatMessage {
     return {
       id: message.id,
       content: message.content,
       roomId: message.roomId,
-      roomType: message.roomType,
-      messageType: message.messageType,
+      roomType: message.roomType as ChatRoomType,
+      messageType: message.messageType as ChatMessageType,
       userId: message.userId,
       userName: message.userName,
       userEmail: message.userEmail,

@@ -2,6 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { google } from 'googleapis';
 import { PrismaService } from '../../infrastructure/prisma.service';
 
+interface CalendarEvent {
+  title: string;
+  description?: string;
+  startTime: string;
+  endTime: string;
+  reminderMinutes?: number;
+}
+
 @Injectable()
 export class GoogleCalendarService {
   private oauth2Client;
@@ -184,7 +192,7 @@ export class GoogleCalendarService {
 
   async createEvent(
     userId: string,
-    event: any,
+    event: CalendarEvent,
     accessToken: string,
     refreshToken: string
   ) {
@@ -239,7 +247,7 @@ export class GoogleCalendarService {
 
   async updateEvent(
     eventId: string,
-    event: any,
+    event: CalendarEvent,
     accessToken: string,
     refreshToken: string
   ) {

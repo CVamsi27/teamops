@@ -59,8 +59,9 @@ export class TaskService implements OnModuleDestroy {
       await this.kafkaProducer.connect();
       this.kafkaEnabled = true;
       this.logger.log('Kafka producer connected successfully');
-    } catch (e: any) {
-      this.logger.warn('Kafka producer connect failed: ' + (e?.message ?? e));
+    } catch (error) {
+      const err = error as Error;
+      this.logger.warn('Kafka producer connect failed: ' + (err?.message ?? String(error)));
       this.kafkaProducer = null;
       this.kafkaEnabled = false;
     }
@@ -248,8 +249,9 @@ export class TaskService implements OnModuleDestroy {
         ],
       });
       this.logger.debug(`Published event to topic: ${topic}`);
-    } catch (e: any) {
-      this.logger.warn('Failed to publish event: ' + (e?.message ?? e));
+    } catch (error) {
+      const err = error as Error;
+      this.logger.warn('Failed to publish event: ' + (err?.message ?? String(error)));
     }
   }
 

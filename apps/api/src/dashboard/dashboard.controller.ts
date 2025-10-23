@@ -7,6 +7,7 @@ import { ValidateResponse } from '../common/response-validation.decorator';
 import {
   DashboardDataSchema,
   type DashboardData as DashboardDataType,
+  type Task,
 } from '@workspace/api';
 
 interface AuthenticatedRequest extends Request {
@@ -61,29 +62,41 @@ export class DashboardController {
     const now = new Date();
     const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
     const upcomingTasks = allTasks.filter((task) => {
-      if (!task.dueDate) return false;
-      const dueDate = new Date(task.dueDate);
+      const t = task as Record<string, unknown>;
+      if (!t.dueDate) return false;
+      const dueDate = new Date(String(t.dueDate));
       return dueDate >= now && dueDate <= nextWeek;
     });
 
     const taskStats = {
-      todo: allTasks.filter((task) => task.status === 'TODO').length,
-      inProgress: allTasks.filter((task) => task.status === 'IN_PROGRESS')
-        .length,
-      done: allTasks.filter((task) => task.status === 'DONE').length,
+      todo: allTasks.filter((task) => {
+        const t = task as Record<string, unknown>;
+        return t.status === 'TODO';
+      }).length,
+      inProgress: allTasks.filter((task) => {
+        const t = task as Record<string, unknown>;
+        return t.status === 'IN_PROGRESS';
+      }).length,
+      done: allTasks.filter((task) => {
+        const t = task as Record<string, unknown>;
+        return t.status === 'DONE';
+      }).length,
     };
 
     return {
-      upcomingTasks: upcomingTasks.slice(0, 10),
+      upcomingTasks: (upcomingTasks as Task[]).slice(0, 10),
       activeProjects: activeProjects.slice(0, 5),
       myTeams,
       taskStats,
     };
   }
 
-  private deduplicateTasks(tasks: any[]): any[] {
-    const taskMap = new Map();
-    tasks.forEach((task) => taskMap.set(task.id, task));
+  private deduplicateTasks(tasks: unknown[]): unknown[] {
+    const taskMap = new Map<string, unknown>();
+    tasks.forEach((task) => {
+      const t = task as Record<string, unknown>;
+      taskMap.set(String(t.id), task);
+    });
     return Array.from(taskMap.values());
   }
 }

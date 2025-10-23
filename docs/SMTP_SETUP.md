@@ -124,9 +124,7 @@ transporter
     subject: "Mailgun SMTP Test",
     html: "<h1>Mailgun is working!</h1><p>Email sent successfully via SMTP.</p>",
   })
-  .then(() => {
-    console.log("✅ Email sent via Mailgun!");
-  })
+  .then(() => {})
   .catch(console.error);
 ```
 

@@ -5,12 +5,15 @@ import {
   UseQueryResult,
   UseQueryOptions,
 } from "@tanstack/react-query";
-import { ZodType } from "zod";
+import { AxiosError } from "axios";
+import { ZodError, ZodType } from "zod";
 import { api } from "@/lib/api";
 
 type ApiQueryOptions<T> = Partial<UseQueryOptions<T>> & {
   enabled?: boolean;
 };
+
+type ApiError = AxiosError<{ message?: string }>;
 
 export function useApiQuery<T>(
   queryKey: string[],
@@ -27,12 +30,14 @@ export function useApiQuery<T>(
         const { data } = await api.get(endpoint);
         try {
           return schema.parse(data);
-        } catch (zodError: any) {
+        } catch (zodError) {
+          const error = zodError as ZodError;
           throw new Error(
-            `Data validation failed for ${endpoint}: ${zodError.message}`,
+            `Data validation failed for ${endpoint}: ${error.message}`,
           );
         }
-      } catch (apiError: any) {
+      } catch (error) {
+        const apiError = error as ApiError;
         if (apiError.response) {
           if (apiError.response.status === 401) {
             throw new Error("Unauthorized: Please login again");
@@ -53,7 +58,7 @@ export function useApiQuery<T>(
         } else if (apiError.request) {
           throw new Error("Network error: Please check your connection");
         } else {
-          throw apiError;
+          throw error;
         }
       }
     },

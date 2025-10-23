@@ -121,8 +121,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const savedMessage = await this.chatService.createMessage({
         content: message.content,
         roomId,
-        roomType: roomType.toUpperCase() as any,
-        messageType: 'MESSAGE' as any,
+        roomType: roomType.toUpperCase() as 'TEAM' | 'TASK',
+        messageType: 'MESSAGE',
         userId: message.userId,
         userName: message.userName,
         userEmail: message.userEmail,
@@ -191,7 +191,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     roomId: string,
     roomType: string,
     event: string,
-    data: any
+    data: unknown
   ) {
     const roomKey = `${roomType.toLowerCase()}_${roomId}`;
     this.server.to(roomKey).emit(event, data);

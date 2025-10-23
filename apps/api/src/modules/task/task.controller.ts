@@ -52,6 +52,8 @@ export class TaskController {
     const taskWithCreator = {
       ...body,
       createdById: req.user!.userId,
+      // Default assigneeId to creator if not provided
+      assigneeId: body.assigneeId ?? req.user!.userId,
     };
     return this.service.create(taskWithCreator);
   }

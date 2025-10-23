@@ -12,6 +12,14 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { GetChatHistoryDto } from './dto/get-chat-history.dto';
 import type { ChatMessage, CreateChatMessage } from '@workspace/api';
 
+interface AuthRequest {
+  user: {
+    sub: string;
+    name?: string;
+    email: string;
+  };
+}
+
 @Controller('chat')
 @UseGuards(JwtAuthGuard)
 export class ChatController {
@@ -20,7 +28,7 @@ export class ChatController {
   @Get('history')
   async getChatHistory(
     @Query() query: GetChatHistoryDto,
-    @Request() _req: any
+    @Request() _req: AuthRequest
   ): Promise<ChatMessage[]> {
     const { roomId, roomType, limit, offset } = query;
 
@@ -31,7 +39,7 @@ export class ChatController {
   async createMessage(
     @Body()
     body: { content: string; roomId: string; roomType: 'TEAM' | 'TASK' },
-    @Request() _req: any
+    @Request() _req: AuthRequest
   ): Promise<ChatMessage> {
     const user = _req.user;
     if (!user) {
@@ -55,7 +63,7 @@ export class ChatController {
   async getOnlineUsers(
     @Query('roomType') roomType: string,
     @Query('roomId') roomId: string,
-    @Request() _req: any
+    @Request() _req: AuthRequest
   ): Promise<{ onlineUsers: string[] }> {
     const onlineUsers = await this.chatService.getOnlineUsers(roomId, roomType);
     return { onlineUsers };
@@ -65,7 +73,7 @@ export class ChatController {
   async getRoomStats(
     @Query('roomType') roomType: string,
     @Query('roomId') roomId: string,
-    @Request() _req: any
+    @Request() _req: AuthRequest
   ): Promise<{ messageCount: number; onlineUsers: string[] }> {
     const [messageCount, onlineUsers] = await Promise.all([
       this.chatService.getRoomMessageCount(roomId, roomType),

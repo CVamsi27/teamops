@@ -244,9 +244,6 @@ export class KafkaService {
       const successful = results.filter(
         (result) => result.status === "fulfilled",
       ).length;
-      console.log(
-        `Batch publish: ${successful}/${events.length} messages sent`,
-      );
 
       return successful === events.length;
     } catch (error) {

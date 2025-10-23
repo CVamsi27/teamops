@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { io } from "socket.io-client";
 
 export const useNotifications = (
-  onEvent: (topic: string, payload: any) => void,
+  onEvent: (topic: string, payload: unknown) => void,
 ) => {
   useEffect(() => {
     const socket = io(process.env.NEXT_PUBLIC_WS_URL);
@@ -12,5 +12,5 @@ export const useNotifications = (
     return () => {
       socket.disconnect();
     };
-  }, []);
+  }, [onEvent]);
 };

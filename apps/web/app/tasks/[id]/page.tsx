@@ -230,7 +230,16 @@ export default function TaskDetailPage() {
                     <User className="h-4 w-4" />
                     Assignee
                   </h3>
-                  <Badge variant="outline">{task.assigneeId}</Badge>
+                  <div>
+                    <p className="text-sm font-medium">
+                      {task.assignee?.name || task.assignee?.email || "Unknown"}
+                    </p>
+                    {task.assignee?.email && (
+                      <p className="text-xs text-muted-foreground">
+                        {task.assignee.email}
+                      </p>
+                    )}
+                  </div>
                 </div>
               )}
 

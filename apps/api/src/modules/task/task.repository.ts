@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../infrastructure/prisma.service';
 import type {
-  Task as PrismaTask,
   TaskStatus as PrismaTaskStatus,
   TaskPriority as PrismaTaskPriority,
 } from '@prisma/client';
@@ -13,19 +12,48 @@ export class TaskRepository {
 
   async findAll(): Promise<Task[]> {
     const list = await this.prisma.task.findMany({
+      include: {
+        assignee: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
       orderBy: { createdAt: 'desc' },
     });
     return list.map(this.map);
   }
 
   async findOne(id: string): Promise<Task | null> {
-    const t = await this.prisma.task.findUnique({ where: { id } });
+    const t = await this.prisma.task.findUnique({ 
+      where: { id },
+      include: {
+        assignee: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
     return t ? this.map(t) : null;
   }
 
   async findByAssigneeId(assigneeId: string): Promise<Task[]> {
     const tasks = await this.prisma.task.findMany({
       where: { assigneeId },
+      include: {
+        assignee: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
       orderBy: { createdAt: 'desc' },
     });
     return tasks.map(this.map);
@@ -34,6 +62,15 @@ export class TaskRepository {
   async findByProjectId(projectId: string): Promise<Task[]> {
     const tasks = await this.prisma.task.findMany({
       where: { projectId },
+      include: {
+        assignee: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
       orderBy: { createdAt: 'desc' },
     });
     return tasks.map(this.map);
@@ -51,8 +88,17 @@ export class TaskRepository {
         assigneeId: payload.assigneeId ?? null,
         createdById: payload.createdById,
       },
+      include: {
+        assignee: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
     });
-    return this.map(t);
+    return this.map(t as any);
   }
 
   async update(id: string, payload: UpdateTask): Promise<Task | null> {
@@ -73,8 +119,17 @@ export class TaskRepository {
       const t = await this.prisma.task.update({
         where: { id },
         data: updateData,
+        include: {
+          assignee: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
       });
-      return this.map(t);
+      return this.map(t as any);
     } catch {
       return null;
     }
@@ -89,7 +144,7 @@ export class TaskRepository {
     }
   }
 
-  private map(t: PrismaTask): Task {
+  private map(t: any): Task {
     return {
       id: t.id,
       title: t.title,
@@ -102,6 +157,11 @@ export class TaskRepository {
       createdById: t.createdById,
       createdAt: t.createdAt.toISOString(),
       updatedAt: t.updatedAt.toISOString(),
+      assignee: t.assignee ? {
+        id: t.assignee.id,
+        name: t.assignee.name ?? undefined,
+        email: t.assignee.email,
+      } : undefined,
     };
   }
 }

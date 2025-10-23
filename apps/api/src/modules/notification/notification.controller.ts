@@ -13,6 +13,15 @@ import { NotificationService } from './notification.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import type { CreateNotification } from '@workspace/api';
 
+interface AuthRequest {
+  user: {
+    id: string;
+    userId?: string;
+    email?: string;
+    role?: string;
+  };
+}
+
 @Controller('notifications')
 @UseGuards(JwtAuthGuard)
 export class NotificationController {
@@ -20,7 +29,7 @@ export class NotificationController {
 
   @Get()
   async findAll(
-    @Request() req: any,
+    @Request() req: AuthRequest,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
     @Query('unread') unread?: string
@@ -45,13 +54,13 @@ export class NotificationController {
   }
 
   @Get('unread-count')
-  async getUnreadCount(@Request() req: any) {
+  async getUnreadCount(@Request() req: AuthRequest) {
     const userId = req.user.id;
     return this.notificationService.getUnreadCount(userId);
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string, @Request() req: any) {
+  async findOne(@Param('id') id: string, @Request() req: AuthRequest) {
     const userId = req.user.id;
     return this.notificationService.findOne(id, userId);
   }
@@ -59,7 +68,7 @@ export class NotificationController {
   @Post()
   async create(
     @Body() createNotificationDto: CreateNotification,
-    @Request() req: any
+    @Request() req: AuthRequest
   ) {
     return this.notificationService.createFromApi({
       ...createNotificationDto,
@@ -68,13 +77,13 @@ export class NotificationController {
   }
 
   @Patch(':id/read')
-  async markAsRead(@Param('id') id: string, @Request() req: any) {
+  async markAsRead(@Param('id') id: string, @Request() req: AuthRequest) {
     const userId = req.user.id;
     return this.notificationService.markAsRead(id, userId);
   }
 
   @Patch('mark-all-read')
-  async markAllAsRead(@Request() req: any) {
+  async markAllAsRead(@Request() req: AuthRequest) {
     const userId = req.user.id;
     return this.notificationService.markAllAsRead(userId);
   }
@@ -82,8 +91,8 @@ export class NotificationController {
   @Patch(':id')
   async update(
     @Param('id') id: string,
-    @Body() updateNotificationDto: any,
-    @Request() req: any
+    @Body() updateNotificationDto: Record<string, unknown>,
+    @Request() req: AuthRequest
   ) {
     const userId = req.user.id;
     return this.notificationService.update(id, updateNotificationDto, userId);

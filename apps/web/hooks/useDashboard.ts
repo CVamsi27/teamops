@@ -39,10 +39,11 @@ export type DashboardData = z.infer<typeof DashboardDataSchema>;
 
 export function useDashboard() {
   return useApiQuery(["dashboard"], "/dashboard", DashboardDataSchema, {
-    retry: (failureCount, error: any) => {
+    retry: (failureCount: number, error: unknown) => {
+      const err = error as Error;
       if (
-        error?.message?.includes("Unauthorized") ||
-        error?.message?.includes("Data validation failed")
+        err?.message?.includes("Unauthorized") ||
+        err?.message?.includes("Data validation failed")
       ) {
         return false;
       }

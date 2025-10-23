@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { TeamDeletionDialog } from "@/components/teams/team-deletion-dialog";
 import { TeamMemberInvite } from "@/components/teams/team-member-invite";
+import { TeamsInfoDialog } from "@/components/teams/teams-info-dialog";
 
 export default function TeamsPage() {
   const { list, remove } = useTeams();
@@ -55,11 +56,14 @@ export default function TeamsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold">Teams</h1>
-          <p className="text-muted-foreground mt-1">
-            Manage your teams and collaborate with members
-          </p>
+        <div className="flex items-center gap-3">
+          <div>
+            <h1 className="text-3xl font-bold">Teams</h1>
+            <p className="text-muted-foreground mt-1">
+              Manage your teams and collaborate with members
+            </p>
+          </div>
+          <TeamsInfoDialog />
         </div>
         <Button asChild>
           <Link href="/teams/new">

@@ -5,10 +5,12 @@ import { type Project } from "@workspace/api";
 import { Button } from "@workspace/ui/components/button";
 import { Card, CardContent } from "@workspace/ui/components/card";
 import { Badge } from "@workspace/ui/components/badge";
-import { Plus, Edit, FolderOpen, Users } from "lucide-react";
+import { Plus, Edit, Users, Eye } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { ProjectDeletionDialog } from "@/components/projects/project-deletion-dialog";
+import { ProjectMembersDialog } from "@/components/projects/project-members-dialog";
+import { ProjectsInfoDialog } from "@/components/projects/projects-info-dialog";
 
 export default function ProjectsPage() {
   const { list, remove } = useProjects();
@@ -61,11 +63,14 @@ export default function ProjectsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold">Projects</h1>
-          <p className="text-muted-foreground mt-1">
-            Manage your team projects and collaboration
-          </p>
+        <div className="flex items-center gap-3">
+          <div>
+            <h1 className="text-3xl font-bold">Projects</h1>
+            <p className="text-muted-foreground mt-1">
+              Manage your team projects and collaboration
+            </p>
+          </div>
+          <ProjectsInfoDialog />
         </div>
         <Button asChild>
           <Link href="/projects/new">
@@ -80,7 +85,7 @@ export default function ProjectsPage() {
         {list.data?.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center">
-              <FolderOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <Eye className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold mb-2">No projects yet</h3>
               <p className="text-muted-foreground mb-4">
                 Get started by creating your first project
@@ -122,6 +127,15 @@ export default function ProjectsPage() {
                   </div>
 
                   <div className="flex items-center gap-2 flex-shrink-0">
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href={`/projects/${project.id}`}>
+                        <Eye className="h-4 w-4" />
+                        <span className="hidden sm:inline ml-2">View</span>
+                      </Link>
+                    </Button>
+
+                    <ProjectMembersDialog teamId={project.teamId} />
+
                     <Button variant="outline" size="sm" asChild>
                       <Link href={`/projects/${project.id}/edit`}>
                         <Edit className="h-4 w-4" />

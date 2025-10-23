@@ -1,5 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { ProjectRepository } from './project.repository';
+import { ProjectMembershipRepository, type ProjectMembership, type ProjectRole } from './project-membership.repository';
 import { PrismaService } from '../../infrastructure/prisma.service';
 import type {
   Project,
@@ -8,10 +9,19 @@ import type {
   ProjectDeletionInfo,
 } from '@workspace/api';
 
+export interface ProjectMember extends ProjectMembership {
+  user?: {
+    id: string;
+    email: string;
+    name: string | null;
+  };
+}
+
 @Injectable()
 export class ProjectService {
   constructor(
     private repo: ProjectRepository,
+    private membershipRepo: ProjectMembershipRepository,
     private prisma: PrismaService
   ) {}
 
@@ -102,4 +112,147 @@ export class ProjectService {
   async getProjectsByTeam(teamId: string): Promise<Project[]> {
     return this.repo.findByTeamId(teamId);
   }
+
+  async getProjectMembers(projectId: string, requesterId: string): Promise<ProjectMember[]> {
+    // Check if requester is a member of the project
+    const requesterMembership = await this.membershipRepo.findByUserAndProject(
+      requesterId,
+      projectId
+    );
+    if (!requesterMembership) {
+      throw new ForbiddenException('You do not have access to this project');
+    }
+
+    return this.membershipRepo.findAllByProjectIdWithUser(projectId) as Promise<ProjectMember[]>;
+  }
+
+  async addProjectMember(
+    projectId: string,
+    userId: string,
+    role: ProjectRole,
+    requesterId: string
+  ): Promise<ProjectMember> {
+    // Check if requester is LEAD or can manage members
+    const requesterMembership = await this.membershipRepo.findByUserAndProject(
+      requesterId,
+      projectId
+    );
+    if (!requesterMembership) {
+      throw new ForbiddenException('You do not have access to this project');
+    }
+    if (requesterMembership.role !== 'LEAD') {
+      throw new ForbiddenException(
+        'Only project leads can add members'
+      );
+    }
+
+    // Check if user already member
+    const existingMembership = await this.membershipRepo.findByUserAndProject(
+      userId,
+      projectId
+    );
+    if (existingMembership) {
+      throw new ForbiddenException('User is already a member of this project');
+    }
+
+    return this.membershipRepo.create({
+      userId,
+      projectId,
+      role,
+    }) as Promise<ProjectMember>;
+  }
+
+  async updateProjectMemberRole(
+    projectId: string,
+    userId: string,
+    role: ProjectRole,
+    requesterId: string
+  ): Promise<ProjectMember> {
+    // Check if requester is LEAD
+    const requesterMembership = await this.membershipRepo.findByUserAndProject(
+      requesterId,
+      projectId
+    );
+    if (!requesterMembership) {
+      throw new ForbiddenException('You do not have access to this project');
+    }
+    if (requesterMembership.role !== 'LEAD') {
+      throw new ForbiddenException(
+        'Only project leads can change member roles'
+      );
+    }
+
+    // Check if target user is a member
+    const targetMembership = await this.membershipRepo.findByUserAndProject(
+      userId,
+      projectId
+    );
+    if (!targetMembership) {
+      throw new NotFoundException('User is not a member of this project');
+    }
+
+    // Prevent removing the last lead
+    if (targetMembership.role === 'LEAD' && role !== 'LEAD') {
+      const leadCount = await (this.prisma as any).projectMembership.count({
+        where: {
+          projectId,
+          role: 'LEAD',
+        },
+      });
+      if (leadCount === 1) {
+        throw new ForbiddenException(
+          'Cannot remove the last project lead'
+        );
+      }
+    }
+
+    return this.membershipRepo.updateRole(userId, projectId, role) as Promise<ProjectMember>;
+  }
+
+  async removeProjectMember(
+    projectId: string,
+    userId: string,
+    requesterId: string
+  ): Promise<void> {
+    // Check if requester is LEAD
+    const requesterMembership = await this.membershipRepo.findByUserAndProject(
+      requesterId,
+      projectId
+    );
+    if (!requesterMembership) {
+      throw new ForbiddenException('You do not have access to this project');
+    }
+    if (requesterMembership.role !== 'LEAD') {
+      throw new ForbiddenException(
+        'Only project leads can remove members'
+      );
+    }
+
+    // Check if target is a member
+    const targetMembership = await this.membershipRepo.findByUserAndProject(
+      userId,
+      projectId
+    );
+    if (!targetMembership) {
+      throw new NotFoundException('User is not a member of this project');
+    }
+
+    // Prevent removing the last lead
+    if (targetMembership.role === 'LEAD') {
+      const leadCount = await (this.prisma as any).projectMembership.count({
+        where: {
+          projectId,
+          role: 'LEAD',
+        },
+      });
+      if (leadCount === 1) {
+        throw new ForbiddenException(
+          'Cannot remove the last project lead'
+        );
+      }
+    }
+
+    await this.membershipRepo.delete(userId, projectId);
+  }
 }
+

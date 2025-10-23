@@ -1,8 +1,10 @@
 "use client";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { useTasks } from "@/hooks/tasks/useTasks";
 import { useProjects } from "@/hooks/useProjects";
+import { useProjectMembers } from "@/hooks/projects/useProjectMembers";
 import { type CreateTask, type UpdateTask, type Task } from "@workspace/api";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
@@ -24,7 +26,6 @@ import { Label } from "@workspace/ui/components/label";
 import { toast } from "@workspace/ui/components/toast";
 import { ArrowLeft, Plus, Edit, Calendar } from "lucide-react";
 import Link from "next/link";
-import { useEffect } from "react";
 import { PRIORITY_OPTIONS, STATUS_OPTIONS } from "@/lib/const";
 
 interface TaskFormProps {
@@ -40,12 +41,17 @@ type TaskFormData = {
   status: "TODO" | "IN_PROGRESS" | "DONE";
   projectId?: string;
   dueDate?: string | null;
+  assigneeId?: string | null;
 };
 
 export function TaskForm({ mode, task, onSuccess }: TaskFormProps) {
   const router = useRouter();
   const { create, update } = useTasks();
   const { list: projectsQuery } = useProjects();
+  const [selectedProjectId, setSelectedProjectId] = useState<string | undefined>(
+    mode === "edit" && task ? task.projectId : undefined
+  );
+  const { data: projectMembers } = useProjectMembers(selectedProjectId || "");
 
   const today = new Date().toISOString().split("T")[0];
 
@@ -70,7 +76,9 @@ export function TaskForm({ mode, task, onSuccess }: TaskFormProps) {
         dueDate: task.dueDate
           ? new Date(task.dueDate).toISOString().split("T")[0]
           : today,
+        assigneeId: task.assigneeId || undefined,
       });
+      setSelectedProjectId(task.projectId);
     }
   }, [task, form, mode, today]);
 
@@ -83,6 +91,7 @@ export function TaskForm({ mode, task, onSuccess }: TaskFormProps) {
         status: data.status,
         projectId: data.projectId!,
         dueDate: data.dueDate || null,
+        assigneeId: data.assigneeId || null,
       };
 
       create.mutate(createData, {
@@ -104,6 +113,7 @@ export function TaskForm({ mode, task, onSuccess }: TaskFormProps) {
         priority: data.priority,
         status: data.status,
         dueDate: data.dueDate ? new Date(data.dueDate).toISOString() : null,
+        assigneeId: data.assigneeId || null,
       };
 
       update.mutate(
@@ -199,7 +209,10 @@ export function TaskForm({ mode, task, onSuccess }: TaskFormProps) {
               <div className="space-y-2">
                 <Label htmlFor="project">Project *</Label>
                 <Select
-                  onValueChange={(value) => form.setValue("projectId", value)}
+                  onValueChange={(value) => {
+                    form.setValue("projectId", value);
+                    setSelectedProjectId(value);
+                  }}
                   value={form.watch("projectId") || ""}
                 >
                   <SelectTrigger>
@@ -243,6 +256,30 @@ export function TaskForm({ mode, task, onSuccess }: TaskFormProps) {
                 </div>
               </div>
             )}
+
+            <div className="space-y-2">
+              <Label htmlFor="assignee">Assign To</Label>
+              <Select
+                onValueChange={(value) => form.setValue("assigneeId", value)}
+                value={form.watch("assigneeId") || ""}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select assignee" />
+                </SelectTrigger>
+                <SelectContent>
+                  {projectMembers?.map((member) => (
+                    <SelectItem key={member.userId} value={member.userId}>
+                      {member.user?.name || member.user?.email || "Unknown"}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                {selectedProjectId
+                  ? "Select a project member to assign this task to. If not selected, you will be assigned by default."
+                  : "Select a project first to see available members"}
+              </p>
+            </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">

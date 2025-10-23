@@ -79,10 +79,10 @@ model Notification {
 }
 
 model Project {
-  id           String  @id @default(uuid())
+  id           String   @id @default(uuid())
   name         String
   description  String?
-  isCompleted  Boolean @default(false)
+  isCompleted  Boolean  @default(false)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   teamId       String
@@ -91,6 +91,7 @@ model Project {
   createdBy    User     @relation(fields: [createdById], references: [id])
   tasks        Task[]
   activities   Activity[]
+  memberships  ProjectMembership[]
 
   @@index([teamId])
   @@index([createdById])
@@ -147,6 +148,7 @@ model User {
   googleRefreshToken   String?
   googleTokenExpiry    DateTime?
   memberships          Membership[]
+  projectMemberships   ProjectMembership[]
   notifications        Notification[]
   assignedTasks        Task[]         @relation("TaskAssignee")
   createdTasks         Task[]         @relation("TaskCreator")
@@ -174,6 +176,21 @@ model ChatMessage {
   @@index([roomId, roomType])
   @@index([createdAt])
   @@index([userId])
+}
+
+model ProjectMembership {
+  id        String    @id @default(uuid())
+  role      ProjectRole @default(CONTRIBUTOR)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  userId    String
+  projectId String
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, projectId])
+  @@index([userId])
+  @@index([projectId])
 }
 
 enum ActivityType {
@@ -204,6 +221,13 @@ enum Role {
   VIEWER
 }
 
+enum ProjectRole {
+  LEAD
+  CONTRIBUTOR
+  REVIEWER
+  VIEWER
+}
+
 enum TaskStatus {
   TODO
   IN_PROGRESS
@@ -213,6 +237,7 @@ enum TaskStatus {
 enum ChatRoomType {
   TEAM
   TASK
+  PROJECT
 }
 
 enum ChatMessageType {
