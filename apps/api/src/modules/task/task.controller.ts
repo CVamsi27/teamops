@@ -37,6 +37,23 @@ export class TaskController {
     return this.service.list();
   }
 
+  @Get('workload/:projectId')
+  async getWorkloadDistribution(
+    @Param('projectId') projectId: string
+  ): Promise<
+    Array<{
+      userId: string;
+      name: string | null;
+      email: string;
+      totalTasks: number;
+      todoCount: number;
+      inProgressCount: number;
+      doneCount: number;
+    }>
+  > {
+    return this.service.getWorkloadDistribution(projectId);
+  }
+
   @Get(':id')
   @ValidateResponse(TaskSchema)
   async get(@Param('id') id: string): Promise<Task> {

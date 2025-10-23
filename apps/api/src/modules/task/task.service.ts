@@ -108,6 +108,73 @@ export class TaskService implements OnModuleDestroy {
     return this.repo.findByProjectId(projectId);
   }
 
+  async getWorkloadDistribution(projectId: string): Promise<
+    Array<{
+      userId: string;
+      name: string | null;
+      email: string;
+      totalTasks: number;
+      todoCount: number;
+      inProgressCount: number;
+      doneCount: number;
+    }>
+  > {
+    // Get all tasks for the project
+    const tasks = await this.repo.findByProjectId(projectId);
+
+    // Get all project members
+    const members = await this.membershipRepo.findAllByProjectIdWithUser(
+      projectId
+    );
+
+    // Build workload distribution map
+    const workloadMap = new Map<
+      string,
+      {
+        userId: string;
+        name: string | null;
+        email: string;
+        totalTasks: number;
+        todoCount: number;
+        inProgressCount: number;
+        doneCount: number;
+      }
+    >();
+
+    // Initialize all members with zero tasks
+    members.forEach((member) => {
+      if (member.user) {
+        workloadMap.set(member.userId, {
+          userId: member.userId,
+          name: member.user.name,
+          email: member.user.email,
+          totalTasks: 0,
+          todoCount: 0,
+          inProgressCount: 0,
+          doneCount: 0,
+        });
+      }
+    });
+
+    // Count tasks by assignee and status
+    tasks.forEach((task) => {
+      if (task.assigneeId && workloadMap.has(task.assigneeId)) {
+        const workload = workloadMap.get(task.assigneeId)!;
+        workload.totalTasks += 1;
+
+        if (task.status === 'TODO') {
+          workload.todoCount += 1;
+        } else if (task.status === 'IN_PROGRESS') {
+          workload.inProgressCount += 1;
+        } else if (task.status === 'DONE') {
+          workload.doneCount += 1;
+        }
+      }
+    });
+
+    return Array.from(workloadMap.values());
+  }
+
   async get(id: string): Promise<Task> {
     const t = await this.repo.findOne(id);
     if (!t) throw new NotFoundException('Task not found');
