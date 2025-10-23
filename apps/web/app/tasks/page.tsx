@@ -15,7 +15,8 @@ import {
   Eye,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { TaskFilters, type TaskFilterOptions } from "@/components/tasks/task-filters";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,13 +34,14 @@ export default function TasksPage() {
   const tasksList = useTasks();
   const { list: projectsList } = useProjects();
   const [deletingTask, setDeletingTask] = useState<string | null>(null);
+  const [filters, setFilters] = useState<TaskFilterOptions>({});
 
   const handleDelete = (taskId: string) => {
     setDeletingTask(taskId);
   };
 
   const getProjectName = (projectId: string) => {
-    const project = projectsList.data?.find((p) => p.id === projectId);
+    const project = projectsList.data?.find((p: any) => p.id === projectId);
     return project?.name || "Unknown Project";
   };
 
@@ -107,6 +109,21 @@ export default function TasksPage() {
     };
   };
 
+  // Apply filters to tasks
+  const filteredTasks = useMemo(() => {
+    if (!tasksList.list.data) return [];
+
+    return tasksList.list.data.filter((task: any) => {
+      if (filters.status && task.status !== filters.status) return false;
+      if (filters.priority && task.priority !== filters.priority) return false;
+      if (filters.assigneeId && task.assigneeId !== filters.assigneeId)
+        return false;
+      if (filters.projectId && task.projectId !== filters.projectId)
+        return false;
+      return true;
+    });
+  }, [tasksList.list.data, filters]);
+
   if (tasksList.list.isLoading) {
     return (
       <div className="space-y-6">
@@ -150,9 +167,35 @@ export default function TasksPage() {
         </Button>
       </div>
 
+      {/* Filters */}
+      {tasksList.list.data && tasksList.list.data.length > 0 && (
+        <TaskFilters
+          tasks={tasksList.list.data}
+          onFiltersChange={setFilters}
+          currentFilters={filters}
+        />
+      )}
+
+      {/* Results Summary */}
+      {Object.keys(filters).length > 0 && (
+        <div className="text-sm text-muted-foreground">
+          Showing {filteredTasks.length} of {tasksList.list.data?.length} tasks
+        </div>
+      )}
+
       {/* Tasks List */}
       <div className="grid gap-4">
-        {tasksList.list.data?.length === 0 ? (
+        {filteredTasks.length === 0 && Object.keys(filters).length > 0 ? (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <CheckCircle className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">No tasks match filters</h3>
+              <p className="text-muted-foreground mb-4">
+                Try adjusting your filters to see more tasks
+              </p>
+            </CardContent>
+          </Card>
+        ) : filteredTasks.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center">
               <CheckCircle className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
@@ -169,11 +212,14 @@ export default function TasksPage() {
             </CardContent>
           </Card>
         ) : (
-          tasksList.list.data?.map((task) => {
+          filteredTasks.map((task: any) => {
             const dueDate = formatDueDate(task.dueDate || undefined);
 
             return (
-              <Card key={task.id} className="hover:shadow-md transition-shadow">
+              <Card
+                key={task.id}
+                className="hover:shadow-md transition-shadow"
+              >
                 <CardContent className="p-6">
                   <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
                     <div className="flex-1 min-w-0 space-y-3">
