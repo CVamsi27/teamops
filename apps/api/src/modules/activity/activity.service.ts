@@ -13,6 +13,8 @@ export class ActivityService {
       TASK_UPDATED: 'task_updated',
       TASK_COMPLETED: 'task_completed',
       TASK_DELETED: 'task_deleted',
+      TASK_ASSIGNED: 'task_assigned' as const,
+      TASK_UNASSIGNED: 'task_unassigned' as const,
       PROJECT_CREATED: 'project_created',
       PROJECT_UPDATED: 'project_updated',
       PROJECT_DELETED: 'project_deleted',
@@ -117,7 +119,9 @@ export class ActivityService {
       | 'task_updated'
       | 'task_completed'
       | 'task_deleted'
-      | 'due_date_changed',
+      | 'due_date_changed'
+      | 'task_assigned'
+      | 'task_unassigned',
     taskId: string,
     taskTitle: string,
     userId: string,
@@ -125,8 +129,18 @@ export class ActivityService {
     userEmail: string,
     metadata?: Record<string, unknown>
   ): Promise<void> {
+    const typeMap: Record<string, ActivityType> = {
+      'task_created': 'TASK_CREATED',
+      'task_updated': 'TASK_UPDATED',
+      'task_completed': 'TASK_COMPLETED',
+      'task_deleted': 'TASK_DELETED',
+      'task_assigned': 'TASK_ASSIGNED',
+      'task_unassigned': 'TASK_UNASSIGNED',
+      'due_date_changed': 'DUE_DATE_CHANGED',
+    };
+
     await this.createActivity({
-      type,
+      type: typeMap[type] || type,
       userId,
       userName,
       userEmail,
