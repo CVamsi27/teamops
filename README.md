@@ -1,7 +1,7 @@
 # **TeamOps**
 
 > A **modern, full-stack team collaboration platform** built with **Next.js 15, NestJS, WebSockets, and PostgreSQL**.
-> Designed to showcase **scalable architecture**, **real-time communication**, and **modern development practices**.
+> Designed to showcase **scalable architecture**, **intelligent task management**, **real-time communication**, and **modern development practices**.
 
 ![TeamOps Banner](https://dummyimage.com/1200x300/000/fff&text=TeamOps+-+Modern+Team+Collaboration+Platform)
 
@@ -9,12 +9,14 @@
 
 ## **✨ Overview**
 
-**TeamOps** is a comprehensive **team management and collaboration platform** that streamlines project coordination, task management, and real-time communication. Built with modern technologies and designed for scalability, it demonstrates best practices in full-stack development, microservices architecture, and cloud-native deployment.
+**TeamOps** is a comprehensive **team management and collaboration platform** that streamlines project coordination, task management, and real-time communication with smart assignment and workload distribution. Built with modern technologies and designed for scalability, it demonstrates best practices in full-stack development, microservices architecture, and cloud-native deployment.
 
 ### **🎯 Key Highlights**
 
 - 🚀 **Modern Tech Stack** — Next.js 15, NestJS, TypeScript, Prisma
 - ⚡ **Real-Time Features** — WebSockets, live notifications, instant updates
+- 🎯 **Intelligent Task Assignment** — Auto-assign tasks to creator, permission-based reassignment
+- 📊 **Workload Distribution** — Visual team workload analytics and metrics
 - 🏗️ **Scalable Architecture** — Microservices, event-driven design
 - 🌐 **Cloud-Native** — Optimized for Render, Vercel, and modern hosting
 - 🔒 **Enterprise-Ready** — JWT auth, role-based access, data security
@@ -43,12 +45,15 @@ pnpm dev
 - **🗄️ Database**: [Neon](https://neon.tech) - Serverless PostgreSQL
 - **💾 Cache/Events**: [Upstash](https://upstash.com) - Redis & Kafka (optional)
 
-### **📚 Documentation**
+## **📚 Documentation Reference**
 
-- 📖 [Complete Setup Guide](docs/README.md)
-- 🏗️ [Architecture Overview](docs/ARCHITECTURE.md)
-- 🚀 [Deployment Guide](docs/DEPLOYMENT_STEPS.md)
-- 🔧 [Render Deployment](docs/RENDER_DEPLOYMENT.md)
+- 📖 [Complete Setup Guide](docs/README.md) — Development environment setup
+- 🏗️ [Architecture Overview](docs/ARCHITECTURE.md) — System design and structure
+- 🚀 [Deployment Guide](docs/DEPLOYMENT_STEPS.md) — Production deployment steps
+- 🔧 [Render Deployment](docs/RENDER_DEPLOYMENT.md) — Render-specific setup
+- 🔐 [GitHub Actions Guide](docs/GITHUB_ACTIONS_GUIDE.md) — CI/CD automation
+- 📧 [SMTP Setup Guide](docs/SMTP_SETUP.md) — Email configuration
+- 🎯 [Phase 2 Enhancements](PHASE_2_ENHANCEMENTS.md) — Task assignment features
 
 ---
 
@@ -71,7 +76,7 @@ pnpm dev
 
 ## **⚡ Features**
 
-### **🎯 Current Features (v1.0)**
+### **🎯 Phase 1 - Core Features (v1.0)** ✅
 
 - 🔐 **Authentication & Authorization** — JWT + Google OAuth integration
 - 👥 **Team Management** — Create teams, invite members via email, role-based access
@@ -83,13 +88,23 @@ pnpm dev
 - 📅 **Google Calendar Integration** — Sync tasks with calendar events
 - 🎨 **Modern UI** — Responsive design with dark/light mode support
 
+### **🎯 Phase 2 - Task Assignment & Collaboration (v1.1)** ✅ NEW
+
+- 🎯 **Smart Task Assignment** — Tasks default to creator, explicit assignment optional
+- 🔐 **Permission-Based Reassignment** — Only LEAD/CONTRIBUTOR members can reassign tasks
+- 🔔 **Assignment Notifications** — Real-time alerts when tasks are assigned/unassigned
+- 👥 **Auto-Membership** — Creator auto-added as LEAD to projects, ADMIN to teams
+- 📊 **Workload Distribution** — Visual analytics showing task counts per team member by status (TODO/IN_PROGRESS/DONE)
+- 📈 **Team Statistics** — Member metrics including total tasks, average workload
+
 ### **🔧 Technical Features**
 
 - ⚡ **Monorepo Architecture** — Efficient code sharing and management
 - 🔄 **Event-Driven Design** — Kafka integration for scalable messaging
 - 📱 **Responsive Design** — Mobile-first, cross-platform compatibility
 - 🛡️ **Security** — CORS protection, JWT validation, input sanitization
-- 🎭 **Role-Based Access** — Admin, Member, Viewer permissions
+- 🎭 **Role-Based Access** — LEAD, CONTRIBUTOR, REVIEWER, VIEWER permissions
+- 📊 **Workload Analytics** — Aggregated metrics and visualization
 - 📈 **Performance** — Redis caching, optimized queries, CDN assets
 
 ---
@@ -149,15 +164,102 @@ teamops/
 
 ---
 
-## **📅 Roadmap**
+---
 
-### **v1.0 – MVP** ✅
+## **🎯 Task Assignment & Collaboration System**
+
+### **Smart Task Assignment**
+
+Tasks in TeamOps feature intelligent assignment management:
+
+- **Auto-Assignment**: Tasks are automatically assigned to their creator
+- **Explicit Assignment**: Users can assign tasks to team members with permission checks
+- **Permission Control**: Only LEAD and CONTRIBUTOR members can reassign tasks
+- **Notifications**: Real-time notifications when tasks are assigned or reassigned
+- **Workload Tracking**: Built-in analytics to monitor team member workloads
+
+### **API Endpoints**
+
+```bash
+# Assign task to member (requires LEAD/CONTRIBUTOR role)
+PATCH /api/tasks/:taskId
+{
+  "assigneeId": "user-id"
+}
+
+# Get workload distribution for project
+GET /api/tasks/workload/:projectId
+Response:
+[
+  {
+    "userId": "id",
+    "name": "John Doe",
+    "email": "john@example.com",
+    "totalTasks": 5,
+    "todoCount": 2,
+    "inProgressCount": 2,
+    "doneCount": 1
+  }
+]
+```
+
+### **Permission Model**
+
+| Role | Can Assign | Can Reassign | Can View Workload |
+| --- | --- | --- | --- |
+| **LEAD** | ✅ | ✅ | ✅ |
+| **CONTRIBUTOR** | ✅ | ✅ | ✅ |
+| **REVIEWER** | ❌ | ❌ | ✅ |
+| **VIEWER** | ❌ | ❌ | ✅ |
+
+### **Frontend Components**
+
+- **Workload Distribution View** — Visual bar chart showing team member tasks by status
+- **Task Assignment Selector** — Dropdown to assign/reassign tasks
+- **Task Filters** — Filter tasks by assignee (My Tasks, Team Tasks, etc.)
+
+### **Event Notifications**
+
+When tasks are assigned or reassigned:
+
+```json
+{
+  "type": "task_assigned",
+  "taskId": "task-123",
+  "assigneeId": "user-456",
+  "projectId": "project-789",
+  "assignedBy": "user-001",
+  "timestamp": "2025-10-23T10:30:00Z"
+}
+```
+
+---
+
+## **📅 Development Roadmap**
+
+### **v1.0 – MVP** ✅ COMPLETE
 
 - ✅ User authentication & team management
 - ✅ Project & task CRUD operations
 - ✅ Real-time notifications via WebSockets
 - ✅ Basic chat functionality
 - ✅ Google Calendar integration
+
+### **v1.1 – Task Assignment & Collaboration** ✅ COMPLETE
+
+- ✅ Smart task assignment (default to creator)
+- ✅ Auto-membership for projects/teams
+- ✅ Permission-based task reassignment
+- ✅ Assignment change notifications
+- ✅ Workload distribution analytics
+
+### **v1.2 – Advanced Task Management** 🚀 IN PROGRESS
+
+- 🔄 **Assignee filters** → Filter tasks by assignee ("My Tasks", "Team Tasks", etc.)
+- 🔄 **Bulk reassignment** → Select multiple tasks and reassign in batch
+- 🔄 **Assignment history** → Track who assigned tasks and when
+- 🔄 **@mention notifications** → Notify users when mentioned in comments
+- 🔄 **Task templates** → Create templates with pre-assigned members
 
 ### **v2.0 – Enhanced Collaboration**
 
@@ -186,6 +288,10 @@ teamops/
 - 🤝 **Contributor Guide** → Easy onboarding for open source contributors
 - 🐳 **Docker Setup** → Containerized development environment
 - 🔌 **Plugin System** → Extensible architecture for third-party integrations
+
+---
+
+## **📚 Documentation Reference**
 
 ---
 
@@ -344,9 +450,11 @@ npm run deploy:vercel
 
 ### **Free Hosting Options**
 
-- **Vercel**: $0/month (Recommended)
-- **Railway**: $0 for first few months
-- **Render**: $0/month forever
+- **Vercel**: $0/month (Recommended for Frontend)
+- **Render**: $0/month forever (Recommended for Backend)
+- **Railway**: Pay-as-you-go (Alternative)
+- **Neon**: Free PostgreSQL database
+- **Upstash**: Free Redis + Kafka (optional)
 
 ### **CI/CD Ready**
 
@@ -355,214 +463,15 @@ npm run deploy:vercel
 - ✅ Optional auto-deploy to production
 - ✅ Zero-config setup
 
-📖 **[Complete Documentation →](docs/README.md)**
-📖 **[🏗️ Architecture Overview →](docs/ARCHITECTURE.md)**
-📖 **[Quick Deployment Guide →](docs/DEPLOYMENT_STEPS.md)**
-📖 **[Free Cloud Setup →](docs/FREE_CLOUD_SETUP.md)**
-📖 **[GitHub Actions Setup →](docs/ACTIONS_SETUP.md)**
-
 ---
 
-## **🚀 Tech Stack**
+## **� Quick Links**
 
-| Layer               | Technology                                                               | Purpose                                        |
-| ------------------- | ------------------------------------------------------------------------ | ---------------------------------------------- |
-| **Frontend**        | [Next.js 15](https://nextjs.org/) + TypeScript + TailwindCSS + ShadCN UI | Fast, SEO-friendly, responsive UI              |
-| **Backend**         | [Nest.js](https://nestjs.com/) + TypeScript                              | Microservices-based API backend                |
-| **Database**        | PostgreSQL + Prisma ORM                                                  | Relational database with schema-based modeling |
-| **Event Streaming** | Apache Kafka                                                             | Real-time events & notifications               |
-| **Auth**            | NextAuth.js + JWT                                                        | Secure authentication & authorization          |
-| **Caching**         | Redis                                                                    | Session storage & faster response times        |
-| **Deployment**      | Vercel (frontend), Railway/Render (backend), Neon (database)             | Cloud-native scalable infra                    |
-| **Testing**         | Jest + React Testing Library                                             | Unit & integration testing                     |
-| **CI/CD**           | GitHub Actions                                                           | Automated testing & deployments                |
-| **Docs**            | Storybook + OpenAPI                                                      | Component & API documentation                  |
+� **[Complete Documentation →](docs/README.md)**
+🏗️ **[Architecture Overview →](docs/ARCHITECTURE.md)**
+� **[Deployment Guide →](docs/DEPLOYMENT_STEPS.md)**
+� **[GitHub Actions Setup →](docs/GITHUB_ACTIONS_GUIDE.md)**
+📧 **[SMTP Email Setup →](docs/SMTP_SETUP.md)**
+🎯 **[Phase 2 Task Features →](PHASE_2_ENHANCEMENTS.md)**
 
 ---
-
-## **⚡ Features**
-
-### **MVP (v1.0)**
-
-- 🔑 **Authentication** — JWT + OAuth login/signup
-- 👥 **Team Management** — Create teams, invite members, assign roles
-- 📌 **Project & Task Management** — Create projects, tasks, priorities, and deadlines
-- 🔔 **Real-Time Notifications** — Powered by **Kafka + WebSockets**
-- � **Live Communication** — Real-time updates via **WebSockets**
-- �📊 **Dashboard** — See projects, tasks, and team stats in one place
-
----
-
-## **🏗️ System Architecture**
-
-### **High-Level Design (HLD)**
-
-```
-┌─────────────────┐    HTTP/REST    ┌─────────────────┐
-│   Frontend      │◄───────────────►│   Backend       │
-│   (Next.js)     │                 │   (NestJS)      │
-│   Port: 3000    │                 │   Port: 3001    │
-└─────────────────┘                 └─────────────────┘
-                                             │
-                                             ▼
-                                    ┌─────────────────┐
-                                    │   PostgreSQL    │
-                                    │   + Redis       │
-                                    │   + Kafka       │
-                                    └─────────────────┘
-```
-
-- **Frontend** → Next.js app (Vercel)
-- **Backend** → NestJS API (Railway/Render)
-- **Database** → PostgreSQL (Neon)
-- **Cache** → Redis (Upstash)
-- **Events** → Kafka (Upstash)
-
----
-
-### **Low-Level Design (LLD)**
-
-#### **Frontend (Next.js) - `apps/web`**
-
-```
-apps/web/
- ├── app/                  # Next.js 13+ app directory
- │   ├── dashboard/        # Dashboard pages
- │   ├── projects/         # Project management
- │   ├── tasks/           # Task management
- │   └── profile/         # User profile
- ├── components/          # Reusable UI components
- ├── hooks/              # Custom React hooks
- ├── lib/                # Utilities and services
- └── styles/             # CSS and styling
-```
-
-#### **Backend (NestJS) - `apps/api`**
-
-```
-apps/api/
- ├── src/
- │   ├── modules/
- │   │   ├── auth/        # Authentication service
- │   │   ├── user/        # User management
- │   │   ├── team/        # Team management
- │   │   ├── project/     # Project service
- │   │   ├── task/        # Task service
- │   │   └── notification/ # Notification service
- │   ├── common/          # Shared utilities
- │   └── infrastructure/  # Database, Kafka, etc.
- └── prisma/              # Database schema
-```
-
----
-
-## **📅 Roadmap**
-
-### **v1.0 – MVP**
-
-- ✅ Authentication & Authorization
-- ✅ Team & Project Management
-- ✅ Task CRUD + Deadlines
-- ✅ Real-time Notifications
-- ✅ Dashboard UI
-
-### **v2.0 – Advanced Collaboration**
-
-- 💬 Live Chat + Comments
-- 📆 Google Calendar & Slack Integration
-- 🗓️ Project Timelines & Gantt Charts
-- ⚡ **Full Kafka Integration** — Event-driven architecture for real-time features
-
-### **v3.0 – Enterprise Features**
-
-- 📊 **Advanced Analytics** → Burndown charts, velocity, performance KPIs
-- 🔄 **Custom Workflows** → Define unique task pipelines per team
-- 🏢 **Multi-Tenancy Support** → Separate data for multiple organizations
-- 🛡️ **Role-Based API Access** → More granular permissions
-
-### **v4.0 – AI-Powered Productivity**
-
-- 🤖 **AI Task Suggestions** → Based on past activity and patterns
-- 📅 **AI-Generated Project Timelines** → Intelligent project planning
-- 🔔 **Predictive Alerts** → Early warnings for delayed tasks
-
-### **v5.0 – Open Source Focus**
-
-- 📜 **Fully Documented API** → Complete OpenAPI/Swagger documentation
-- 🤝 **Contributor-Friendly Guide** → Easy onboarding for open source contributors
-- 🐳 **Docker-Based Setup** → Quick development environment setup
-
----
-
-## **🛠️ Installation & Setup**
-
-### **1. Clone the Repository**
-
-```bash
-git clone https://github.com/CVamsi27/teamops.git
-cd teamops
-```
-
-### **2. Setup Environment Variables**
-
-Create `.env` files for **frontend** and **backend**:
-
-#### **Frontend `.env`**
-
-```env
-NEXT_PUBLIC_API_URL=http://localhost:3001
-NEXTAUTH_SECRET=your_secret
-NEXTAUTH_URL=http://localhost:3000
-```
-
-#### **Backend `.env`**
-
-```env
-DATABASE_URL=postgresql://user:password@localhost:5432/teamops
-KAFKA_BROKER=localhost:9092
-JWT_SECRET=your_secret
-AWS_ACCESS_KEY=xxx
-AWS_SECRET_KEY=xxx
-AWS_BUCKET=teamops-files
-```
-
-### **3. Install Dependencies**
-
-```bash
-# Install all dependencies (frontend + backend)
-pnpm install
-```
-
-### **4. Run Development Servers**
-
-```bash
-# Start both frontend and backend
-npm run dev
-
-# This starts:
-# - Frontend: http://localhost:3000 (Next.js)
-# - Backend: http://localhost:3001 (NestJS)
-```
-
----
-
-## **🌎 Deployment**
-
-### **Free Cloud Deployment**
-
-- **Frontend** → [Vercel](https://vercel.com) (Free)
-- **Backend** → [Railway](https://railway.app) or [Render](https://render.com) (Free)
-- **Database** → [Neon](https://neon.tech) (Free PostgreSQL)
-- **Cache & Events** → [Upstash](https://upstash.com) (Free Redis + Kafka)
-
-### **Alternative: Enterprise**
-
-- **Backend** → AWS ECS/EKS, Google Cloud Run
-- **Database** → AWS RDS, Google Cloud SQL
-- **File Storage** → AWS S3, Google Cloud Storage
-
----
-
-## ** License**
-
-MIT © [Vamsi Krishna](https://github.com/CVamsi27)
