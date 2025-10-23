@@ -102,8 +102,13 @@ export function ActivityTimeline({
     switch (type) {
       case "task_created":
         return `${userName} created task "${entityName}"`;
-      case "task_updated":
+      case "task_updated": {
+        // Check if this is an assignment change
+        if (metadata?.newAssigneeId) {
+          return `${userName} reassigned "${entityName}"`;
+        }
         return `${userName} updated task "${entityName}"`;
+      }
       case "task_completed":
         return `${userName} completed task "${entityName}"`;
       case "task_deleted":

@@ -23,6 +23,8 @@ export const ActivityEventSchema = z.object({
     'task_updated',
     'task_completed',
     'task_deleted',
+    'task_assigned',
+    'task_unassigned',
     'project_created',
     'project_updated',
     'project_deleted',
