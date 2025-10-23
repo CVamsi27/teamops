@@ -92,6 +92,7 @@ model Project {
   tasks        Task[]
   activities   Activity[]
   memberships  ProjectMembership[]
+  templates    TaskTemplate[]
 
   @@index([teamId])
   @@index([createdById])
@@ -155,6 +156,8 @@ model User {
   createdProjects      Project[]
   activities           Activity[]
   chatMessages         ChatMessage[]
+  createdTemplates     TaskTemplate[] @relation("TemplateCreator")
+  templateAssignments  TemplateAssignee[] @relation("TemplateAssignee")
 
   @@index([email])
 }
@@ -191,6 +194,38 @@ model ProjectMembership {
   @@unique([userId, projectId])
   @@index([userId])
   @@index([projectId])
+}
+
+model TaskTemplate {
+  id            String   @id @default(uuid())
+  name          String
+  description   String?
+  priority      TaskPriority @default(MEDIUM)
+  projectId     String
+  createdById   String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy     User     @relation("TemplateCreator", fields: [createdById], references: [id])
+  assignees     TemplateAssignee[]
+  
+  @@index([projectId])
+  @@index([createdById])
+}
+
+model TemplateAssignee {
+  id         String   @id @default(uuid())
+  templateId String
+  userId     String
+  createdAt  DateTime @default(now())
+  
+  template   TaskTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  user       User         @relation("TemplateAssignee", fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([templateId, userId])
+  @@index([templateId])
+  @@index([userId])
 }
 
 enum ActivityType {
