@@ -104,7 +104,6 @@ export function TaskFilters({
               <SelectValue placeholder="All statuses" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All statuses</SelectItem>
               {statusOptions.map((status) => (
                 <SelectItem key={status} value={status}>
                   {status.replace("_", " ")}
@@ -129,7 +128,6 @@ export function TaskFilters({
               <SelectValue placeholder="All priorities" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All priorities</SelectItem>
               {priorityOptions.map((priority) => (
                 <SelectItem key={priority} value={priority}>
                   {priority}
@@ -154,7 +152,6 @@ export function TaskFilters({
               <SelectValue placeholder="All assignees" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All assignees</SelectItem>
               {uniqueAssignees.map((assignee) => (
                 <SelectItem key={assignee.id} value={assignee.id}>
                   {assignee.name || assignee.email}
@@ -179,7 +176,6 @@ export function TaskFilters({
               <SelectValue placeholder="All projects" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All projects</SelectItem>
               {uniqueProjects.map((project) => (
                 <SelectItem key={project.id} value={project.id}>
                   {project.name}
