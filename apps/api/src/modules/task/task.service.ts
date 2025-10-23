@@ -404,6 +404,46 @@ export class TaskService implements OnModuleDestroy {
     if (!ok) throw new NotFoundException('Task not found');
   }
 
+  async bulkReassign(
+    taskIds: string[],
+    newAssigneeId: string,
+    user: { userId: string; email: string }
+  ): Promise<{ updated: number; failed: number }> {
+    let updated = 0;
+    let failed = 0;
+
+    for (const taskId of taskIds) {
+      try {
+        // Get the task first
+        const task = await this.repo.findOne(taskId);
+        if (!task) {
+          failed++;
+          continue;
+        }
+
+        // Check permission for the project
+        try {
+          await this.checkReassignmentPermission(user.userId, task.projectId);
+        } catch {
+          this.logger.warn(
+            `Permission denied for user ${user.userId} to reassign task ${taskId}`
+          );
+          failed++;
+          continue;
+        }
+
+        // Perform the update
+        await this.update(taskId, { assigneeId: newAssigneeId }, user);
+        updated++;
+      } catch (error) {
+        this.logger.warn(`Failed to reassign task ${taskId}:`, error);
+        failed++;
+      }
+    }
+
+    return { updated, failed };
+  }
+
   private async publishTaskEvent(
     topic: string,
     payload: TaskCreatedEvent | TaskUpdatedEvent

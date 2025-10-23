@@ -99,4 +99,29 @@ export class TaskController {
       email: req.user!.email,
     });
   }
+
+  @Post('bulk/reassign')
+  @ValidateResponse(
+    z.object({
+      updated: z.number(),
+      failed: z.number(),
+    })
+  )
+  async bulkReassign(
+    @Body(
+      new ZodValidationPipe(
+        z.object({
+          taskIds: z.array(z.string()),
+          newAssigneeId: z.string(),
+        })
+      )
+    )
+    body: { taskIds: string[]; newAssigneeId: string },
+    @Request() req: AuthenticatedRequest
+  ): Promise<{ updated: number; failed: number }> {
+    return this.service.bulkReassign(body.taskIds, body.newAssigneeId, {
+      userId: req.user!.userId,
+      email: req.user!.email,
+    });
+  }
 }
