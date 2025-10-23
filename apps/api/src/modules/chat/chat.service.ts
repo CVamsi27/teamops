@@ -1,5 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Inject, Optional } from '@nestjs/common';
 import { ChatRepository } from './chat.repository';
+import {
+  extractMentions,
+  createMentionNotifications,
+} from './utils/mention-parser';
 import type {
   ChatMessage,
   CreateChatMessage,
@@ -12,12 +16,21 @@ interface ChatGateway {
   getOnlineUsers(roomId: string, roomType: string): string[];
 }
 
+interface NotificationService {
+  createFromApi(data: any): Promise<any>;
+}
+
 @Injectable()
 export class ChatService {
   private readonly logger = new Logger(ChatService.name);
   private chatGateway: ChatGateway | null = null;
 
-  constructor(private chatRepository: ChatRepository) {}
+  constructor(
+    private chatRepository: ChatRepository,
+    @Optional()
+    @Inject('NotificationService')
+    private notificationService?: NotificationService
+  ) {}
 
   setChatGateway(gateway: ChatGateway) {
     this.chatGateway = gateway;
@@ -29,10 +42,92 @@ export class ChatService {
       this.logger.log(
         `Message created: ${message.id} in room ${payload.roomId}`
       );
+
+      // Process mentions if message is not a system message
+      if (payload.messageType !== 'SYSTEM' && this.notificationService) {
+        await this.processMentions(
+          message,
+          payload.content,
+          payload.userName,
+          payload.roomId,
+          payload.roomType
+        );
+      }
+
       return message;
     } catch (error) {
       this.logger.error('Error creating message:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Processes @mentions in a chat message and creates notifications
+   */
+  private async processMentions(
+    message: ChatMessage,
+    content: string,
+    authorName: string,
+    roomId: string,
+    roomType: ChatRoomType
+  ): Promise<void> {
+    try {
+      // Extract mentions from content
+      const mentions = extractMentions(content);
+
+      if (mentions.length === 0) {
+        return;
+      }
+
+      this.logger.debug(`Found ${mentions.length} mentions in message ${message.id}`);
+
+      // Note: In a real implementation, you would fetch team members from the repository
+      // For now, we create notifications for valid mentions
+      // This would need to be enhanced with actual user lookup
+
+      const notificationData = createMentionNotifications(
+        mentions.map(m => ({
+          userId: m, // In real impl, this would be looked up
+          userName: m,
+          userEmail: `${m}@teamops.local`, // Placeholder
+        })),
+        message.id,
+        authorName,
+        roomId,
+        roomType as string
+      );
+
+      // Create notifications for each mentioned user
+      for (const notification of notificationData) {
+        try {
+          if (this.notificationService) {
+            await this.notificationService.createFromApi({
+              userId: notification.userId,
+              title: notification.title,
+              message: notification.message,
+              type: notification.type,
+              data: notification.data,
+              read: false,
+            });
+
+            this.logger.log(
+              `Mention notification created for user ${notification.userId} in message ${message.id}`
+            );
+          }
+        } catch (err) {
+          const error = err as Error;
+          this.logger.warn(
+            `Failed to create mention notification for user ${notification.userId}: ${error.message}`
+          );
+          // Continue processing other mentions even if one fails
+        }
+      }
+    } catch (error) {
+      const err = error as Error;
+      this.logger.warn(
+        `Error processing mentions in message ${message.id}: ${err.message}`
+      );
+      // Don't throw - mention processing should not break message creation
     }
   }
 
