@@ -1,11 +1,14 @@
 import {
   Injectable,
   NotFoundException,
+  ForbiddenException,
   OnModuleDestroy,
   Logger,
 } from '@nestjs/common';
 import { TaskRepository } from './task.repository';
 import { ActivityService } from '../activity/activity.service';
+import { NotificationService } from '../notification/notification.service';
+import { ProjectMembershipRepository } from '../project/project-membership.repository';
 import { Kafka, Producer, Partitioners } from 'kafkajs';
 import type {
   CreateTaskWithCreator,
@@ -24,7 +27,9 @@ export class TaskService implements OnModuleDestroy {
 
   constructor(
     private repo: TaskRepository,
-    private activityService: ActivityService
+    private activityService: ActivityService,
+    private notificationService: NotificationService,
+    private membershipRepo: ProjectMembershipRepository
   ) {
     if (process.env.KAFKA_ENABLED === 'true') {
       this.initializeKafka();
@@ -64,6 +69,30 @@ export class TaskService implements OnModuleDestroy {
       this.logger.warn('Kafka producer connect failed: ' + (err?.message ?? String(error)));
       this.kafkaProducer = null;
       this.kafkaEnabled = false;
+    }
+  }
+
+  private async checkReassignmentPermission(
+    userId: string,
+    projectId: string
+  ): Promise<void> {
+    if (!projectId) {
+      // Task without project can be reassigned by anyone who can update it
+      return;
+    }
+
+    const membership = await this.membershipRepo.findByUserAndProject(
+      userId,
+      projectId
+    );
+
+    if (
+      !membership ||
+      (membership.role !== 'LEAD' && membership.role !== 'CONTRIBUTOR')
+    ) {
+      throw new ForbiddenException(
+        'Only LEAD and CONTRIBUTOR members can reassign tasks'
+      );
     }
   }
 
@@ -109,6 +138,37 @@ export class TaskService implements OnModuleDestroy {
       this.logger.warn('Failed to track activity:', error);
     }
 
+    // Send notification to assignee (usually the creator by default)
+    if (t.assigneeId) {
+      try {
+        const assigneeInfo = await this.repo['prisma'].user.findUnique({
+          where: { id: t.assigneeId },
+          select: { name: true, email: true },
+        });
+
+        const assigneeName = assigneeInfo?.name || assigneeInfo?.email || 'Unknown';
+
+        // Only notify if assignee is different from creator
+        if (t.assigneeId !== dto.createdById) {
+          await this.notificationService.createFromApi({
+            userId: t.assigneeId,
+            title: `New Task: ${t.title}`,
+            message: `${userName} created and assigned "${t.title}" to ${assigneeName}`,
+            type: 'task_assigned',
+            data: {
+              taskId: t.id,
+              taskTitle: t.title,
+              createdBy: dto.createdById,
+              createdByName: userName,
+            },
+            read: false,
+          });
+        }
+      } catch (error) {
+        this.logger.warn('Failed to create task assignment notification:', error);
+      }
+    }
+
     const event: TaskCreatedEvent = {
       id: t.id,
       title: t.title,
@@ -127,6 +187,11 @@ export class TaskService implements OnModuleDestroy {
   ): Promise<Task> {
     const oldTask = await this.repo.findOne(id);
     if (!oldTask) throw new NotFoundException('Task not found');
+
+    // Check permission to reassign task if assigneeId is being changed
+    if (dto.assigneeId !== undefined && dto.assigneeId !== oldTask.assigneeId) {
+      await this.checkReassignmentPermission(user.userId, oldTask.projectId!);
+    }
 
     const t = await this.repo.update(id, dto);
     if (!t) throw new NotFoundException('Task not found');
@@ -170,6 +235,50 @@ export class TaskService implements OnModuleDestroy {
         } catch (error) {
           this.logger.warn('Failed to track due date activity:', error);
         }
+      }
+    }
+
+    // Handle assignee change notifications
+    if (dto.assigneeId !== undefined && dto.assigneeId !== oldTask.assigneeId) {
+      try {
+        // Notify new assignee (if exists)
+        if (dto.assigneeId) {
+          await this.notificationService.createFromApi({
+            userId: dto.assigneeId,
+            title: `Task Assigned: ${t.title}`,
+            message: `${userName} assigned "${t.title}" to you`,
+            type: 'task_assigned',
+            data: {
+              taskId: t.id,
+              taskTitle: t.title,
+              assignedBy: user.userId,
+              assignedByName: userName,
+            },
+            read: false,
+          });
+        }
+
+        // Notify old assignee (if exists, unless they're the one making the change)
+        if (oldTask.assigneeId && oldTask.assigneeId !== user.userId) {
+          await this.notificationService.createFromApi({
+            userId: oldTask.assigneeId,
+            title: `Task Unassigned: ${t.title}`,
+            message: `${userName} unassigned "${t.title}" from you`,
+            type: 'task_unassigned',
+            data: {
+              taskId: t.id,
+              taskTitle: t.title,
+              unassignedBy: user.userId,
+              unassignedByName: userName,
+            },
+            read: false,
+          });
+        }
+
+        metadata.oldAssigneeId = oldTask.assigneeId;
+        metadata.newAssigneeId = dto.assigneeId;
+      } catch (error) {
+        this.logger.warn('Failed to create assignee notification:', error);
       }
     }
 
