@@ -262,7 +262,7 @@ UPSTASH_REDIS_REST_TOKEN=your-redis-token
 UPSTASH_KAFKA_REST_URL=your-kafka-url
 UPSTASH_KAFKA_REST_TOKEN=your-kafka-token
 JWT_SECRET=your-jwt-secret
-NEXT_PUBLIC_API_URL=https://your-app.onrender.com
+NEXT_PUBLIC_API_URL=https://teamops-api.buildora.work
 ```
 
 ### Step 4: Deploy

@@ -23,7 +23,7 @@ async function bootstrap() {
         process.env.FRONTEND_URL || 'http://localhost:3000',
         'http://localhost:8080',
         'http://localhost:9000',
-        'https://teamops-web.onrender.com',
+        'https://teamops.buildora.work',
       ];
 
       const isAllowed =

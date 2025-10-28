@@ -126,8 +126,8 @@ Add these in **Settings → Secrets and variables → Actions → Variables**:
 
 ```bash
 # Render URLs
-RENDER_API_URL=https://teamops-api.onrender.com
-RENDER_WEB_URL=https://teamops-web.onrender.com
+RENDER_API_URL=https://teamops-api.buildora.work
+RENDER_WEB_URL=https://teamops.buildora.work
 
 # Vercel + Railway URLs
 VERCEL_WEB_URL=https://teamops.vercel.app
@@ -190,7 +190,7 @@ npm run deploy:free  # Interactive wizard
 
 - Dashboard: https://dashboard.render.com
 - Logs: Available in Render dashboard
-- Health: `https://your-service.onrender.com/api/health`
+- Health: `https://teamops-api.buildora.work/api/health`
 
 ### **Vercel:**
 

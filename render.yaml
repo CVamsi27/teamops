@@ -23,7 +23,7 @@ services:
       - key: DATABASE_URL
         sync: false
       - key: FRONTEND_URL
-        value: https://teamops-web.onrender.com
+        value: https://teamops.buildora.work
       - key: JWT_SECRET
         generateValue: true
       - key: JWT_EXPIRES_IN
@@ -33,9 +33,9 @@ services:
       - key: GOOGLE_CLIENT_SECRET
         sync: false
       - key: GOOGLE_CALLBACK_URL
-        value: https://teamops-api.onrender.com/api/auth/google/callback
+        value: https://teamops-api.buildora.work/api/auth/google/callback
       - key: GOOGLE_CALENDAR_CALLBACK_URL
-        value: https://teamops-api.onrender.com/api/integrations/google-calendar/callback
+        value: https://teamops-api.buildora.work/api/integrations/google-calendar/callback
       - key: UPSTASH_REDIS_REST_URL
         sync: false
       - key: UPSTASH_REDIS_REST_TOKEN
@@ -85,6 +85,6 @@ services:
       - key: PORT
         value: 10000
       - key: NEXT_PUBLIC_API_URL
-        value: https://teamops-api.onrender.com/api
+        value: https://teamops-api.buildora.work/api
       - key: NEXT_PUBLIC_WS_URL
-        value: https://teamops-api.onrender.com
+        value: https://teamops-api.buildora.work

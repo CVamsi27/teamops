@@ -108,8 +108,8 @@ jobs:
 
       - name: Health check API
         run: |
-          API_URL="${{ vars.RENDER_API_URL || 'https://teamops-api.onrender.com' }}"
-          WEB_URL="${{ vars.RENDER_WEB_URL || 'https://teamops-web.onrender.com' }}"
+          API_URL="${{ vars.RENDER_API_URL || 'https://teamops-api.buildora.work' }}"
+          WEB_URL="${{ vars.RENDER_WEB_URL || 'https://teamops.buildora.work' }}"
 
           echo "🔍 Checking API health: $API_URL/api/health"
 
@@ -161,8 +161,8 @@ jobs:
         run: |
           if [ "${{ needs.deploy-render.result }}" == "success" ] && [ "${{ needs.health-check.result }}" == "success" ]; then
             echo "✅ 🎉 TeamOps successfully deployed to Render!"
-            echo "🌐 Web: ${{ vars.RENDER_WEB_URL || 'https://teamops-web.onrender.com' }}"
-            echo "⚙️  API: ${{ vars.RENDER_API_URL || 'https://teamops-api.onrender.com' }}"
+            echo "🌐 Web: ${{ vars.RENDER_WEB_URL || 'https://teamops.buildora.work' }}"
+            echo "⚙️  API: ${{ vars.RENDER_API_URL || 'https://teamops-api.buildora.work' }}"
           else
             echo "❌ Deployment failed or health checks did not pass"
             echo "🔍 Check the logs above for details"

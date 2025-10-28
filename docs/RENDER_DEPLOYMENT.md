@@ -72,8 +72,8 @@ No additional variables needed - all are pre-configured in render.yaml
 
 ### 6. Verify Deployment
 
-- API Health Check: `https://teamops-api.onrender.com/api/health`
-- Web App: `https://teamops-web.onrender.com`
+- API Health Check: `https://teamops-api.buildora.work/api/health`
+- Web App: `https://teamops.buildora.work`
 
 ## Build Configuration
 

@@ -63,7 +63,7 @@ SMTP_FROM_EMAIL=no-reply@your-domain.com
 SMTP_FROM_NAME=TeamOps
 
 # Frontend URL
-FRONTEND_URL=https://teamops-web.onrender.com
+FRONTEND_URL=https://teamops.buildora.work
 ```
 
 ## ⚙️ Render Dashboard Configuration
