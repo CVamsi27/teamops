@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { AlertCircle } from 'lucide-react';
 
 interface TeamMember {
@@ -165,10 +165,12 @@ export function MentionInput({
                 }`}
               >
                 {member.avatar && (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={member.avatar}
                     alt={member.name}
                     className="w-6 h-6 rounded-full"
+                    suppressHydrationWarning
                   />
                 )}
                 <div className="flex-1 min-w-0">
@@ -206,7 +208,7 @@ export function MentionInput({
 
       {/* Help text */}
       <p className="text-xs text-gray-500">
-        💡 Tip: Type @ to mention team members. They'll receive a notification.
+        💡 Tip: Type @ to mention team members. They&apos;ll receive a notification.
       </p>
     </div>
   );

@@ -41,7 +41,7 @@ export default function TasksPage() {
   };
 
   const getProjectName = (projectId: string) => {
-    const project = projectsList.data?.find((p: any) => p.id === projectId);
+    const project = projectsList.data?.find((p) => p.id === projectId);
     return project?.name || "Unknown Project";
   };
 
@@ -113,7 +113,7 @@ export default function TasksPage() {
   const filteredTasks = useMemo(() => {
     if (!tasksList.list.data) return [];
 
-    return tasksList.list.data.filter((task: any) => {
+    return tasksList.list.data.filter((task) => {
       if (filters.status && task.status !== filters.status) return false;
       if (filters.priority && task.priority !== filters.priority) return false;
       if (filters.assigneeId && task.assigneeId !== filters.assigneeId)
@@ -212,7 +212,7 @@ export default function TasksPage() {
             </CardContent>
           </Card>
         ) : (
-          filteredTasks.map((task: any) => {
+          filteredTasks.map((task) => {
             const dueDate = formatDueDate(task.dueDate || undefined);
 
             return (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useWorkloadDistribution, type WorkloadDistribution } from "@/hooks/useWorkloadDistribution";
+import { useWorkloadDistribution } from "@/hooks/useWorkloadDistribution";
 import {
   Card,
   CardHeader,
@@ -76,16 +76,6 @@ export function WorkloadDistributionView({
 
   // Sort by total tasks descending
   const sortedWorkload = [...workload].sort((a, b) => b.totalTasks - a.totalTasks);
-
-  const getWorkloadColor = (totalTasks: number, maxTasks: number) => {
-    const percentage = (totalTasks / maxTasks) * 100;
-    if (percentage === 0) return "bg-gray-200";
-    if (percentage < 33) return "bg-green-500";
-    if (percentage < 66) return "bg-yellow-500";
-    return "bg-red-500";
-  };
-
-  const maxTasks = Math.max(...sortedWorkload.map((m) => m.totalTasks), 1);
 
   return (
     <Card className={className}>

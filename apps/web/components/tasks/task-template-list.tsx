@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Copy, Trash2, Edit2 } from 'lucide-react';
+import { Plus, Trash2, Edit2 } from 'lucide-react';
 
 interface TaskTemplate {
   id: string;
@@ -168,7 +168,7 @@ export function TaskTemplateList({
       {selectedTemplateData && (
         <div className="border-t pt-4 mt-4">
           <h4 className="font-semibold text-sm mb-3">
-            Create task from "{selectedTemplateData.name}"
+            Create task from &quot;{selectedTemplateData.name}&quot;
           </h4>
           <div className="space-y-3">
             <div>
@@ -184,7 +184,7 @@ export function TaskTemplateList({
 
             {selectedTemplateData.assignees.length > 0 && (
               <div className="bg-blue-50 p-3 rounded text-sm">
-                <p className="font-medium text-blue-900 mb-2">Will be assigned to:</p>
+                <p className="font-medium text-blue-900 mb-2">Will be assigned to&colon;</p>
                 <div className="flex flex-wrap gap-2">
                   {selectedTemplateData.assignees.map(assignee => (
                     <span

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Select,
   SelectContent,
@@ -19,8 +19,14 @@ export type TaskFilterOptions = {
   projectId?: string;
 };
 
+interface Task {
+  assignee?: { id: string; name: string | null; email: string } | null;
+  project?: { id: string; name: string } | null;
+  [key: string]: unknown;
+}
+
 interface TaskFiltersProps {
-  tasks: any[];
+  tasks: Task[];
   onFiltersChange: (filters: TaskFilterOptions) => void;
   currentFilters?: TaskFilterOptions;
 }
@@ -37,7 +43,7 @@ export function TaskFilters({
     new Map(
       tasks
         .filter((t) => t.assignee)
-        .map((t) => [t.assignee.id, t.assignee])
+        .map((t) => [t.assignee!.id, t.assignee!])
     ).values()
   );
 
@@ -46,7 +52,7 @@ export function TaskFilters({
     new Map(
       tasks
         .filter((t) => t.project)
-        .map((t) => [t.project.id, t.project])
+        .map((t) => [t.project!.id, t.project!])
     ).values()
   );
 
@@ -153,8 +159,8 @@ export function TaskFilters({
             </SelectTrigger>
             <SelectContent>
               {uniqueAssignees.map((assignee) => (
-                <SelectItem key={assignee.id} value={assignee.id}>
-                  {assignee.name || assignee.email}
+                <SelectItem key={assignee!.id} value={assignee!.id}>
+                  {assignee!.name || assignee!.email}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -177,8 +183,8 @@ export function TaskFilters({
             </SelectTrigger>
             <SelectContent>
               {uniqueProjects.map((project) => (
-                <SelectItem key={project.id} value={project.id}>
-                  {project.name}
+                <SelectItem key={project!.id} value={project!.id}>
+                  {project!.name}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -211,7 +217,7 @@ export function TaskFilters({
             <Badge variant="secondary" className="text-xs gap-1">
               Assignee:{" "}
               {
-                uniqueAssignees.find((a) => a.id === filters.assigneeId)?.name ||
+                uniqueAssignees.find((a) => a!.id === filters.assigneeId)?.name ||
                   "Unknown"
               }
               <X
@@ -223,7 +229,7 @@ export function TaskFilters({
           {filters.projectId && (
             <Badge variant="secondary" className="text-xs gap-1">
               Project:{" "}
-              {uniqueProjects.find((p) => p.id === filters.projectId)?.name ||
+              {uniqueProjects.find((p) => p!.id === filters.projectId)?.name ||
                 "Unknown"}
               <X
                 className="h-3 w-3 cursor-pointer"

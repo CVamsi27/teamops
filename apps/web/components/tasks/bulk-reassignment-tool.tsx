@@ -14,13 +14,11 @@ import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { useBulkReassignTasks } from "@/hooks/tasks/useBulkReassignTasks";
 
 interface BulkReassignmentToolProps {
-  tasks: any[];
   projectMembers: Array<{ id: string; name: string; email: string }>;
   onReassignmentComplete?: () => void;
 }
 
 export function BulkReassignmentTool({
-  tasks,
   projectMembers,
   onReassignmentComplete,
 }: BulkReassignmentToolProps) {
